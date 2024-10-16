@@ -24,9 +24,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Shapes", "Examples\N
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Avalonia", "Avalonia", "{CBE7A7BE-DE8B-4EE9-B245-F32B340B61DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodify.Avalonia", "Nodify.Avalonia\Nodify.Avalonia.csproj", "{955EE600-C924-4686-A4B7-BBA8325C4BFB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Avalonia", "Nodify.Avalonia\Nodify.Avalonia.csproj", "{955EE600-C924-4686-A4B7-BBA8325C4BFB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{3D60299A-A091-43D4-99F7-FBFD0DE1D465}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Avalonia.Playground", "Examples\Nodify.Avalonia.Playground\Nodify.Avalonia.Playground.csproj", "{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +64,10 @@ Global
 		{955EE600-C924-4686-A4B7-BBA8325C4BFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{955EE600-C924-4686-A4B7-BBA8325C4BFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{955EE600-C924-4686-A4B7-BBA8325C4BFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +80,7 @@ Global
 		{BAD92DB9-BDCA-4BB7-8F24-B7D3FE470476} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
 		{955EE600-C924-4686-A4B7-BBA8325C4BFB} = {CBE7A7BE-DE8B-4EE9-B245-F32B340B61DE}
 		{3D60299A-A091-43D4-99F7-FBFD0DE1D465} = {CBE7A7BE-DE8B-4EE9-B245-F32B340B61DE}
+		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C} = {3D60299A-A091-43D4-99F7-FBFD0DE1D465}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9E59DB6-FB93-48F3-A8E0-1E549009E043}
