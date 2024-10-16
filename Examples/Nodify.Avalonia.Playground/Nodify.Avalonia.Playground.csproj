@@ -32,6 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Nodify.Avalonia\Nodify.Avalonia.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="App.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
     </Compile>

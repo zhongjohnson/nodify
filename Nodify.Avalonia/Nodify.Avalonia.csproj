@@ -1,16 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <OutputType>Library</OutputType>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Description>An MVVM Node editor for Avalonia.</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);Avalonia</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);Avalonia</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.1.4" />
     <PackageReference Include="Avalonia.Desktop" Version="11.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Connections\" />
+    <Folder Include="EditorStates\" />
+    <Folder Include="Events\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Minimap\" />
+    <Folder Include="Themes\" />
+    <Folder Include="Nodes\" />
   </ItemGroup>
 
 </Project>
