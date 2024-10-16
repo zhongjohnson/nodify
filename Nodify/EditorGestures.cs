@@ -1,4 +1,13 @@
-﻿using System.Windows.Input;
+﻿#if Avalonia
+using Avalonia.Controls;
+using Avalonia.Input;
+using Nodify.Avalonia.Helpers.Gestures;
+using ModifierKeys = Avalonia.Input.KeyModifiers;
+using KeyGesture = Nodify.Avalonia.Helpers.Gestures.KeyboardGesture;
+#else
+using System.Windows;
+using System.Windows.Input;
+#endif
 
 namespace Nodify
 {
@@ -40,7 +49,7 @@ namespace Nodify
             public InputGestureRef Append { get; }
 
             /// <summary>Gesture to invert the selected items.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
+            /// <remarks>Defaults to <see cref="Control"/>+<see cref="MouseAction.LeftClick"/>.</remarks>
             public InputGestureRef Invert { get; }
 
             /// <summary>Cancel the current selection operation reverting to the previous selection.</summary>
@@ -135,11 +144,11 @@ namespace Nodify
             public ModifierKeys ZoomModifierKey { get; set; }
 
             /// <summary>Gesture used to zoom in.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="Key.OemPlus"/>.</remarks>
+            /// <remarks>Defaults to <see cref="Control"/>+<see cref="Key.OemPlus"/>.</remarks>
             public InputGestureRef ZoomIn { get; }
 
             /// <summary>Gesture used to zoom out.</summary>
-            /// <remarks>Defaults to <see cref="ModifierKeys.Control"/>+<see cref="Key.OemMinus"/>.</remarks>
+            /// <remarks>Defaults to <see cref="Control"/>+<see cref="Key.OemMinus"/>.</remarks>
             public InputGestureRef ZoomOut { get; }
 
             /// <summary>Gesture used to move the editor's viewport location to (0, 0).</summary>

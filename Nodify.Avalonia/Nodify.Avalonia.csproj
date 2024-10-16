@@ -16,8 +16,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Nodify\EditorGestures.cs" Link="EditorGestures.cs" />
+    <Compile Include="..\Nodify\EditorStates\ContainerDefaultState.cs" Link="EditorStates\ContainerDefaultState.cs" />
+    <Compile Include="..\Nodify\EditorStates\ContainerDraggingState.cs" Link="EditorStates\ContainerDraggingState.cs" />
+    <Compile Include="..\Nodify\EditorStates\ContainerState.cs" Link="EditorStates\ContainerState.cs" />
     <Compile Include="..\Nodify\Events\ResizeEventArgs.cs" Link="Events\ResizeEventArgs.cs" />
+    <Compile Include="..\Nodify\Helpers\BoxValue.cs" Link="Helpers\BoxValue.cs" />
     <Compile Include="..\Nodify\Helpers\MultiGesture.cs" Link="Helpers\MultiGesture.cs" />
+    <Compile Include="..\Nodify\ItemContainer.cs" Link="ItemContainer.cs" />
     <Compile Include="..\Nodify\Nodes\KnotNode.cs" Link="Nodes\KnotNode.cs" />
     <Compile Include="..\Nodify\Nodes\Node.cs" Link="Nodes\Node.cs" />
     <Compile Include="..\Nodify\NodifyCanvas.cs" Link="NodifyCanvas.cs" />
@@ -30,7 +36,6 @@
 
   <ItemGroup>
     <Folder Include="Connections\" />
-    <Folder Include="EditorStates\" />
     <Folder Include="Events\" />
     <Folder Include="Minimap\" />
     <Folder Include="Themes\" />

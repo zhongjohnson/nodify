@@ -1,5 +1,14 @@
-﻿using System.Windows;
+﻿#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Nodify.Avalonia.Extensions;
+#else
+using System.Windows;
 using System.Windows.Controls;
+#endif
 
 namespace Nodify
 {
@@ -10,8 +19,13 @@ namespace Nodify
     {
         #region Dependency Properties
 
+#if Avalonia
+        public static readonly StyledProperty<Point> LocationProperty = ItemContainer.LocationProperty.AddOwner<DecoratorContainer>();
+        public static readonly StyledProperty<Size> ActualSizeProperty = ItemContainer.ActualSizeProperty.AddOwner<DecoratorContainer>();
+#else
         public static readonly DependencyProperty LocationProperty = ItemContainer.LocationProperty.AddOwner(typeof(DecoratorContainer), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.AffectsParentArrange, OnLocationChanged));
         public static readonly DependencyProperty ActualSizeProperty = ItemContainer.ActualSizeProperty.AddOwner(typeof(DecoratorContainer));
+#endif
 
         /// <summary>
         /// Gets or sets the location of this <see cref="DecoratorContainer"/> inside the <see cref="NodifyEditor.DecoratorsHost"/>.
@@ -37,7 +51,7 @@ namespace Nodify
             item.OnLocationChanged();
         }
 
-        #endregion
+#endregion
 
         #region Routed Events
 
@@ -64,13 +78,31 @@ namespace Nodify
 
         static DecoratorContainer()
         {
+#if Avalonia
+            LocationProperty.Changed.AddClassHandler<DecoratorContainer, Point>(OnLocationChanged);
+#else
             DefaultStyleKeyProperty.OverrideMetadata(typeof(DecoratorContainer), new FrameworkPropertyMetadata(typeof(DecoratorContainer)));
+#endif
         }
 
+#if Avalonia
+        public DecoratorContainer()
+        {
+            SizeChanged += OnRenderSizeChanged;
+        }
+
+        /// <inheritdoc />
+        protected void OnRenderSizeChanged(object? sender, SizeChangedEventArgs sizeChangedEventArgs)
+        {
+            ActualSize = ((DecoratorContainer)sender).RenderSize();
+        }
+
+#else
         /// <inheritdoc />
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
         {
             ActualSize = sizeInfo.NewSize;
         }
+#endif
     }
 }

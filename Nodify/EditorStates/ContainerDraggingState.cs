@@ -1,6 +1,29 @@
-﻿using System.Windows;
-using System.Windows.Controls.Primitives;
+﻿#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Styling;
+using Nodify.Avalonia.Helpers;
+using Nodify.Avalonia.Extensions;
+using Nodify.Avalonia.EditorStates;
+using MouseButtonEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseWheelEventArgs = Avalonia.Input.PointerWheelEventArgs;
+using RoutedEventHandler = System.EventHandler<Avalonia.Interactivity.RoutedEventArgs>;
+using DragStartedEventHandler = System.EventHandler<Avalonia.Input.VectorEventArgs>;
+using DragDeltaEventHandler = System.EventHandler<Avalonia.Input.VectorEventArgs>;
+using DragCompletedEventHandler = System.EventHandler<Nodify.Avalonia.EditorStates.DragCompletedEventArgs>;
+using DragDeltaEventArgs = Avalonia.Input.VectorEventArgs;
+#else
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
