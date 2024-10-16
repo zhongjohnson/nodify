@@ -1,14 +1,22 @@
 ﻿using System;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Interactivity;
+#else
 using System.Windows;
+#endif
 
 namespace Nodify
 {
+#if !Avalonia
     /// <summary>
     /// Represents the method that will handle resize related routed events.
     /// </summary>
     /// <param name="sender">The sender of this event.</param>
     /// <param name="e">The event data.</param>
     public delegate void ResizeEventHandler(object sender, ResizeEventArgs e);
+#endif
 
     /// <summary>
     /// Provides data for resize related routed events.
@@ -37,7 +45,12 @@ namespace Nodify
         /// </summary>
         public Size NewSize { get; }
 
+#if Avalonia
+        protected void InvokeEventHandler(Delegate genericHandler, object genericTarget)
+            => ((EventHandler<ResizeEventArgs>)genericHandler)(genericTarget, this);
+#else
         protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
             => ((ResizeEventHandler)genericHandler)(genericTarget, this);
+#endif
     }
 }
