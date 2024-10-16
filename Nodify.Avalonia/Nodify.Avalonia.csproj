@@ -27,7 +27,6 @@
     <Folder Include="Helpers\" />
     <Folder Include="Minimap\" />
     <Folder Include="Themes\" />
-    <Folder Include="Nodes\" />
   </ItemGroup>
 
 </Project>
