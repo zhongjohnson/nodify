@@ -1,7 +1,20 @@
 ﻿using System.Collections;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls.Presenters;
+using Avalonia.Interactivity;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Markup.Xaml.Templates;
+using Avalonia.Styling;
+#else
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
@@ -11,7 +24,42 @@ namespace Nodify
     public class Node : HeaderedContentControl
     {
         #region Dependency Properties
+#if Avalonia
+        public static readonly StyledProperty<IBrush> ContentBrushProperty = AvaloniaProperty.Register<Node, IBrush>(nameof(ContentBrush));
+        public static readonly StyledProperty<IBrush> HeaderBrushProperty = AvaloniaProperty.Register<Node, IBrush>(nameof(HeaderBrush));
+        public static readonly StyledProperty<IBrush> FooterBrushProperty = AvaloniaProperty.Register<Node, IBrush>(nameof(FooterBrush));
+        public static readonly StyledProperty<object?> FooterProperty = AvaloniaProperty.Register<Node, object?>(nameof(Footer));
+        public static readonly StyledProperty<DataTemplate> FooterTemplateProperty = AvaloniaProperty.Register<Node, DataTemplate>(nameof(FooterTemplate));
+        public static readonly StyledProperty<DataTemplate> InputConnectorTemplateProperty = AvaloniaProperty.Register<Node, DataTemplate>(nameof(InputConnectorTemplate));
+        public static readonly DirectProperty<Node, bool> HasFooterProperty =
+            AvaloniaProperty.RegisterDirect<Node, bool>(nameof(HasFooter), o => o.HasFooter);
+        public static readonly DirectProperty<Node, bool> HasHeaderProperty =
+            AvaloniaProperty.RegisterDirect<Node, bool>(nameof(HasHeader), o => o.HasHeader);
+        public static readonly StyledProperty<DataTemplate> OutputConnectorTemplateProperty = AvaloniaProperty.Register<Node, DataTemplate>(nameof(OutputConnectorTemplate));
+        public static readonly StyledProperty<IEnumerable> InputProperty = AvaloniaProperty.Register<Node, IEnumerable>(nameof(Input));
+        public static readonly StyledProperty<IEnumerable> OutputProperty = AvaloniaProperty.Register<Node, IEnumerable>(nameof(Output));
+        public static readonly StyledProperty<Style> ContentContainerStyleProperty = AvaloniaProperty.Register<Node, Style>(nameof(ContentContainerStyle));
+        public static readonly StyledProperty<Style> HeaderContainerStyleProperty = AvaloniaProperty.Register<Node, Style>(nameof(HeaderContainerStyle));
+        public static readonly StyledProperty<Style> FooterContainerStyleProperty = AvaloniaProperty.Register<Node, Style>(nameof(FooterContainerStyle));
 
+        private bool _hasHeader;
+        private bool _hasFooter;
+        
+        /// <summary>
+        /// Gets a value that indicates whether the <see cref="Footer"/> is <see langword="null" />.
+        /// </summary>
+        public bool HasFooter
+        {
+            get => _hasFooter;
+            private set => this.SetAndRaise(HasFooterProperty, ref _hasFooter, value);
+        }
+
+        public bool HasHeader
+        {
+            get => _hasHeader;
+            private set => this.SetAndRaise(HasHeaderProperty, ref _hasHeader, value);
+        }
+#else
         public static readonly DependencyProperty ContentBrushProperty = DependencyProperty.Register(nameof(ContentBrush), typeof(Brush), typeof(Node));
         public static readonly DependencyProperty HeaderBrushProperty = DependencyProperty.Register(nameof(HeaderBrush), typeof(Brush), typeof(Node));
         public static readonly DependencyProperty FooterBrushProperty = DependencyProperty.Register(nameof(FooterBrush), typeof(Brush), typeof(Node));
@@ -26,7 +74,7 @@ namespace Nodify
         public static readonly DependencyProperty ContentContainerStyleProperty = DependencyProperty.Register(nameof(ContentContainerStyle), typeof(Style), typeof(Node));
         public static readonly DependencyProperty HeaderContainerStyleProperty = DependencyProperty.Register(nameof(HeaderContainerStyle), typeof(Style), typeof(Node));
         public static readonly DependencyProperty FooterContainerStyleProperty = DependencyProperty.Register(nameof(FooterContainerStyle), typeof(Style), typeof(Node));
-
+#endif
         /// <summary>
         /// Gets or sets the brush used for the background of the <see cref="ContentControl.Content"/> of this <see cref="Node"/>.
         /// </summary>
@@ -53,7 +101,7 @@ namespace Nodify
             get => (Brush)GetValue(FooterBrushProperty);
             set => SetValue(FooterBrushProperty, value);
         }
-        
+
         /// <summary>
         /// Gets or sets the data for the footer of this control.
         /// </summary>
@@ -71,7 +119,7 @@ namespace Nodify
             get => (DataTemplate)GetValue(FooterTemplateProperty);
             set => SetValue(FooterTemplateProperty, value);
         }
-        
+
         /// <summary>
         /// Gets or sets the template used to display the content of the control's <see cref="Input"/> connectors.
         /// </summary>
@@ -80,7 +128,7 @@ namespace Nodify
             get => (DataTemplate)GetValue(InputConnectorTemplateProperty);
             set => SetValue(InputConnectorTemplateProperty, value);
         }
-        
+
         /// <summary>
         /// Gets or sets the template used to display the content of the control's <see cref="Output"/> connectors.
         /// </summary>
@@ -89,7 +137,7 @@ namespace Nodify
             get => (DataTemplate)GetValue(OutputConnectorTemplateProperty);
             set => SetValue(OutputConnectorTemplateProperty, value);
         }
-        
+
         /// <summary>
         /// Gets or sets the data for the input <see cref="Connector"/>s of this control.
         /// </summary>
@@ -98,7 +146,7 @@ namespace Nodify
             get => (IEnumerable)GetValue(InputProperty);
             set => SetValue(InputProperty, value);
         }
-        
+
         /// <summary>
         /// Gets or sets the data for the output <see cref="Connector"/>s of this control.
         /// </summary>
@@ -135,6 +183,7 @@ namespace Nodify
             set => SetValue(FooterContainerStyleProperty, value);
         }
 
+#if !Avalonia
         /// <summary>
         /// Gets a value that indicates whether the <see cref="Footer"/> is <see langword="null" />.
         /// </summary>
@@ -145,12 +194,18 @@ namespace Nodify
             Node node = (Node)d;
             node.SetValue(HasFooterPropertyKey, e.NewValue != null ? BoxValue.True : BoxValue.False);
         }
+#endif
 
         #endregion
 
         static Node()
         {
+#if Avalonia
+            FooterProperty.Changed.AddClassHandler<Node, object?>((o, e) => o.HasFooter = e.NewValue.Value != null);
+            HeaderProperty.Changed.AddClassHandler<Node, object?>((o, e) => o.HasHeader = e.NewValue.Value != null);
+#else
             DefaultStyleKeyProperty.OverrideMetadata(typeof(Node), new FrameworkPropertyMetadata(typeof(Node)));
+#endif
         }
     }
 }
