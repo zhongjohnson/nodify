@@ -20,6 +20,7 @@
     <Compile Include="..\Nodify\Helpers\MultiGesture.cs" Link="Helpers\MultiGesture.cs" />
     <Compile Include="..\Nodify\Nodes\KnotNode.cs" Link="Nodes\KnotNode.cs" />
     <Compile Include="..\Nodify\Nodes\Node.cs" Link="Nodes\Node.cs" />
+    <Compile Include="..\Nodify\NodifyCanvas.cs" Link="NodifyCanvas.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,14 @@
-﻿using System.Windows;
+﻿#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Nodify.Avalonia.Extensions;
+using UIElementCollection = Avalonia.Controls.Controls;
+#else
+using System.Windows;
 using System.Windows.Controls;
+#endif
 
 namespace Nodify
 {
@@ -19,7 +28,12 @@ namespace Nodify
     /// <summary>A canvas like panel that works with <see cref="INodifyCanvasItem"/>s.</summary>
     public class NodifyCanvas : Panel
     {
+#if Avalonia
+        public static readonly StyledProperty<Rect> ExtentProperty = AvaloniaProperty.Register<NodifyCanvas, Rect>(nameof(Extent));
+        public UIElementCollection InternalChildren => Children;
+#else
         public static readonly DependencyProperty ExtentProperty = DependencyProperty.Register(nameof(Extent), typeof(Rect), typeof(NodifyCanvas), new FrameworkPropertyMetadata(BoxValue.Rect));
+#endif
 
         /// <summary>The area covered by the children of this panel.</summary>
         public Rect Extent
@@ -43,8 +57,11 @@ namespace Nodify
                 var item = (INodifyCanvasItem)children[i];
                 item.Arrange(new Rect(item.Location, item.DesiredSize));
 
+#if Avalonia
+                Size size = children[i].RenderSize();
+#else
                 Size size = children[i].RenderSize;
-
+#endif
                 if (item.Location.X < minX)
                 {
                     minX = item.Location.X;

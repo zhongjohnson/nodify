@@ -6,6 +6,7 @@ using KeyGesture = Nodify.Avalonia.Helpers.Gestures.KeyboardGesture;
 #else
 using System.Windows.Input;
 #endif
+
 namespace Nodify
 {
     /// <summary>Combines multiple input gestures.</summary>
