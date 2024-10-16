@@ -4,17 +4,17 @@ using Avalonia.Interactivity;
 
 namespace Nodify.Avalonia.Helpers.Gestures;
 
-public class PointerGesture : InputGesture
+public class MouseGesture : InputGesture
 {
     private readonly MouseAction _action;
     private readonly KeyModifiers _modifiers;
 
-    public PointerGesture(MouseAction action, KeyModifiers modifiers)
+    public MouseGesture(MouseAction action, KeyModifiers modifiers)
     {
         _action = action;
         _modifiers = modifiers;
     }
-    public PointerGesture(MouseAction action)
+    public MouseGesture(MouseAction action)
     {
         _action = action;
     }

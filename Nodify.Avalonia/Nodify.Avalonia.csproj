@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Compile Include="..\Nodify\Events\ResizeEventArgs.cs" Link="Events\ResizeEventArgs.cs" />
+    <Compile Include="..\Nodify\Helpers\MultiGesture.cs" Link="Helpers\MultiGesture.cs" />
     <Compile Include="..\Nodify\Nodes\KnotNode.cs" Link="Nodes\KnotNode.cs" />
     <Compile Include="..\Nodify\Nodes\Node.cs" Link="Nodes\Node.cs" />
   </ItemGroup>
@@ -30,7 +31,6 @@
     <Folder Include="Connections\" />
     <Folder Include="EditorStates\" />
     <Folder Include="Events\" />
-    <Folder Include="Helpers\" />
     <Folder Include="Minimap\" />
     <Folder Include="Themes\" />
   </ItemGroup>

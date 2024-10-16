@@ -6,6 +6,7 @@ namespace Nodify.Avalonia.Helpers.Gestures;
 public class KeyboardGesture : InputGesture
 {
     private readonly KeyGesture _internal;
+
     public KeyboardGesture(Key key)
     {
         _internal = new KeyGesture(key);

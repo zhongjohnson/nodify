@@ -1,5 +1,11 @@
-﻿using System.Windows.Input;
-
+﻿#if Avalonia
+using Avalonia.Input;
+using Nodify.Avalonia.Helpers.Gestures;
+using InputEventArgs = Avalonia.Interactivity.RoutedEventArgs;
+using KeyGesture = Nodify.Avalonia.Helpers.Gestures.KeyboardGesture;
+#else
+using System.Windows.Input;
+#endif
 namespace Nodify
 {
     /// <summary>Combines multiple input gestures.</summary>
