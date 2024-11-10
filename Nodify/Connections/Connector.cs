@@ -1,6 +1,25 @@
-﻿using System.Windows;
+﻿using System.Windows.Input;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
+using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.VisualTree;
+using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml.Templates;
+using Avalonia.Controls.Primitives;
+using Nodify.Avalonia.Extensions;
+using Tmds.DBus.Protocol;
+using FrameworkElement = Avalonia.Controls.Control;
+using Control = Avalonia.Controls.Primitives.TemplatedControl;
+#else
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Data;
+#endif
 
 namespace Nodify
 {
@@ -9,16 +28,28 @@ namespace Nodify
     /// Has a <see cref="ElementConnector"/> that the <see cref="Anchor"/> is calculated from for the <see cref="PendingConnection"/>. Center of this control is used if missing.
     /// </summary>
     [TemplatePart(Name = ElementConnector, Type = typeof(FrameworkElement))]
+#if Avalonia
+    [PseudoClasses(IsConnectedPseudoClass, PendingConnection.IsOverElementPseudoClass)]
+#endif
     public class Connector : Control
     {
         protected const string ElementConnector = "PART_Connector";
 
         #region Routed Events
 
+#if Avalonia
+        private const string IsConnectedPseudoClass = ":isconnected";
+
+        public static readonly RoutedEvent PendingConnectionStartedEvent = RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionStarted), RoutingStrategies.Bubble);
+        public static readonly RoutedEvent PendingConnectionCompletedEvent = RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionCompleted), RoutingStrategies.Bubble);
+        public static readonly RoutedEvent PendingConnectionDragEvent = RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionDrag), RoutingStrategies.Bubble);
+        public static readonly RoutedEvent DisconnectEvent = RoutedEvent.Register<Connector, ConnectorEventArgs>(nameof(Disconnect), RoutingStrategies.Bubble);
+#else
         public static readonly RoutedEvent PendingConnectionStartedEvent = EventManager.RegisterRoutedEvent(nameof(PendingConnectionStarted), RoutingStrategy.Bubble, typeof(PendingConnectionEventHandler), typeof(Connector));
         public static readonly RoutedEvent PendingConnectionCompletedEvent = EventManager.RegisterRoutedEvent(nameof(PendingConnectionCompleted), RoutingStrategy.Bubble, typeof(PendingConnectionEventHandler), typeof(Connector));
         public static readonly RoutedEvent PendingConnectionDragEvent = EventManager.RegisterRoutedEvent(nameof(PendingConnectionDrag), RoutingStrategy.Bubble, typeof(PendingConnectionEventHandler), typeof(Connector));
         public static readonly RoutedEvent DisconnectEvent = EventManager.RegisterRoutedEvent(nameof(Disconnect), RoutingStrategy.Bubble, typeof(ConnectorEventHandler), typeof(Connector));
+#endif
 
         /// <summary>Triggered by the <see cref="EditorGestures.ConnectorGestures.Connect"/> gesture.</summary>
         public event PendingConnectionEventHandler PendingConnectionStarted
@@ -54,15 +85,23 @@ namespace Nodify
 
         #region Dependency Properties
 
+#if Avalonia
+        public static readonly StyledProperty<Point> AnchorProperty = AvaloniaProperty.Register<Connector, Point>(nameof(Anchor));
+        public static readonly StyledProperty<bool> IsConnectedProperty = AvaloniaProperty.Register<Connector, bool>(nameof(IsConnected));
+        public static readonly StyledProperty<ICommand?> DisconnectCommandProperty = AvaloniaProperty.Register<Connector, ICommand?>(nameof(DisconnectCommand));
+        public static readonly DirectProperty<Connector, bool> IsPendingConnectionProperty =
+            AvaloniaProperty.RegisterDirect<Connector, bool>(nameof(IsPendingConnection), o => o.IsPendingConnection);
+#else
         public static readonly DependencyProperty AnchorProperty = DependencyProperty.Register(nameof(Anchor), typeof(Point), typeof(Connector), new FrameworkPropertyMetadata(BoxValue.Point));
         public static readonly DependencyProperty IsConnectedProperty = DependencyProperty.Register(nameof(IsConnected), typeof(bool), typeof(Connector), new FrameworkPropertyMetadata(BoxValue.False, OnIsConnectedChanged));
         public static readonly DependencyProperty DisconnectCommandProperty = DependencyProperty.Register(nameof(DisconnectCommand), typeof(ICommand), typeof(Connector));
         private static readonly DependencyPropertyKey IsPendingConnectionPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsPendingConnection), typeof(bool), typeof(Connector), new FrameworkPropertyMetadata(BoxValue.False));
         public static readonly DependencyProperty IsPendingConnectionProperty = IsPendingConnectionPropertyKey.DependencyProperty;
+#endif
 
         /// <summary>
         /// Gets the location where <see cref="Connection"/>s can be attached to. 
-        /// Bind with <see cref="System.Windows.Data.BindingMode.OneWayToSource"/>
+        /// Bind with <see cref="BindingMode.OneWayToSource"/>
         /// </summary>
         public Point Anchor
         {
@@ -85,7 +124,11 @@ namespace Nodify
         public bool IsPendingConnection
         {
             get => (bool)GetValue(IsPendingConnectionProperty);
+#if Avalonia
+            protected internal set => SetAndRaise(IsPendingConnectionProperty, ref _isPendingConnection, value);
+#else
             protected set => SetValue(IsPendingConnectionPropertyKey, value);
+#endif
         }
 
         /// <summary>
@@ -98,13 +141,24 @@ namespace Nodify
             set => SetValue(DisconnectCommandProperty, value);
         }
 
-        #endregion
+#endregion
 
         static Connector()
         {
+#if Avalonia
+            FocusableProperty.OverrideMetadata(typeof(Connector), new StyledPropertyMetadata<bool>(true));
+#else
             DefaultStyleKeyProperty.OverrideMetadata(typeof(Connector), new FrameworkPropertyMetadata(typeof(Connector)));
             FocusableProperty.OverrideMetadata(typeof(Connector), new FrameworkPropertyMetadata(BoxValue.True));
+#endif
         }
+
+#if Avalonia
+        public Connector()
+        {
+            SizeChanged += OnRenderSizeChanged;
+        }
+#endif
 
         #region Fields
 
@@ -152,14 +206,25 @@ namespace Nodify
         private Point _thumbCenter;
         private bool _isHooked;
 
-        #endregion
+#if Avalonia
+        private bool _isPendingConnection;
+#endif
+#endregion
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
+
+            Thumb = e.NameScope.Find<Control>(ElementConnector) ?? this;
+#else
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
 
             Thumb = Template.FindName(ElementConnector, this) as FrameworkElement ?? this;
+#endif
 
             Container = this.GetParentOfType<ItemContainer>();
             Editor = Container?.Editor ?? this.GetParentOfType<NodifyEditor>();
@@ -205,18 +270,30 @@ namespace Nodify
         private void OnConnectorUnloaded(object sender, RoutedEventArgs e)
             => TrySetAnchorUpdateEvents(false);
 
+#if Avalonia
+        private static void OnIsConnectedChanged(Connector d, AvaloniaPropertyChangedEventArgs<bool> e)
+#else
         private static void OnIsConnectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+#endif
         {
             var con = (Connector)d;
 
+#if Avalonia
+            if ((bool)e.NewValue.Value)
+#else
             if ((bool)e.NewValue)
+#endif
             {
                 con.UpdateAnchor();
             }
         }
 
         /// <inheritdoc />
+#if Avalonia
+        protected void OnRenderSizeChanged(object? sender, SizeChangedEventArgs sizeInfo)
+#else
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+#endif
         {
             // Subscribe to events if not already subscribed 
             // Useful for advanced connectors that start collapsed because the loaded event is not called
@@ -270,7 +347,11 @@ namespace Nodify
             var viewport = new Rect(editor.ViewportLocation, editor.ViewportSize);
             double offset = OptimizeSafeZone / editor.ViewportZoom;
 
+#if Avalonia
+            Rect area = viewport.Inflate(offset, offset);
+#else
             Rect area = Rect.Inflate(viewport, offset, offset);
+#endif
 
             // Update only the connectors that are in the viewport or will be in the viewport
             if (area.Contains(location))
@@ -289,9 +370,15 @@ namespace Nodify
 
             if (Thumb != null && Container != null)
             {
+#if Avalonia
+                var thumbSize = (Vector)Thumb.Bounds.Size.ToVector();
+                Vector containerMargin = (Vector)Container.Bounds.Size.ToVector() - (Vector)Container.DesiredSize.ToVector();
+                Point relativeLocation = Thumb.TranslatePoint((Point)(thumbSize / 2 - containerMargin / 2), Container) ?? default;
+#else
                 var thumbSize = (Vector)Thumb.RenderSize;
                 Vector containerMargin = (Vector)Container.RenderSize - (Vector)Container.DesiredSize;
                 Point relativeLocation = Thumb.TranslatePoint((Point)(thumbSize / 2 - containerMargin / 2), Container);
+#endif
                 Anchor = new Point(location.X + relativeLocation.X, location.Y + relativeLocation.Y);
             }
         }
@@ -307,23 +394,35 @@ namespace Nodify
             }
         }
 
-        #endregion
+#endregion
 
         #region Event Handlers
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
+#else
         protected override void OnLostMouseCapture(MouseEventArgs e)
+#endif
         {
             // Always cancel if lost capture
             OnConnectorDragCompleted(cancel: true);
         }
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
+#else
         protected override void OnMouseDown(MouseButtonEventArgs e)
+#endif
         {
             Focus();
 
+#if Avalonia
+            this.CaptureMouseSafe(e);
+#else
             this.CaptureMouseSafe();
+#endif
 
             e.Handled = true;
 
@@ -341,13 +440,21 @@ namespace Nodify
                 else
                 {
                     UpdateAnchor();
+#if Avalonia
+                    OnConnectorDragStarted(e);
+#else
                     OnConnectorDragStarted();
+#endif
                 }
             }
         }
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
+#else
         protected override void OnMouseUp(MouseButtonEventArgs e)
+#endif
         {
             // Don't select the ItemContainer when starting a pending connecton for sticky connections
             e.Handled = EnableStickyConnections && IsPendingConnection;
@@ -362,16 +469,27 @@ namespace Nodify
             {
                 // Cancel pending connection
                 OnConnectorDragCompleted(cancel: true);
+#if Avalonia
+                this.ReleaseMouseCapture(e);
+#else
                 ReleaseMouseCapture();
+#endif
 
                 // Don't show context menu
                 e.Handled = true;
             }
 
+#if Avalonia
+            if (e.Pointer.Captured == this && !IsPendingConnection)
+            {
+                this.ReleaseMouseCapture(e);
+            }
+#else
             if (IsMouseCaptured && !IsPendingConnection)
             {
                 ReleaseMouseCapture();
             }
+#endif
         }
 
         /// <inheritdoc />
@@ -381,12 +499,18 @@ namespace Nodify
             {
                 // Cancel pending connection
                 OnConnectorDragCompleted(cancel: true);
+#if !Avalonia
                 ReleaseMouseCapture();
+#endif
             }
         }
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnPointerMoved(PointerEventArgs e)
+#else
         protected override void OnMouseMove(MouseEventArgs e)
+#endif
         {
             if (IsPendingConnection)
             {
@@ -409,12 +533,23 @@ namespace Nodify
             RaiseEvent(args);
         }
 
+#if Avalonia
+        protected virtual void OnConnectorDragStarted(PointerPressedEventArgs e)
+#else
         protected virtual void OnConnectorDragStarted()
+#endif
         {
+#if Avalonia
+            if (Thumb != null)
+            {
+                _thumbCenter = new Point(Thumb.Bounds.Width / 2, Thumb.Bounds.Height / 2);
+            }
+#else
             if (Thumb != null)
             {
                 _thumbCenter = new Point(Thumb.ActualWidth / 2, Thumb.ActualHeight / 2);
             }
+#endif
 
             var args = new PendingConnectionEventArgs(DataContext)
             {
@@ -426,10 +561,17 @@ namespace Nodify
             RaiseEvent(args);
             IsPendingConnection = !args.Canceled;
 
+#if Avalonia
+            if (e.Pointer.Captured == this && !IsPendingConnection)
+            {
+                this.ReleaseMouseCapture(e);
+            }
+#else
             if (IsMouseCaptured && !IsPendingConnection)
             {
                 ReleaseMouseCapture();
             }
+#endif
         }
 
         protected virtual void OnConnectorDragCompleted(bool cancel = false)
@@ -474,6 +616,6 @@ namespace Nodify
             }
         }
 
-        #endregion
+#endregion
     }
 }

@@ -1,5 +1,11 @@
 ﻿using System;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Interactivity;
+#else
 using System.Windows;
+#endif
 
 namespace Nodify
 {
@@ -52,7 +58,12 @@ namespace Nodify
         /// </summary>
         public bool Canceled { get; set; }
 
+#if Avalonia
+        protected void InvokeEventHandler(Delegate genericHandler, object genericTarget)
+            => ((PendingConnectionEventHandler)genericHandler)(genericTarget, this);
+#else
         protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
             => ((PendingConnectionEventHandler)genericHandler)(genericTarget, this);
+#endif
     }
 }

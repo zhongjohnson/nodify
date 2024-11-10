@@ -1,9 +1,31 @@
 ﻿using System;
+using System.Windows.Input;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Data;
+using Avalonia.Controls.Shapes;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Primitives;
+using Avalonia.Layout;
+using Nodify.Avalonia.EditorStates;
+using Nodify.Avalonia.Extensions;
+using FrameworkElement = Avalonia.Controls.Control;
+using ResizeEventHandler = System.EventHandler<Nodify.ResizeEventArgs>;
+using DragDeltaEventArgs = Avalonia.Input.VectorEventArgs;
+using DragStartedEventArgs = Avalonia.Input.VectorEventArgs;
+using MouseButtonEventArgs = Avalonia.Input.PointerPressedEventArgs;
+#else
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
 using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
@@ -39,8 +61,17 @@ namespace Nodify
 
         #region Routed Events
 
+#if Avalonia
+        public double ActualWidth => Bounds.Width;
+        public double ActualHeight => Bounds.Height;
+        public Size RenderSize => Bounds.Size;
+
+        public static readonly RoutedEvent ResizeStartedEvent = RoutedEvent.Register<GroupingNode, ResizeEventArgs>(nameof(ResizeStarted), RoutingStrategies.Bubble);
+        public static readonly RoutedEvent ResizeCompletedEvent = RoutedEvent.Register<GroupingNode, ResizeEventArgs>(nameof(ResizeCompleted), RoutingStrategies.Bubble);
+#else
         public static readonly RoutedEvent ResizeStartedEvent = EventManager.RegisterRoutedEvent(nameof(ResizeStarted), RoutingStrategy.Bubble, typeof(ResizeEventHandler), typeof(GroupingNode));
         public static readonly RoutedEvent ResizeCompletedEvent = EventManager.RegisterRoutedEvent(nameof(ResizeCompleted), RoutingStrategy.Bubble, typeof(ResizeEventHandler), typeof(GroupingNode));
+#endif
 
         /// <summary>
         /// Occurs when the node finished resizing.
@@ -64,17 +95,34 @@ namespace Nodify
 
         #region Dependency Properties
 
+#if Avalonia
+        public static readonly StyledProperty<IBrush> HeaderBrushProperty = Node.HeaderBrushProperty.AddOwner<GroupingNode>();
+        public static readonly StyledProperty<bool> CanResizeProperty = AvaloniaProperty.Register<GroupingNode, bool>(nameof(CanResize), true);
+        public static readonly StyledProperty<Size> ActualSizeProperty = AvaloniaProperty.Register<GroupingNode, Size>(nameof(ActualSize), defaultBindingMode: BindingMode.TwoWay);
+        public static readonly StyledProperty<GroupingMovementMode> MovementModeProperty = AvaloniaProperty.Register<GroupingNode, GroupingMovementMode>(nameof(MovementMode), GroupingMovementMode.Group);
+        public static readonly DirectProperty<GroupingNode, ICommand?> ResizeCompletedCommandProperty = AvaloniaProperty.RegisterDirect<GroupingNode, ICommand?>(nameof(ResizeCompletedCommand), o => o.ResizeCompletedCommand, (o, v) => o.ResizeCompletedCommand = v);
+        public static readonly DirectProperty<GroupingNode, ICommand?> ResizeStartedCommandProperty = AvaloniaProperty.RegisterDirect<GroupingNode, ICommand?>(nameof(ResizeStartedCommand), o => o.ResizeStartedCommand, (o, v) => o.ResizeStartedCommand = v);
+#else
         public static readonly DependencyProperty HeaderBrushProperty = Node.HeaderBrushProperty.AddOwner(typeof(GroupingNode));
         public static readonly DependencyProperty CanResizeProperty = DependencyProperty.Register(nameof(CanResize), typeof(bool), typeof(GroupingNode), new FrameworkPropertyMetadata(BoxValue.True));
         public static readonly DependencyProperty ActualSizeProperty = DependencyProperty.Register(nameof(ActualSize), typeof(Size), typeof(GroupingNode), new FrameworkPropertyMetadata(BoxValue.Size, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnActualSizeChanged));
         public static readonly DependencyProperty MovementModeProperty = DependencyProperty.Register(nameof(MovementMode), typeof(GroupingMovementMode), typeof(GroupingNode), new FrameworkPropertyMetadata(GroupMovementBoxed));
         public static readonly DependencyProperty ResizeCompletedCommandProperty = DependencyProperty.Register(nameof(ResizeCompletedCommand), typeof(ICommand), typeof(GroupingNode));
         public static readonly DependencyProperty ResizeStartedCommandProperty = DependencyProperty.Register(nameof(ResizeStartedCommand), typeof(ICommand), typeof(GroupingNode));
+#endif
 
+#if Avalonia
+        private static void OnActualSizeChanged(GroupingNode d, AvaloniaPropertyChangedEventArgs<Size> e)
+#else
         private static void OnActualSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+#endif
         {
             var node = (GroupingNode)d;
+#if Avalonia
+            var newSize = (Size)e.NewValue.Value;
+#else
             var newSize = (Size)e.NewValue;
+#endif
             node.Width = newSize.Width;
             node.Height = newSize.Height;
         }
@@ -135,7 +183,7 @@ namespace Nodify
             set => SetValue(ResizeStartedCommandProperty, value);
         }
 
-        #endregion
+#endregion
 
         #region Fields
 
@@ -160,7 +208,7 @@ namespace Nodify
         protected FrameworkElement? HeaderControl;
 
         /// <summary>
-        /// Gets the <see cref="System.Windows.Controls.ContentControl"/> control of this <see cref="GroupingNode"/>.
+        /// Gets the <see cref="Avalonia.Controls.ContentControl"/> control of this <see cref="GroupingNode"/>.
         /// </summary>
         protected FrameworkElement? ContentControl;
 
@@ -171,10 +219,25 @@ namespace Nodify
 
         static GroupingNode()
         {
+#if Avalonia
+            Panel.ZIndexProperty.OverrideMetadata<GroupingNode>(new StyledPropertyMetadata<int>(-1));
+            Panel.ZIndexProperty.Changed.AddClassHandler<GroupingNode, int>(OnZIndexPropertyChanged);
+            ActualSizeProperty.Changed.AddClassHandler<GroupingNode, Size>(OnActualSizeChanged);
+#else
             DefaultStyleKeyProperty.OverrideMetadata(typeof(GroupingNode), new FrameworkPropertyMetadata(typeof(GroupingNode)));
             Panel.ZIndexProperty.OverrideMetadata(typeof(GroupingNode), new FrameworkPropertyMetadata(-1, OnZIndexPropertyChanged));
+#endif
         }
 
+#if Avalonia
+        private static void OnZIndexPropertyChanged(GroupingNode node, AvaloniaPropertyChangedEventArgs<int> e)
+        {
+            if (node.Container != null)
+            {
+                node.SetValue(Panel.ZIndexProperty, e.NewValue.Value);
+            }
+        }
+#else
         private static void OnZIndexPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var node = (GroupingNode)d;
@@ -183,15 +246,22 @@ namespace Nodify
                 Panel.SetZIndex(node.Container, (int)e.NewValue);
             }
         }
+#endif
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GroupingNode"/> class.
         /// </summary>
         public GroupingNode()
         {
+#if Avalonia
+            AddHandler(Thumb.DragDeltaEvent, OnResize);
+            AddHandler(Thumb.DragCompletedEvent, OnResizeCompleted);
+            AddHandler(Thumb.DragStartedEvent, OnResizeStarted);
+#else
             AddHandler(Thumb.DragDeltaEvent, new DragDeltaEventHandler(OnResize));
             AddHandler(Thumb.DragCompletedEvent, new DragCompletedEventHandler(OnResizeCompleted));
             AddHandler(Thumb.DragStartedEvent, new DragStartedEventHandler(OnResizeStarted));
+#endif
 
             Loaded += OnNodeLoaded;
             Unloaded += OnNodeUnloaded;
@@ -201,7 +271,11 @@ namespace Nodify
         {
             if (HeaderControl != null)
             {
+#if Avalonia
+                HeaderControl.PointerPressed += OnHeaderMouseDown;
+#else
                 HeaderControl.MouseDown += OnHeaderMouseDown;
+#endif
                 HeaderControl.SizeChanged += OnHeaderSizeChanged;
                 CalculateDesiredHeaderSize();
             }
@@ -211,7 +285,11 @@ namespace Nodify
         {
             if (HeaderControl != null)
             {
+#if Avalonia
+                HeaderControl.PointerPressed -= OnHeaderMouseDown;
+#else
                 HeaderControl.MouseDown -= OnHeaderMouseDown;
+#endif
                 HeaderControl.SizeChanged -= OnHeaderSizeChanged;
             }
         }
@@ -223,7 +301,11 @@ namespace Nodify
             {
                 // Switch the default movement mode if necessary
                 var prevMovementMode = MovementMode;
+#if Avalonia
+                if (Editor.State.CurrentKeyModifiers == EditorGestures.Mappings.GroupingNode.SwitchMovementMode)
+#else
                 if (Keyboard.Modifiers == EditorGestures.Mappings.GroupingNode.SwitchMovementMode)
+#endif
                 {
                     MovementMode = MovementMode == GroupingMovementMode.Group ? GroupingMovementMode.Self : GroupingMovementMode.Group;
                 }
@@ -267,6 +349,15 @@ namespace Nodify
         }
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
+
+            ResizeThumb = e.NameScope.Find<Control>(ElementResizeThumb);
+            HeaderControl = e.NameScope.Find<Control>(ElementHeader);
+            ContentControl = e.NameScope.Find<Control>(ElementContent);
+#else
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
@@ -274,22 +365,34 @@ namespace Nodify
             ResizeThumb = Template.FindName(ElementResizeThumb, this) as FrameworkElement;
             HeaderControl = Template.FindName(ElementHeader, this) as FrameworkElement;
             ContentControl = Template.FindName(ElementContent, this) as FrameworkElement;
+#endif
 
             Container = this.GetParentOfType<ItemContainer>();
             Editor = Container?.Editor ?? this.GetParentOfType<NodifyEditor>();
 
             if (Container != null)
             {
+#if Avalonia
+                Container.SetValue(ZIndexProperty, GetValue(ZIndexProperty));
+#else
                 Panel.SetZIndex(Container, Panel.GetZIndex(this));
+#endif
             }
         }
 
         private void OnResize(object sender, DragDeltaEventArgs e)
         {
+#if Avalonia
+            if (CanResize && ReferenceEquals(e.Source, ResizeThumb))
+            {
+                double resultWidth = ActualWidth + e.Vector.X;
+                double resultHeight = ActualHeight + e.Vector.Y;
+#else
             if (CanResize && ReferenceEquals(e.OriginalSource, ResizeThumb))
             {
                 double resultWidth = ActualWidth + e.HorizontalChange;
                 double resultHeight = ActualHeight + e.VerticalChange;
+#endif
 
                 // Snap to grid
                 if (Editor != null)
@@ -352,8 +455,13 @@ namespace Nodify
         {
             if (HeaderControl != null && ResizeThumb != null)
             {
+#if Avalonia
+                _minHeight = Math.Max(HeaderControl.Bounds.Height + ResizeThumb.Bounds.Height, MinHeight);
+                _minWidth = Math.Max(ResizeThumb.Bounds.Width, MinWidth);
+#else
                 _minHeight = Math.Max(HeaderControl.ActualHeight + ResizeThumb.ActualHeight, MinHeight);
                 _minWidth = Math.Max(ResizeThumb.ActualWidth, MinWidth);
+#endif
 
                 // If there's content don't resize it
                 if (ContentControl != null)
@@ -366,7 +474,11 @@ namespace Nodify
             // Allow selecting only by the header
             if (Container != null)
             {
+#if Avalonia
+                Container.DesiredSizeForSelection = new Size(ActualWidth, Math.Max(HeaderControl?.Bounds.Height ?? _minHeight, MinHeight));
+#else
                 Container.DesiredSizeForSelection = new Size(ActualWidth, Math.Max(HeaderControl?.ActualHeight ?? _minHeight, MinHeight));
+#endif
             }
         }
     }

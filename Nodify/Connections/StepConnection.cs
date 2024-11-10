@@ -1,7 +1,18 @@
 ﻿using System;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls.Presenters;
+using Avalonia.Interactivity;
+using Nodify.Avalonia.Extensions;
+using DependencyObject = Avalonia.AvaloniaObject;
+#else
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
@@ -15,9 +26,15 @@ namespace Nodify
 
     public class StepConnection : LineConnection
     {
+#if Avalonia
+        public static readonly StyledProperty<ConnectorPosition> SourcePositionProperty = AvaloniaProperty.Register<BaseConnection, ConnectorPosition>(nameof(SourcePosition));
+        public static readonly StyledProperty<ConnectorPosition> TargetPositionProperty = AvaloniaProperty.Register<BaseConnection, ConnectorPosition>(nameof(TargetPosition));
+#else
         public static readonly DependencyProperty SourcePositionProperty = DependencyProperty.Register(nameof(SourcePosition), typeof(ConnectorPosition), typeof(StepConnection), new FrameworkPropertyMetadata(ConnectorPosition.Right, FrameworkPropertyMetadataOptions.AffectsRender, OnConnectorPositionChanged));
         public static readonly DependencyProperty TargetPositionProperty = DependencyProperty.Register(nameof(TargetPosition), typeof(ConnectorPosition), typeof(StepConnection), new FrameworkPropertyMetadata(ConnectorPosition.Left, FrameworkPropertyMetadataOptions.AffectsRender, OnConnectorPositionChanged));
+#endif
 
+#if !Avalonia
         private static void OnConnectorPositionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var connection = (StepConnection)d;
@@ -25,12 +42,15 @@ namespace Nodify
             connection.CoerceValue(SourceOrientationProperty);
             connection.CoerceValue(TargetOrientationProperty);
         }
+#endif
 
         static StepConnection()
         {
+#if !Avalonia
             SourceOrientationProperty.OverrideMetadata(typeof(StepConnection), new FrameworkPropertyMetadata(Orientation.Horizontal, null, CoerceSourceOrientation));
             TargetOrientationProperty.OverrideMetadata(typeof(StepConnection), new FrameworkPropertyMetadata(Orientation.Horizontal, null, CoerceTargetOrientation));
             DirectionProperty.OverrideMetadata(typeof(StepConnection), new FrameworkPropertyMetadata(ConnectionDirection.Forward, null, CoerceConnectionDirection));
+#endif
             NodifyEditor.CuttingConnectionTypes.Add(typeof(StepConnection));
         }
 
@@ -117,7 +137,11 @@ namespace Nodify
             return new Point((p3.X + p2.X - text.Width) / 2, (p3.Y + p2.Y - text.Height) / 2);
 
             static Vector GetMax(in Vector a, in Vector b)
+#if Avalonia
+                => a.SquaredLength > b.SquaredLength ? a : b;
+#else
                 => a.LengthSquared > b.LengthSquared ? a : b;
+#endif
         }
 
         protected override void DrawDirectionalArrowsGeometry(StreamGeometryContext context, Point source, Point target)

@@ -1,5 +1,21 @@
 ﻿using System;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Interactivity;
+using Avalonia.Controls;
+using Nodify.Avalonia;
+using Nodify.Avalonia.Helpers.Gestures;
+using Nodify.Avalonia.Helpers;
+using Nodify.Avalonia.Extensions;
+using CommandBinding = Nodify.Avalonia.RoutedCommandBinding;
+using MultiSelector = Avalonia.Controls.Primitives.SelectingItemsControl;
+#else
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+#endif
 
 namespace Nodify
 {
@@ -34,7 +50,9 @@ namespace Nodify
         /// </summary>
         public Point Location { get; }
 
+#if !Avalonia
         protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
             => ((ZoomEventHandler)genericHandler)(genericTarget, this);
+#endif
     }
 }

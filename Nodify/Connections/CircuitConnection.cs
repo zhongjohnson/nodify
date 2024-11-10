@@ -1,7 +1,15 @@
 ﻿using System;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Nodify.Avalonia.Extensions;
+#else
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
@@ -12,7 +20,11 @@ namespace Nodify
     {
         protected const double Degrees = Math.PI / 180.0d;
 
+#if Avalonia
+        public static readonly StyledProperty<double> AngleProperty = AvaloniaProperty.Register<LineConnection, double>(nameof(Angle), BoxValue.Double45);
+#else
         public static readonly DependencyProperty AngleProperty = DependencyProperty.Register(nameof(Angle), typeof(double), typeof(LineConnection), new FrameworkPropertyMetadata(BoxValue.Double45, FrameworkPropertyMetadataOptions.AffectsRender));
+#endif
 
         /// <summary>
         /// The angle of the connection in degrees.
@@ -25,7 +37,9 @@ namespace Nodify
 
         static CircuitConnection()
         {
+#if !Avalonia
             DefaultStyleKeyProperty.OverrideMetadata(typeof(CircuitConnection), new FrameworkPropertyMetadata(typeof(CircuitConnection)));
+#endif
             NodifyEditor.CuttingConnectionTypes.Add(typeof(CircuitConnection));
         }
 
@@ -54,7 +68,11 @@ namespace Nodify
             Vector deltaSource = p1 - p0;
             Vector deltaTarget = p2 - p1;
 
+#if Avalonia
+            if (deltaSource.SquaredLength > deltaTarget.SquaredLength)
+#else
             if (deltaSource.LengthSquared > deltaTarget.LengthSquared)
+#endif
             {
                 return new Point((p0.X + p1.X - text.Width) / 2, (p0.Y + p1.Y - text.Height) / 2);
             }
@@ -86,7 +104,11 @@ namespace Nodify
 
             if (TargetOrientation == Orientation.Vertical)
             {
+#if Avalonia
+                arrowOffset = new Vector(arrowOffset.Y, arrowOffset.X);
+#else
                 (arrowOffset.X, arrowOffset.Y) = (arrowOffset.Y, arrowOffset.X);
+#endif
             }
 
             Point endPoint = Spacing > 0 ? target - arrowOffset : target;

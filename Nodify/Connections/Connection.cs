@@ -1,7 +1,15 @@
 ﻿using System;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Nodify.Avalonia.Extensions;
+#else
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
@@ -12,7 +20,9 @@ namespace Nodify
     {
         static Connection()
         {
+#if !Avalonia
             DefaultStyleKeyProperty.OverrideMetadata(typeof(Connection), new FrameworkPropertyMetadata(typeof(Connection)));
+#endif
             NodifyEditor.CuttingConnectionTypes.Add(typeof(Connection));
         }
 

@@ -5,6 +5,9 @@ using Avalonia.Media;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Nodify.Avalonia.Extensions;
+using DependencyObject = Avalonia.AvaloniaObject;
+using DependencyPropertyChangedEventArgs = Avalonia.AvaloniaPropertyChangedEventArgs<Avalonia.Point>;
+using RoutedEventHandler = System.EventHandler<Avalonia.Interactivity.RoutedEventArgs>;
 #else
 using System.Windows;
 using System.Windows.Controls;
@@ -51,11 +54,15 @@ namespace Nodify
             item.OnLocationChanged();
         }
 
-#endregion
+        #endregion
 
         #region Routed Events
 
+#if Avalonia
+        public static readonly RoutedEvent LocationChangedEvent = RoutedEvent.Register<DecoratorContainer, RoutedEventArgs>(nameof(LocationChanged), RoutingStrategies.Bubble);
+#else
         public static readonly RoutedEvent LocationChangedEvent = EventManager.RegisterRoutedEvent(nameof(LocationChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(DecoratorContainer));
+#endif
 
         /// <summary>
         /// Occurs when the <see cref="Location"/> of this <see cref="DecoratorContainer"/> is changed.
@@ -74,7 +81,7 @@ namespace Nodify
             RaiseEvent(new RoutedEventArgs(LocationChangedEvent, this));
         }
 
-        #endregion
+#endregion
 
         static DecoratorContainer()
         {

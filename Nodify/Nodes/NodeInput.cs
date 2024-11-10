@@ -1,5 +1,15 @@
-﻿using System.Windows;
+﻿#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
+using Avalonia.Markup.Xaml.Templates;
+#else
+using System.Windows;
 using System.Windows.Controls;
+#endif
 
 namespace Nodify
 {
@@ -10,10 +20,17 @@ namespace Nodify
     {
         #region Dependency Properties
 
+#if Avalonia
+        public static readonly StyledProperty<object?> HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner<NodeInput>();
+        public static readonly StyledProperty<IDataTemplate?> HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner<NodeInput>();
+        public static readonly StyledProperty<ControlTemplate> ConnectorTemplateProperty = AvaloniaProperty.Register<NodeInput, ControlTemplate>(nameof(ConnectorTemplate));
+        public static readonly StyledProperty<Orientation> OrientationProperty = StackPanel.OrientationProperty.AddOwner<NodeInput>();
+#else
         public static readonly DependencyProperty HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner(typeof(NodeInput));
         public static readonly DependencyProperty HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner(typeof(NodeInput));
         public static readonly DependencyProperty ConnectorTemplateProperty = DependencyProperty.Register(nameof(ConnectorTemplate), typeof(ControlTemplate), typeof(NodeInput));
         public static readonly DependencyProperty OrientationProperty = StackPanel.OrientationProperty.AddOwner(typeof(NodeInput), new FrameworkPropertyMetadata(Orientation.Horizontal, FrameworkPropertyMetadataOptions.AffectsMeasure));
+#endif
 
         /// <summary>
         /// Gets of sets the data used for the control's header.
@@ -49,11 +66,13 @@ namespace Nodify
             set => SetValue(OrientationProperty, value);
         }
 
-        #endregion
+#endregion
 
         static NodeInput()
         {
+#if !Avalonia
             DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeInput), new FrameworkPropertyMetadata(typeof(NodeInput)));
+#endif
         }
     }
 }

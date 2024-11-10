@@ -1,4 +1,22 @@
-﻿using System.Windows.Input;
+﻿#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Styling;
+using Nodify.Avalonia.Extensions;
+using MouseButtonEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseWheelEventArgs = Avalonia.Input.PointerWheelEventArgs;
+#else
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+#endif
 using static Nodify.SelectionHelper;
 
 namespace Nodify
@@ -48,7 +66,11 @@ namespace Nodify
             => Selection.Update(Editor.MouseLocation);
 
         /// <inheritdoc />
+#if Avalonia
+        public override void HandleMouseDown(PointerPressedEventArgs e)
+#else
         public override void HandleMouseDown(MouseButtonEventArgs e)
+#endif
         {
             if (!Editor.DisablePanning && EditorGestures.Mappings.Editor.Pan.Matches(e.Source, e))
             {
@@ -57,7 +79,11 @@ namespace Nodify
         }
 
         /// <inheritdoc />
+#if Avalonia
+        public override void HandleMouseUp(PointerReleasedEventArgs e)
+#else
         public override void HandleMouseUp(MouseButtonEventArgs e)
+#endif
         {
             EditorGestures.SelectionGestures gestures = EditorGestures.Mappings.Editor.Selection;
 

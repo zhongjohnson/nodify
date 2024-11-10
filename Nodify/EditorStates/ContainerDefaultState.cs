@@ -46,7 +46,11 @@ namespace Nodify
         }
 
         /// <inheritdoc />
+#if Avalonia
+        public override void HandleMouseDown(PointerPressedEventArgs e)
+#else
         public override void HandleMouseDown(MouseButtonEventArgs e)
+#endif
         {
             _canceled = false;
 
@@ -64,7 +68,11 @@ namespace Nodify
         }
 
         /// <inheritdoc />
+#if Avalonia
+        public override void HandleMouseUp(PointerReleasedEventArgs e)
+#else
         public override void HandleMouseUp(MouseButtonEventArgs e)
+#endif
         {
             EditorGestures.ItemContainerGestures gestures = EditorGestures.Mappings.ItemContainer;
             if (!_canceled && gestures.Selection.Select.Matches(e.Source, e))
@@ -108,7 +116,11 @@ namespace Nodify
         }
 
         /// <inheritdoc />
+#if Avalonia
+        public override void HandleMouseMove(PointerEventArgs e)
+#else
         public override void HandleMouseMove(MouseEventArgs e)
+#endif
         {
             if (_canBeDragging)
             {

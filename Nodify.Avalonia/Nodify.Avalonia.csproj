@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
     <Description>An MVVM Node editor for Avalonia.</Description>
   </PropertyGroup>
@@ -16,29 +17,138 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Themes\Brushes.xaml" />
+    <None Remove="Themes\Controls.xaml" />
+    <None Remove="Themes\Dark.xaml" />
+    <None Remove="Themes\Light.xaml" />
+    <None Remove="Themes\Nodify.xaml" />
+    <None Remove="Themes\Styles\Connection.xaml" />
+    <None Remove="Themes\Styles\Connector.xaml" />
+    <None Remove="Themes\Styles\Controls.xaml" />
+    <None Remove="Themes\Styles\DecoratorContainer.xaml" />
+    <None Remove="Themes\Styles\GroupingNode.xaml" />
+    <None Remove="Themes\Styles\ItemContainer.xaml" />
+    <None Remove="Themes\Styles\KnotNode.xaml" />
+    <None Remove="Themes\Styles\Node.xaml" />
+    <None Remove="Themes\Styles\NodeInput.xaml" />
+    <None Remove="Themes\Styles\NodeOutput.xaml" />
+    <None Remove="Themes\Styles\NodifyEditor.xaml" />
+    <None Remove="Themes\Styles\PendingConnection.xaml" />
+    <None Remove="Themes\Styles\StateNode.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Themes\Brushes.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Controls.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Dark.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Light.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Nodify.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\Connection.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\Connector.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\Controls.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\DecoratorContainer.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\GroupingNode.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\ItemContainer.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\KnotNode.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\Node.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\NodeInput.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\NodeOutput.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\NodifyEditor.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\PendingConnection.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+    <AvaloniaResource Include="Themes\Styles\StateNode.xaml">
+      <Generator></Generator>
+    </AvaloniaResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Nodify\Connections\BaseConnection.cs" Link="Connections\BaseConnection.cs" />
+    <Compile Include="..\Nodify\Connections\CircuitConnection.cs" Link="Connections\CircuitConnection.cs" />
+    <Compile Include="..\Nodify\Connections\Connection.cs" Link="Connections\Connection.cs" />
+    <Compile Include="..\Nodify\Connections\ConnectionContainer.cs" Link="Connections\ConnectionContainer.cs" />
+    <Compile Include="..\Nodify\Connections\ConnectionsMultiSelector.cs" Link="Connections\ConnectionsMultiSelector.cs" />
+    <Compile Include="..\Nodify\Connections\Connector.cs" Link="Connections\Connector.cs" />
+    <Compile Include="..\Nodify\Connections\CuttingLine.cs" Link="Connections\CuttingLine.cs" />
+    <Compile Include="..\Nodify\Connections\LineConnection.cs" Link="Connections\LineConnection.cs" />
+    <Compile Include="..\Nodify\Connections\PendingConnection.cs" Link="Connections\PendingConnection.cs" />
+    <Compile Include="..\Nodify\Connections\StepConnection.cs" Link="Connections\StepConnection.cs" />
+    <Compile Include="..\Nodify\DecoratorContainer.cs" Link="DecoratorContainer.cs" />
+    <Compile Include="..\Nodify\DecoratorsControl.cs" Link="DecoratorsControl.cs" />
+    <Compile Include="..\Nodify\EditorCommands.cs" Link="EditorCommands.cs" />
     <Compile Include="..\Nodify\EditorGestures.cs" Link="EditorGestures.cs" />
     <Compile Include="..\Nodify\EditorStates\ContainerDefaultState.cs" Link="EditorStates\ContainerDefaultState.cs" />
     <Compile Include="..\Nodify\EditorStates\ContainerDraggingState.cs" Link="EditorStates\ContainerDraggingState.cs" />
     <Compile Include="..\Nodify\EditorStates\ContainerState.cs" Link="EditorStates\ContainerState.cs" />
+    <Compile Include="..\Nodify\EditorStates\EditorCuttingState.cs" Link="EditorStates\EditorCuttingState.cs" />
+    <Compile Include="..\Nodify\EditorStates\EditorDefaultState.cs" Link="EditorStates\EditorDefaultState.cs" />
+    <Compile Include="..\Nodify\EditorStates\EditorPanningState.cs" Link="EditorStates\EditorPanningState.cs" />
+    <Compile Include="..\Nodify\EditorStates\EditorSelectingState.cs" Link="EditorStates\EditorSelectingState.cs" />
+    <Compile Include="..\Nodify\EditorStates\EditorState.cs" Link="EditorStates\EditorState.cs" />
+    <Compile Include="..\Nodify\Events\ConnectionEventArgs.cs" Link="Events\ConnectionEventArgs.cs" />
+    <Compile Include="..\Nodify\Events\ConnectorEventArgs.cs" Link="Events\ConnectorEventArgs.cs" />
+    <Compile Include="..\Nodify\Events\PendingConnectionEventArgs.cs" Link="Events\PendingConnectionEventArgs.cs" />
     <Compile Include="..\Nodify\Events\ResizeEventArgs.cs" Link="Events\ResizeEventArgs.cs" />
     <Compile Include="..\Nodify\Helpers\BoxValue.cs" Link="Helpers\BoxValue.cs" />
+    <Compile Include="..\Nodify\Helpers\MathExtensions.cs" Link="Helpers\MathExtensions.cs" />
     <Compile Include="..\Nodify\Helpers\MultiGesture.cs" Link="Helpers\MultiGesture.cs" />
+    <Compile Include="..\Nodify\Helpers\SelectionHelper.cs" Link="Helpers\SelectionHelper.cs" />
+    <Compile Include="..\Nodify\Helpers\UnscaleTransformConverter.cs" Link="Helpers\UnscaleTransformConverter.cs" />
     <Compile Include="..\Nodify\ItemContainer.cs" Link="ItemContainer.cs" />
+    <Compile Include="..\Nodify\Minimap\Minimap.cs" Link="Minimap\Minimap.cs" />
+    <Compile Include="..\Nodify\Minimap\MinimapItem.cs" Link="Minimap\MinimapItem.cs" />
+    <Compile Include="..\Nodify\Minimap\MinimapPanel.cs" Link="Minimap\MinimapPanel.cs" />
+    <Compile Include="..\Nodify\Minimap\SubtractConverter.cs" Link="Minimap\SubtractConverter.cs" />
+    <Compile Include="..\Nodify\Minimap\ZoomEventArgs.cs" Link="Minimap\ZoomEventArgs.cs" />
+    <Compile Include="..\Nodify\Nodes\GroupingNode.cs" Link="Nodes\GroupingNode.cs" />
     <Compile Include="..\Nodify\Nodes\KnotNode.cs" Link="Nodes\KnotNode.cs" />
     <Compile Include="..\Nodify\Nodes\Node.cs" Link="Nodes\Node.cs" />
+    <Compile Include="..\Nodify\Nodes\NodeInput.cs" Link="Nodes\NodeInput.cs" />
+    <Compile Include="..\Nodify\Nodes\NodeOutput.cs" Link="Nodes\NodeOutput.cs" />
+    <Compile Include="..\Nodify\Nodes\StateNode.cs" Link="Nodes\StateNode.cs" />
     <Compile Include="..\Nodify\NodifyCanvas.cs" Link="NodifyCanvas.cs" />
+    <Compile Include="..\Nodify\NodifyEditor.cs" Link="NodifyEditor.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.1.4" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.1.4" />
+    <PackageReference Include="Avalonia" Version="11.2.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Connections\" />
-    <Folder Include="Events\" />
     <Folder Include="Minimap\" />
-    <Folder Include="Themes\" />
   </ItemGroup>
 
 </Project>

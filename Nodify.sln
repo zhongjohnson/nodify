@@ -30,6 +30,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{3D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Avalonia.Playground", "Examples\Nodify.Avalonia.Playground\Nodify.Avalonia.Playground.csproj", "{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Avalonia.Demo", "Examples\Nodify.Avalonia.Demo\Nodify.Avalonia.Demo.csproj", "{1A8766C8-D404-441B-A029-70315877FBF9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodify.Avalonia.Shared", "Examples\Nodify.Avalonia.Shared\Nodify.Avalonia.Shared.csproj", "{0BEAFF4B-932D-4919-AAF2-8E51B7CF464B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +72,14 @@ Global
 		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A8766C8-D404-441B-A029-70315877FBF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A8766C8-D404-441B-A029-70315877FBF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A8766C8-D404-441B-A029-70315877FBF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A8766C8-D404-441B-A029-70315877FBF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BEAFF4B-932D-4919-AAF2-8E51B7CF464B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BEAFF4B-932D-4919-AAF2-8E51B7CF464B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BEAFF4B-932D-4919-AAF2-8E51B7CF464B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BEAFF4B-932D-4919-AAF2-8E51B7CF464B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,6 +93,8 @@ Global
 		{955EE600-C924-4686-A4B7-BBA8325C4BFB} = {CBE7A7BE-DE8B-4EE9-B245-F32B340B61DE}
 		{3D60299A-A091-43D4-99F7-FBFD0DE1D465} = {CBE7A7BE-DE8B-4EE9-B245-F32B340B61DE}
 		{A4037BEB-C1B5-4B3E-950E-E8E0734D689C} = {3D60299A-A091-43D4-99F7-FBFD0DE1D465}
+		{1A8766C8-D404-441B-A029-70315877FBF9} = {3D60299A-A091-43D4-99F7-FBFD0DE1D465}
+		{0BEAFF4B-932D-4919-AAF2-8E51B7CF464B} = {3D60299A-A091-43D4-99F7-FBFD0DE1D465}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9E59DB6-FB93-48F3-A8E0-1E549009E043}

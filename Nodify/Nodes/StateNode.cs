@@ -1,7 +1,28 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Controls.Shapes;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.VisualTree;
+using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Controls.Metadata;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Templates;
+using Avalonia.Layout;
+using Nodify.Avalonia.Extensions;
+using FrameworkElement = Avalonia.Controls.Control;
+using DataTemplate = Avalonia.Controls.Templates.IDataTemplate;
+using UIElement = Avalonia.Controls.Control;
+#else
 using System.Windows.Media;
+using System.Windows.Controls;
+#endif
 
 namespace Nodify
 {
@@ -15,10 +36,17 @@ namespace Nodify
 
         #region Dependency Properties
 
+#if Avalonia
+        public static readonly StyledProperty<IBrush> HighlightBrushProperty = ItemContainer.HighlightBrushProperty.AddOwner<StateNode>();
+        public static readonly StyledProperty<object?> ContentProperty = ContentPresenter.ContentProperty.AddOwner<StateNode>();
+        public static readonly StyledProperty<IDataTemplate?> ContentTemplateProperty = ContentPresenter.ContentTemplateProperty.AddOwner<StateNode>();
+        public static readonly StyledProperty<CornerRadius> CornerRadiusProperty = TemplatedControl.CornerRadiusProperty.AddOwner<StateNode>();
+#else
         public static readonly DependencyProperty HighlightBrushProperty = ItemContainer.HighlightBrushProperty.AddOwner(typeof(StateNode));
         public static readonly DependencyProperty ContentProperty = ContentPresenter.ContentProperty.AddOwner(typeof(StateNode));
         public static readonly DependencyProperty ContentTemplateProperty = ContentPresenter.ContentTemplateProperty.AddOwner(typeof(StateNode));
         public static readonly DependencyProperty CornerRadiusProperty = Border.CornerRadiusProperty.AddOwner(typeof(StateNode));
+#endif
 
         /// <summary>
         /// Gets or sets the brush used when the <see cref="PendingConnection.IsOverElementProperty"/> attached property is true for this <see cref="StateNode"/>.
@@ -56,7 +84,7 @@ namespace Nodify
             set => SetValue(CornerRadiusProperty, value);
         }
 
-        #endregion
+#endregion
         
         /// <summary>
         /// Gets the <see cref="ContentControl"/> control of this <see cref="StateNode"/>.
@@ -65,18 +93,39 @@ namespace Nodify
 
         static StateNode()
         {
+#if !Avalonia
             DefaultStyleKeyProperty.OverrideMetadata(typeof(StateNode), new FrameworkPropertyMetadata(typeof(StateNode)));
+#endif
         }
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
+
+            ContentControl = e.NameScope.Find<UIElement>(ElementConnector);
+        }
+#else
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
 
             ContentControl = Template.FindName(ElementContent, this) as UIElement;
         }
+#endif
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
+        {
+            // Do not raise PendingConnection events if clicked on content
+            if (e.Source is Visual visual && (!ContentControl?.IsVisualAncestorOf(visual) ?? true) && !Equals(e.Source, ContentControl))
+            {
+                base.OnPointerPressed(e);
+            }
+        }
+#else
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
@@ -85,8 +134,19 @@ namespace Nodify
                 base.OnMouseDown(e);
             }
         }
+#endif
 
         /// <inheritdoc />
+#if Avalonia
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
+        {
+            // Do not raise PendingConnection events if clicked on content
+            if (e.Source is Visual visual && (!ContentControl?.IsVisualAncestorOf(visual) ?? true) && !Equals(e.Source, ContentControl))
+            {
+                base.OnPointerReleased(e);
+            }
+        }
+#else
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
@@ -95,5 +155,6 @@ namespace Nodify
                 base.OnMouseUp(e);
             }
         }
+#endif
     }
 }

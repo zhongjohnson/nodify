@@ -1,14 +1,31 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Specialized;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Collections;
+using Avalonia.Controls.Shapes;
+using Avalonia.Controls.Primitives;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Nodify.Avalonia.Extensions;
+using MultiSelector = Avalonia.Controls.Primitives.SelectingItemsControl;
+#else
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+#endif
 
 namespace Nodify
 {
     internal class ConnectionsMultiSelector : MultiSelector
     {
+#if Avalonia
+        public static readonly DirectProperty<ConnectionsMultiSelector, IList?> SelectedItemsProperty = NodifyEditor.SelectedItemsProperty.AddOwner<ConnectionsMultiSelector>(o => o.SelectedItems);
+        public static readonly StyledProperty<bool> CanSelectMultipleItemsProperty = NodifyEditor.CanSelectMultipleItemsProperty.AddOwner<ConnectionsMultiSelector>();
+#else
         public static readonly DependencyProperty SelectedItemsProperty = NodifyEditor.SelectedItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(default(IList), OnSelectedItemsSourceChanged));
         public static readonly DependencyProperty CanSelectMultipleItemsProperty = NodifyEditor.CanSelectMultipleItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(BoxValue.True, OnCanSelectMultipleItemsChanged, CoerceCanSelectMultipleItems));
 
@@ -20,6 +37,7 @@ namespace Nodify
 
         private static void OnSelectedItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
             => ((ConnectionsMultiSelector)d).OnSelectedItemsSourceChanged((IList)e.OldValue, (IList)e.NewValue);
+#endif
 
         /// <summary>
         /// Gets or sets the selected connections in the <see cref="NodifyEditor"/>.
@@ -39,24 +57,38 @@ namespace Nodify
             set => SetValue(CanSelectMultipleItemsProperty, value);
         }
 
+#if !Avalonia
         private bool CanSelectMultipleItemsBase
         {
             get => base.CanSelectMultipleItems;
             set => base.CanSelectMultipleItems = value;
         }
+#endif
 
         /// <summary>
         /// The <see cref="NodifyEditor"/> that owns this <see cref="ConnectionsMultiSelector"/>.
         /// </summary>
         public NodifyEditor Editor { get; private set; } = default!;
 
+#if Avalonia
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
+#else
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
+#endif
 
             Editor = this.GetParentOfType<NodifyEditor>() ?? throw new NotSupportedException($"{nameof(ConnectionsMultiSelector)} cannot be used outside the {nameof(NodifyEditor)}");
         }
 
+#if Avalonia
+        protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
+        {
+            return new ConnectionContainer(this);
+        }
+#else
         protected override DependencyObject GetContainerForItemOverride()
         {
             return new ConnectionContainer(this);
@@ -64,6 +96,7 @@ namespace Nodify
 
         protected override bool IsItemItsOwnContainerOverride(object item)
             => item is ConnectionContainer;
+#endif
 
         private void OnSelectedItemsSourceChanged(IList oldValue, IList newValue)
         {
@@ -76,7 +109,7 @@ namespace Nodify
             {
                 nc.CollectionChanged += OnSelectedItemsChanged;
             }
-
+#if !Avalonia
             IList selectedItems = base.SelectedItems;
 
             BeginUpdateSelectedItems();
@@ -89,6 +122,7 @@ namespace Nodify
                 }
             }
             EndUpdateSelectedItems();
+#endif
         }
 
         private void OnSelectedItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -128,6 +162,7 @@ namespace Nodify
             }
         }
 
+#if !Avalonia
         protected override void OnSelectionChanged(SelectionChangedEventArgs e)
         {
             base.OnSelectionChanged(e);
@@ -152,5 +187,6 @@ namespace Nodify
                 }
             }
         }
+#endif
     }
 }

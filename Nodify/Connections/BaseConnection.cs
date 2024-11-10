@@ -1,12 +1,29 @@
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Windows.Input;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Controls.Shapes;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Layout;
+using Nodify.Avalonia.Extensions;
+using ConnectionEventHandler = System.EventHandler<Nodify.ConnectionEventArgs>;
+using MouseButtonEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseEventArgs = Avalonia.Input.PointerEventArgs;
+using UIElement = Avalonia.Controls.Control;
+#else
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+#endif
 
 namespace Nodify
 {
@@ -111,6 +128,39 @@ namespace Nodify
     {
         #region Dependency Properties
 
+#if Avalonia
+        public static readonly StyledProperty<Point> SourceProperty = AvaloniaProperty.Register<BaseConnection, Point>(nameof(Source));
+        public static readonly StyledProperty<Point> TargetProperty = AvaloniaProperty.Register<BaseConnection, Point>(nameof(Target));
+        public static readonly StyledProperty<Size> SourceOffsetProperty = AvaloniaProperty.Register<BaseConnection, Size>(nameof(SourceOffset), new Size(14, 0));
+        public static readonly StyledProperty<Size> TargetOffsetProperty = AvaloniaProperty.Register<BaseConnection, Size>(nameof(TargetOffset), new Size(14, 0));
+        public static readonly StyledProperty<ConnectionOffsetMode> SourceOffsetModeProperty = AvaloniaProperty.Register<BaseConnection, ConnectionOffsetMode>(nameof(SourceOffsetMode), ConnectionOffsetMode.Static);
+        public static readonly StyledProperty<ConnectionOffsetMode> TargetOffsetModeProperty = AvaloniaProperty.Register<BaseConnection, ConnectionOffsetMode>(nameof(TargetOffsetMode), ConnectionOffsetMode.Static);
+        public static readonly StyledProperty<Orientation> SourceOrientationProperty = AvaloniaProperty.Register<BaseConnection, Orientation>(nameof(SourceOrientation), Orientation.Horizontal);
+        public static readonly StyledProperty<Orientation> TargetOrientationProperty = AvaloniaProperty.Register<BaseConnection, Orientation>(nameof(TargetOrientation), Orientation.Horizontal); 
+        public static readonly StyledProperty<ConnectionDirection> DirectionProperty = AvaloniaProperty.Register<BaseConnection, ConnectionDirection>(nameof(Direction));
+        public static readonly StyledProperty<uint> DirectionalArrowsCountProperty = AvaloniaProperty.Register<BaseConnection, uint>(nameof(DirectionalArrowsCount), BoxValue.UInt0);
+        public static readonly StyledProperty<double> DirectionalArrowsOffsetProperty = AvaloniaProperty.Register<BaseConnection, double>(nameof(DirectionalArrowsOffset), BoxValue.Double0);
+        public static readonly StyledProperty<bool> IsAnimatingDirectionalArrowsProperty = AvaloniaProperty.Register<BaseConnection, bool>(nameof(IsAnimatingDirectionalArrows), BoxValue.False);
+        public static readonly StyledProperty<double> DirectionalArrowsAnimationDurationProperty = AvaloniaProperty.Register<BaseConnection, double>(nameof(DirectionalArrowsAnimationDuration), BoxValue.Double2);
+        public static readonly StyledProperty<double> SpacingProperty = AvaloniaProperty.Register<BaseConnection, double>(nameof(Spacing), 0d);
+        public static readonly StyledProperty<Size> ArrowSizeProperty = AvaloniaProperty.Register<BaseConnection, Size>(nameof(ArrowSize), new Size(8, 8));
+        public static readonly StyledProperty<ArrowHeadEnds> ArrowEndsProperty = AvaloniaProperty.Register<BaseConnection, ArrowHeadEnds>(nameof(ArrowEnds), ArrowHeadEnds.End);
+        public static readonly StyledProperty<ArrowHeadShape> ArrowShapeProperty = AvaloniaProperty.Register<BaseConnection, ArrowHeadShape>(nameof(ArrowShape), ArrowHeadShape.Arrowhead);
+        public static readonly StyledProperty<ICommand?> SplitCommandProperty = AvaloniaProperty.Register<BaseConnection, ICommand?>(nameof(SplitCommand));
+        public static readonly StyledProperty<ICommand?> DisconnectCommandProperty = Connector.DisconnectCommandProperty.AddOwner<BaseConnection>();
+        public static readonly StyledProperty<double> OutlineThicknessProperty = AvaloniaProperty.Register<BaseConnection, double>(nameof(OutlineThickness), BoxValue.Double5);
+        public static readonly StyledProperty<Brush> OutlineBrushProperty = AvaloniaProperty.Register<BaseConnection, Brush>(nameof(OutlineBrush), null);
+        public static readonly StyledProperty<IBrush?> ForegroundProperty = TextBlock.ForegroundProperty.AddOwner<BaseConnection>();
+        public static readonly StyledProperty<string?> TextProperty = TextBlock.TextProperty.AddOwner<BaseConnection>();
+        public static readonly AttachedProperty<double> FontSizeProperty = TextElement.FontSizeProperty.AddOwner<BaseConnection>();
+        public static readonly AttachedProperty<FontFamily> FontFamilyProperty = TextElement.FontFamilyProperty.AddOwner<BaseConnection>();
+        public static readonly AttachedProperty<FontWeight> FontWeightProperty = TextElement.FontWeightProperty.AddOwner<BaseConnection>();
+        public static readonly AttachedProperty<FontStyle> FontStyleProperty = TextElement.FontStyleProperty.AddOwner<BaseConnection>();
+        public static readonly AttachedProperty<FontStretch> FontStretchProperty = TextElement.FontStretchProperty.AddOwner<BaseConnection>();
+
+        public static readonly AttachedProperty<bool> IsSelectableProperty = AvaloniaProperty.RegisterAttached<BaseConnection, Control, bool>("IsSelectable", BoxValue.False);
+        public static readonly AttachedProperty<bool> IsSelectedProperty = AvaloniaProperty.RegisterAttached<BaseConnection, Control, bool>("IsSelected", BoxValue.False);
+#else
         public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(nameof(Source), typeof(Point), typeof(BaseConnection), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.AffectsRender));
         public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(nameof(Target), typeof(Point), typeof(BaseConnection), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.AffectsRender));
         public static readonly DependencyProperty SourceOffsetProperty = DependencyProperty.Register(nameof(SourceOffset), typeof(Size), typeof(BaseConnection), new FrameworkPropertyMetadata(BoxValue.ConnectionOffset, FrameworkPropertyMetadataOptions.AffectsRender));
@@ -142,13 +192,22 @@ namespace Nodify
 
         public static readonly DependencyProperty IsSelectableProperty = DependencyProperty.RegisterAttached("IsSelectable", typeof(bool), typeof(BaseConnection), new FrameworkPropertyMetadata(BoxValue.False));
         public static readonly DependencyProperty IsSelectedProperty = DependencyProperty.RegisterAttached("IsSelected", typeof(bool), typeof(BaseConnection), new FrameworkPropertyMetadata(BoxValue.False, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsSelectedChanged));
+#endif
 
+#if Avalonia
+        private static void OnIsSelectedChanged(BaseConnection d, AvaloniaPropertyChangedEventArgs<bool> e)
+#else
         private static void OnIsSelectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+#endif
         {
             var container = d is BaseConnection conn ? conn.Container : ((UIElement)d).GetParentOfType<ConnectionContainer>();
             if (container != null)
             {
+#if Avalonia
+                container.IsSelected = (bool)e.NewValue.Value;
+#else
                 container.IsSelected = (bool)e.NewValue;
+#endif
             }
         }
 
@@ -164,10 +223,18 @@ namespace Nodify
         public static void SetIsSelected(UIElement? elem, bool value)
             => elem?.SetValue(IsSelectedProperty, value);
 
+#if Avalonia
+        private static void OnIsAnimatingDirectionalArrowsChanged(BaseConnection d, AvaloniaPropertyChangedEventArgs<bool> e)
+#else
         private static void OnIsAnimatingDirectionalArrowsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+#endif
         {
             var con = (BaseConnection)d;
+#if Avalonia
+            if (e.NewValue.Value is true)
+#else
             if (e.NewValue is true)
+#endif
             {
                 con.StartAnimation(con.DirectionalArrowsAnimationDuration);
             }
@@ -177,16 +244,28 @@ namespace Nodify
             }
         }
 
+#if Avalonia
+        private static void OnDirectionalArrowsAnimationDurationChanged(BaseConnection d, AvaloniaPropertyChangedEventArgs<double> e)
+#else
         private static void OnDirectionalArrowsAnimationDurationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+#endif
         {
             var con = (BaseConnection)d;
             if (con.IsAnimatingDirectionalArrows)
             {
+#if Avalonia
+                con.StartAnimation((double)e.NewValue.Value);
+#else
                 con.StartAnimation((double)e.NewValue);
+#endif
             }
         }
 
+#if Avalonia
+        private static void OnOutlinePenChanged(BaseConnection d, AvaloniaPropertyChangedEventArgs<Brush> e)
+#else
         private static void OnOutlinePenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+#endif
         {
             ((BaseConnection)d)._outlinePen = null;
         }
@@ -401,7 +480,9 @@ namespace Nodify
         }
 
         /// <inheritdoc cref="TextElement.FontSize" />
+#if !Avalonia
         [TypeConverter(typeof(FontSizeConverter))]
+#endif
         public double FontSize
         {
             get => (double)GetValue(FontSizeProperty);
@@ -436,12 +517,17 @@ namespace Nodify
             set => SetValue(FontStretchProperty, value);
         }
 
-        #endregion
+#endregion
 
         #region Routed Events
 
+#if Avalonia
+        public static readonly RoutedEvent DisconnectEvent = RoutedEvent.Register<BaseConnection, ConnectionEventArgs>(nameof(Disconnect), RoutingStrategies.Bubble);
+        public static readonly RoutedEvent SplitEvent = RoutedEvent.Register<BaseConnection, ConnectionEventArgs>(nameof(Split), RoutingStrategies.Bubble);
+#else
         public static readonly RoutedEvent DisconnectEvent = EventManager.RegisterRoutedEvent(nameof(Disconnect), RoutingStrategy.Bubble, typeof(ConnectionEventHandler), typeof(BaseConnection));
         public static readonly RoutedEvent SplitEvent = EventManager.RegisterRoutedEvent(nameof(Split), RoutingStrategy.Bubble, typeof(ConnectionEventHandler), typeof(BaseConnection));
+#endif
 
         /// <summary>Triggered by the <see cref="EditorGestures.ConnectionGestures.Disconnect"/> gesture.</summary>
         public event ConnectionEventHandler Disconnect
@@ -457,7 +543,7 @@ namespace Nodify
             remove => RemoveHandler(SplitEvent, value);
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Whether to prioritize controls of type <see cref="BaseConnection"/> inside custom connections (connection wrappers) 
@@ -475,18 +561,26 @@ namespace Nodify
 
         private Pen? _outlinePen;
 
+#if !Avalonia
         private readonly StreamGeometry _geometry = new StreamGeometry
         {
             FillRule = FillRule.EvenOdd
         };
+#endif
 
         private ConnectionContainer? _container;
         private ConnectionContainer? Container => _container ??= this.GetParentOfType<ConnectionContainer>();
 
+#if Avalonia
+        protected override Geometry? CreateDefiningGeometry()
+        {
+            var _geometry = new StreamGeometry();
+#else
         protected override Geometry DefiningGeometry
         {
             get
             {
+#endif
                 using (StreamGeometryContext context = _geometry.Open())
                 {
                     (Vector sourceOffset, Vector targetOffset) = GetOffset();
@@ -520,7 +614,9 @@ namespace Nodify
                 }
 
                 return _geometry;
+#if !Avalonia
             }
+#endif
         }
 
         protected abstract ((Point ArrowStartSource, Point ArrowStartTarget), (Point ArrowEndSource, Point ArrowEndTarget)) DrawLineGeometry(StreamGeometryContext context, Point source, Point target);
@@ -673,12 +769,20 @@ namespace Nodify
 
             if (SourceOrientation == Orientation.Vertical)
             {
+#if Avalonia
+                sourceOffset = new Vector(sourceOffset.Y, sourceOffset.X);
+#else
                 (sourceOffset.X, sourceOffset.Y) = (sourceOffset.Y, sourceOffset.X);
+#endif
             }
 
             if (TargetOrientation == Orientation.Vertical)
             {
+#if Avalonia
+                targetOffset = new Vector(targetOffset.Y, targetOffset.X);
+#else
                 (targetOffset.X, targetOffset.Y) = (targetOffset.Y, targetOffset.X);
+#endif
             }
 
             return (sourceOffset, targetOffset);
@@ -711,7 +815,11 @@ namespace Nodify
 
             static Vector GetCircleModeOffset(Vector delta, Size offset)
             {
+#if Avalonia
+                if (delta.SquaredLength > 0d)
+#else
                 if (delta.LengthSquared > 0d)
+#endif
                 {
                     delta.Normalize();
                 }
@@ -721,23 +829,29 @@ namespace Nodify
 
             static Vector GetRectangleModeOffset(Vector delta, Size offset)
             {
+#if Avalonia
+                if (delta.SquaredLength > 0d)
+#else
                 if (delta.LengthSquared > 0d)
+#endif
                 {
                     delta.Normalize();
                 }
 
                 double angle = Math.Atan2(delta.Y, delta.X);
-                var result = new Vector();
+                Vector result;
 
                 if (offset.Width * 2d * Math.Abs(delta.Y) < offset.Height * 2d * Math.Abs(delta.X))
                 {
-                    result.X = Math.Sign(delta.X) * offset.Width;
-                    result.Y = Math.Tan(angle) * result.X;
+                    var x = Math.Sign(delta.X) * offset.Width;
+                    var y = Math.Tan(angle) * x;
+                    result = new Vector(x, y);
                 }
                 else
                 {
-                    result.Y = Math.Sign(delta.Y) * offset.Height;
-                    result.X = 1.0d / Math.Tan(angle) * result.Y;
+                    var y = Math.Sign(delta.Y) * offset.Height;
+                    var x = 1.0d / Math.Tan(angle) * y;
+                    result = new Vector(x, y);
                 }
 
                 return result;
@@ -761,20 +875,32 @@ namespace Nodify
         public void StartAnimation(double duration = 1.5d)
         {
             StopAnimation();
+#if !Avalonia
             this.StartLoopingAnimation(DirectionalArrowsOffsetProperty, DirectionalArrowsOffset + 1d, duration);
+#endif
         }
 
         /// <summary>Stops the animation started by <see cref="StartAnimation(double)"/></summary>
         public void StopAnimation()
         {
-            this.CancelAnimation(DirectionalArrowsOffsetProperty);
+#if !Avalonia
+        this.CancelAnimation(DirectionalArrowsOffsetProperty);
+#endif
         }
 
+#if Avalonia
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
+#else
         protected override void OnMouseDown(MouseButtonEventArgs e)
+#endif
         {
             Focus();
 
+#if Avalonia
+            this.CaptureMouseSafe(e);
+#else
             this.CaptureMouseSafe();
+#endif
 
             EditorGestures.ConnectionGestures gestures = EditorGestures.Mappings.Connection;
             if (gestures.Split.Matches(e.Source, e))
@@ -827,12 +953,23 @@ namespace Nodify
             }
         }
 
+#if Avalonia
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
+#else
         protected override void OnMouseUp(MouseButtonEventArgs e)
+#endif
         {
+#if Avalonia
+            if (e.Pointer.Captured == this)
+            {
+                this.ReleaseMouseCapture(e);
+            }
+#else
             if (IsMouseCaptured)
             {
                 ReleaseMouseCapture();
             }
+#endif
         }
 
         private Pen GetOutlinePen()
@@ -840,6 +977,7 @@ namespace Nodify
             return _outlinePen ??= new Pen(OutlineBrush, StrokeThickness + OutlineThickness * 2d);
         }
 
+#if !Avalonia
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (OutlineBrush != null)
@@ -859,5 +997,6 @@ namespace Nodify
                 drawingContext.DrawText(text, GetTextPosition(text, Source + sourceOffset, Target + targetOffset));
             }
         }
+#endif
     }
 }

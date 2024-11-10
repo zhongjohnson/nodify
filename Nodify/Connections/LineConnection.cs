@@ -1,7 +1,17 @@
 ﻿using System;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls.Presenters;
+using Avalonia.Interactivity;
+using Nodify.Avalonia.Extensions;
+#else
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
@@ -12,7 +22,9 @@ namespace Nodify
     {
         static LineConnection()
         {
+#if !Avalonia
             DefaultStyleKeyProperty.OverrideMetadata(typeof(LineConnection), new FrameworkPropertyMetadata(typeof(LineConnection)));
+#endif
             NodifyEditor.CuttingConnectionTypes.Add(typeof(LineConnection));
         }
 
@@ -87,9 +99,15 @@ namespace Nodify
 
         protected static ((Point SegmentStart, Point SegmentEnd), Point InterpolatedPoint) InterpolateLine(Point p0, Point p1, Point p2, Point p3, double t)
         {
+#if Avalonia
+            double length1 = p1.VectorSubtract(p0).Length;
+            double length2 = p2.VectorSubtract(p1).Length;
+            double length3 = p3.VectorSubtract(p2).Length;
+#else
             double length1 = (p1 - p0).Length;
             double length2 = (p2 - p1).Length;
             double length3 = (p3 - p2).Length;
+#endif
             double totalLength = length1 + length2 + length3;
 
             double ratio1 = length1 / totalLength;
@@ -111,8 +129,13 @@ namespace Nodify
 
         protected static ((Point SegmentStart, Point SegmentEnd), Point InterpolatedPoint) InterpolateLine(Point p0, Point p1, Point p2, double t)
         {
+#if Avalonia
+            double length1 = p1.VectorSubtract(p0).Length;
+            double length2 = p2.VectorSubtract(p1).Length;
+#else
             double length1 = (p1 - p0).Length;
             double length2 = (p2 - p1).Length;
+#endif
             double totalLength = length1 + length2;
 
             double ratio1 = length1 / totalLength;

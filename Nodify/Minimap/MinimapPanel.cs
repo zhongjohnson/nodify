@@ -1,16 +1,42 @@
 ﻿using System;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Data;
+using Avalonia.Controls;
+using Nodify.Avalonia;
+using Nodify.Avalonia.Helpers.Gestures;
+using Nodify.Avalonia.Helpers;
+using Nodify.Avalonia.Extensions;
+using CommandBinding = Nodify.Avalonia.RoutedCommandBinding;
+using MultiSelector = Avalonia.Controls.Primitives.SelectingItemsControl;
+using UIElementCollection = Avalonia.Controls.Controls;
+#else
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+#endif
 
 namespace Nodify
 {
     internal class MinimapPanel : Panel
     {
+#if Avalonia
+        public UIElementCollection InternalChildren => Children;
+
+        public static readonly StyledProperty<Point> ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner<MinimapPanel>();
+        public static readonly StyledProperty<Size> ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner<MinimapPanel>();
+        public static readonly StyledProperty<Rect> ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner<MinimapPanel>();
+        public static readonly StyledProperty<Rect> ItemsExtentProperty = Minimap.ItemsExtentProperty.AddOwner<MinimapPanel>();
+        public static readonly StyledProperty<bool> ResizeToViewportProperty = Minimap.ResizeToViewportProperty.AddOwner<MinimapPanel>();
+#else
         public static readonly DependencyProperty ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner(typeof(MinimapPanel), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.AffectsMeasure));
         public static readonly DependencyProperty ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner(typeof(MinimapPanel), new FrameworkPropertyMetadata(BoxValue.Size, FrameworkPropertyMetadataOptions.AffectsMeasure));
         public static readonly DependencyProperty ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner(typeof(MinimapPanel));
         public static readonly DependencyProperty ItemsExtentProperty = Minimap.ItemsExtentProperty.AddOwner(typeof(MinimapPanel));
         public static readonly DependencyProperty ResizeToViewportProperty = Minimap.ResizeToViewportProperty.AddOwner(typeof(MinimapPanel));
+#endif
 
         /// <inheritdoc cref="Minimap.ViewportLocation" />
         public Point ViewportLocation
@@ -110,7 +136,11 @@ namespace Nodify
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (MinimapItem)children[i];
+#if Avalonia
+                item.Arrange(new Rect(item.Location - (Vector)Extent.Position, item.DesiredSize));
+#else
                 item.Arrange(new Rect(item.Location - (Vector)Extent.Location, item.DesiredSize));
+#endif
             }
 
             return finalSize;

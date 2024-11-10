@@ -1,5 +1,15 @@
-﻿using System.Windows;
+﻿#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
+using Avalonia.Markup.Xaml.Templates;
+#else
+using System.Windows;
 using System.Windows.Controls;
+#endif
 
 namespace Nodify
 {
@@ -9,11 +19,18 @@ namespace Nodify
     public class NodeOutput : Connector
     {
         #region Dependency Properties
-        
+
+#if Avalonia
+        public static readonly StyledProperty<object?> HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner<NodeOutput>();
+        public static readonly StyledProperty<IDataTemplate?> HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner<NodeOutput>();
+        public static readonly StyledProperty<ControlTemplate> ConnectorTemplateProperty = AvaloniaProperty.Register<NodeOutput, ControlTemplate>(nameof(ConnectorTemplate));
+        public static readonly StyledProperty<Orientation> OrientationProperty = StackPanel.OrientationProperty.AddOwner<NodeOutput>();
+#else
         public static readonly DependencyProperty HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner(typeof(NodeOutput));
         public static readonly DependencyProperty HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner(typeof(NodeOutput));
         public static readonly DependencyProperty ConnectorTemplateProperty = NodeInput.ConnectorTemplateProperty.AddOwner(typeof(NodeOutput));
         public static readonly DependencyProperty OrientationProperty = NodeInput.OrientationProperty.AddOwner(typeof(NodeOutput), new FrameworkPropertyMetadata(Orientation.Horizontal, FrameworkPropertyMetadataOptions.AffectsMeasure));
+#endif
 
         /// <summary>
         /// Gets of sets the data used for the control's header.
@@ -53,7 +70,9 @@ namespace Nodify
 
         static NodeOutput()
         {
+#if !Avalonia
             DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeOutput), new FrameworkPropertyMetadata(typeof(NodeOutput)));
+#endif
         }
     }
 }

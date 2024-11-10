@@ -1,7 +1,26 @@
 ﻿using System.Collections.Generic;
+
+#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Styling;
+using Nodify.Avalonia.Extensions;
+using MouseButtonEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseWheelEventArgs = Avalonia.Input.PointerWheelEventArgs;
+using FrameworkElement = Avalonia.Controls.Control;
+using Control = Avalonia.Controls.Primitives.TemplatedControl;
+#else
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
@@ -42,7 +61,11 @@ namespace Nodify
             }
         }
 
+#if Avalonia
+        public override void HandleMouseUp(PointerReleasedEventArgs e)
+#else
         public override void HandleMouseUp(MouseButtonEventArgs e)
+#endif
         {
             EditorGestures.NodifyEditorGestures gestures = EditorGestures.Mappings.Editor;
             if (gestures.Cutting.Matches(e.Source, e))
@@ -58,7 +81,11 @@ namespace Nodify
             }
         }
 
+#if Avalonia
+        public override void HandleMouseMove(PointerEventArgs e)
+#else
         public override void HandleMouseMove(MouseEventArgs e)
+#endif
         {
             Editor.CuttingLineEnd = Editor.MouseLocation;
 

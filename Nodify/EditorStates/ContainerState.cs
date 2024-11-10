@@ -36,6 +36,19 @@ namespace Nodify
         /// <summary>The owner of the state.</summary>
         protected NodifyEditor Editor => Container.Editor;
 
+#if Avalonia
+        /// <inheritdoc cref="ItemContainer.OnMouseDown(MouseButtonEventArgs)"/>
+        public virtual void HandleMouseDown(PointerPressedEventArgs e) { }
+
+        /// <inheritdoc cref="ItemContainer.OnMouseDown(MouseButtonEventArgs)"/>
+        public virtual void HandleMouseUp(PointerReleasedEventArgs e) { }
+
+        /// <inheritdoc cref="ItemContainer.OnMouseMove(MouseEventArgs)"/>
+        public virtual void HandleMouseMove(PointerEventArgs e) { }
+
+        /// <inheritdoc cref="ItemContainer.OnMouseWheel(MouseWheelEventArgs)"/>
+        public virtual void HandleMouseWheel(PointerWheelEventArgs e) { }
+#else
         /// <inheritdoc cref="ItemContainer.OnMouseDown(MouseButtonEventArgs)"/>
         public virtual void HandleMouseDown(MouseButtonEventArgs e) { }
 
@@ -47,6 +60,7 @@ namespace Nodify
 
         /// <inheritdoc cref="ItemContainer.OnMouseWheel(MouseWheelEventArgs)"/>
         public virtual void HandleMouseWheel(MouseWheelEventArgs e) { }
+#endif
 
         /// <inheritdoc cref="ItemContainer.OnKeyUp(KeyEventArgs)"/>
         public virtual void HandleKeyUp(KeyEventArgs e) { }

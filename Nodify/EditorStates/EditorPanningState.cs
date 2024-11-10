@@ -1,5 +1,22 @@
-﻿using System.Windows;
+﻿#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Styling;
+using Nodify.Avalonia.Extensions;
+using MouseButtonEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseWheelEventArgs = Avalonia.Input.PointerWheelEventArgs;
+#else
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+#endif
 
 namespace Nodify
 {
@@ -23,31 +40,53 @@ namespace Nodify
         /// <inheritdoc />
         public override void Enter(EditorState? from)
         {
+#if Avalonia
+            _initialMousePosition = CurrentPointerArgs.GetPosition(Editor);
+#else
             _initialMousePosition = Mouse.GetPosition(Editor);
+#endif
             _previousMousePosition = _initialMousePosition;
             _currentMousePosition = _initialMousePosition;
             Editor.IsPanning = true;
         }
 
         /// <inheritdoc />
+#if Avalonia
+        public override void HandleMouseMove(PointerEventArgs e)
+        {
+            base.HandleMouseMove(e);
+#else
         public override void HandleMouseMove(MouseEventArgs e)
         {
+#endif
             _currentMousePosition = e.GetPosition(Editor);
             Editor.ViewportLocation -= (_currentMousePosition - _previousMousePosition) / Editor.ViewportZoom;
             _previousMousePosition = _currentMousePosition;
         }
 
         /// <inheritdoc />
+#if Avalonia
+        public override void HandleMouseUp(PointerReleasedEventArgs e)
+#else
         public override void HandleMouseUp(MouseButtonEventArgs e)
+#endif
         {
             EditorGestures.NodifyEditorGestures gestures = EditorGestures.Mappings.Editor;
             if (gestures.Pan.Matches(e.Source, e))
             {
                 // Handle right click if panning and moved the mouse more than threshold so context menu doesn't open
+#if Avalonia
+                if (e.InitialPressMouseButton == MouseButton.Right)
+#else
                 if (e.ChangedButton == MouseButton.Right)
+#endif
                 {
                     double contextMenuTreshold = NodifyEditor.HandleRightClickAfterPanningThreshold * NodifyEditor.HandleRightClickAfterPanningThreshold;
+#if Avalonia
+                    if (_currentMousePosition.VectorSubtract(_initialMousePosition).LengthSquared() > contextMenuTreshold)
+#else
                     if ((_currentMousePosition - _initialMousePosition).LengthSquared > contextMenuTreshold)
+#endif
                     {
                         e.Handled = true;
                     }

@@ -1,4 +1,20 @@
-﻿using System.Windows.Input;
+﻿#if Avalonia
+using Avalonia;
+using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Styling;
+using Nodify.Avalonia.Extensions;
+using MouseButtonEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseEventArgs = Avalonia.Input.PointerEventArgs;
+using MouseWheelEventArgs = Avalonia.Input.PointerWheelEventArgs;
+using Nodify.Avalonia.Helpers;
+#else
+using System.Windows;
+using System.Windows.Input;
+#endif
 using static Nodify.SelectionHelper;
 
 namespace Nodify
@@ -28,7 +44,11 @@ namespace Nodify
         }
 
         /// <inheritdoc />
+#if Avalonia
+        public override void HandleMouseDown(PointerPressedEventArgs e)
+#else
         public override void HandleMouseDown(MouseButtonEventArgs e)
+#endif
         {
             EditorGestures.NodifyEditorGestures gestures = EditorGestures.Mappings.Editor;
             if (gestures.Cutting.Matches(e.Source, e))

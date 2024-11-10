@@ -2,9 +2,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+
+#if Avalonia
+using Avalonia;
+using Nodify.Avalonia;
+using Nodify.Avalonia.Helpers.Gestures;
+using Nodify.Avalonia.Helpers;
+using Nodify.Avalonia.Extensions;
+using CommandBinding = Nodify.Avalonia.RoutedCommandBinding;
+using MultiSelector = Avalonia.Controls.Primitives.SelectingItemsControl;
+#else
 using System.Windows;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Controls.Primitives;
+#endif
 
 namespace Nodify
 {
@@ -67,7 +78,11 @@ namespace Nodify
         /// </summary>
         public static RoutedUICommand Align { get; } = new RoutedUICommand("Align", nameof(Align), typeof(EditorCommands));
 
+#if Avalonia
+        internal static void Register(IRoutedCommandBindable type)
+#else
         internal static void Register(Type type)
+#endif
         {
             CommandManager.RegisterClassCommandBinding(type, new CommandBinding(ZoomIn, OnZoomIn, OnQueryStatusZoomIn));
             CommandManager.RegisterClassCommandBinding(type, new CommandBinding(ZoomOut, OnZoomOut, OnQueryStatusZoomOut));
@@ -81,7 +96,11 @@ namespace Nodify
         {
             if (sender is NodifyEditor editor)
             {
+#if Avalonia
+                e.CanExecute = ((NodifyEditor)editor).SelectedItems.Count > 1;
+#else
                 e.CanExecute = ((MultiSelector)editor).SelectedItems.Count > 1;
+#endif
             }
         }
 
@@ -89,7 +108,11 @@ namespace Nodify
         {
             if (sender is NodifyEditor editor)
             {
+#if Avalonia
+                IList selected = ((NodifyEditor)editor).SelectedItems;
+#else
                 IList selected = ((MultiSelector)editor).SelectedItems;
+#endif
                 if (selected.Count > 0)
                 {
                     if (editor.ItemsDragStartedCommand?.CanExecute(null) ?? false)
@@ -101,7 +124,11 @@ namespace Nodify
 
                     for (var i = 0; i < selected.Count; i++)
                     {
+#if Avalonia
+                        containers.Add((ItemContainer)editor.ItemContainerGenerator.CreateContainer(selected[i], i, null));
+#else
                         containers.Add((ItemContainer)editor.ItemContainerGenerator.ContainerFromItem(selected[i]));
+#endif
                     }
 
                     if (e.Parameter is Alignment alignment)
@@ -139,6 +166,27 @@ namespace Nodify
                     containers.ForEach(c => c.Location = new Point(left, c.Location.Y));
                     break;
 
+#if Avalonia
+                case Alignment.Bottom:
+                    double bottom = instigator != null ? instigator.Location.Y + instigator.ActualHeight() : containers.Max(x => x.Location.Y + x.ActualHeight());
+                    containers.ForEach(c => c.Location = new Point(c.Location.X, bottom - c.ActualHeight()));
+                    break;
+
+                case Alignment.Right:
+                    double right = instigator != null ? instigator.Location.X + instigator.ActualWidth() : containers.Max(x => x.Location.X + x.ActualWidth());
+                    containers.ForEach(c => c.Location = new Point(right - c.ActualWidth(), c.Location.Y));
+                    break;
+
+                case Alignment.Middle:
+                    double mid = instigator != null ? instigator.Location.Y + instigator.ActualHeight() / 2 : containers.Average(c => c.Location.Y + c.ActualHeight() / 2);
+                    containers.ForEach(c => c.Location = new Point(c.Location.X, mid - c.ActualHeight() / 2));
+                    break;
+
+                case Alignment.Center:
+                    double center = instigator != null ? instigator.Location.X + instigator.ActualWidth() / 2 : containers.Average(c => c.Location.X + c.ActualWidth() / 2);
+                    containers.ForEach(c => c.Location = new Point(center - c.ActualWidth() / 2, c.Location.Y));
+                    break;
+#else
                 case Alignment.Bottom:
                     double bottom = instigator != null ? instigator.Location.Y + instigator.ActualHeight : containers.Max(x => x.Location.Y + x.ActualHeight);
                     containers.ForEach(c => c.Location = new Point(c.Location.X, bottom - c.ActualHeight));
@@ -158,6 +206,7 @@ namespace Nodify
                     double center = instigator != null ? instigator.Location.X + instigator.ActualWidth / 2 : containers.Average(c => c.Location.X + c.ActualWidth / 2);
                     containers.ForEach(c => c.Location = new Point(center - c.ActualWidth / 2, c.Location.Y));
                     break;
+#endif
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(alignment), alignment, null);

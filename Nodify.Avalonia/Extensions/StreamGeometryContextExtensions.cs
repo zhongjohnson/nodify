@@ -14,5 +14,15 @@ namespace Nodify.Avalonia.Extensions
         {
             e.CubicBezierTo(point1, point2, point3);
         }
+
+        public static void LineTo(this StreamGeometryContext e, Point point, bool isStroked, bool isSmoothJoin)
+        {
+            e.LineTo(point);
+        }
+
+        public static void BeginFigure(this StreamGeometryContext e, Point startPoint, bool isFilled, bool isClosed)
+        {
+            e.BeginFigure(startPoint, isFilled);
+        }
     }
 }
