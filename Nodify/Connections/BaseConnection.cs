@@ -424,7 +424,9 @@ namespace Nodify
         }
 
         /// <inheritdoc cref="TextElement.FontSize" />
+#if !Avalonia
         [TypeConverter(typeof(FontSizeConverter))]
+#endif
         public double FontSize
         {
             get => (double)GetValue(FontSizeProperty);

@@ -19,6 +19,7 @@
     <Compile Include="..\..\Nodify\Connections\Events\ConnectionEventArgs.cs" Link="Connections\Events\ConnectionEventArgs.cs" />
     <Compile Include="..\..\Nodify\Connectors\Events\ConnectorEventArgs.cs" Link="Connectors\Events\ConnectorEventArgs.cs" />
     <Compile Include="..\..\Nodify\Connectors\Events\PendingConnectionEventArgs.cs" Link="Connectors\Events\PendingConnectionEventArgs.cs" />
+    <Compile Include="..\..\Nodify\Utilities\BoxValue.cs" Link="Utilities\BoxValue.cs" />
   </ItemGroup>
 
   <ItemGroup>

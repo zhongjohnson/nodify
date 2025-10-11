@@ -11,11 +11,3 @@ internal class DefaultStyleKeyProperty
         // so you need to add StyleOverrideKey only if you want to set the type to a different class
     }
 }
-
-internal class FrameworkPropertyMetadata
-{
-    public FrameworkPropertyMetadata(Type type)
-    {
-            
-    }
-}
