@@ -6,6 +6,63 @@
 > - Features:
 > - Bugfixes:
 
+#### **Version 7.1.0**
+
+> - Breaking Changes:
+>	- Added ProcessHandledEvents to IInputHandler and removed it from InputProcessor
+>	- Renamed EditorGestures.Editor.ResetViewportLocation to EditorGestures.Editor.ResetViewport
+> - Features:
+>	- Introduced a new BringIntoView method overload in NodifyEditor that accepts an offset from the viewport edges
+>	- Added BringIntoViewEdgeOffset to NodifyEditor to control the viewport edge offset when bringing the focused element into view
+>	- Added ResetViewport to NodifyEditor to reset the viewport's location and zoom
+>	- Improved tab and directional navigation, ensuring that focused elements are automatically brought into view
+>	- Added keyboard navigation layers for nodes, connections and decorators; restricting keyboard navigation to the active layer
+>	- Added ActiveNavigationLayer, ActivateNextNavigationLayer, ActivatePreviousNavigationLayer, RegisterNavigationLayer, RemoveNavigationLayer and ActivateNavigationLayer to NodifyEditor for keyboard layers management
+>	- Added KeyboardNavigationLayer property to NodifyEditor that allows navigating through the ItemContainers
+>	- Added AutoRegisterConnectionsLayer, AutoRegisterDecoratorsLayer, AutoFocusFirstElement, AutoPanOnNodeFocus, PanViewportOnKeyboardDrag and MinimumNavigationStepSize to NodifyEditor
+>	- Added EditorGestures.Editor.Keyboard for keyboard navigation gestures
+>	- Added FindNextFocusTarget, OnElementFocused and OnKeyboardNavigationLayerActivated virtual methods to NodifyEditor
+>	- Added new gestures for keyboard navigation available in EditorGestures.Editor.Keyboard
+>	- Added ToggleContentSelection to GroupingNode and its corresponding gesture to toggle the selection of nodes inside the group
+>	- Added ZoomIn, ZoomOut and ResetViewport methods to the Minimap control
+>	- Added ZoomIn, ZoomOut, ResetViewport and Pan gestures to EditorGestures.Minimap
+>	- Added NavigationStepSize static property to Minimap
+>	- Added Unbind to all gestures inside EditorGestures
+>	- Added the KeyComboGesture that requires a trigger key to be held down before pressing a combo key
+>	- Added FocusVisualPen and FocusVisualPadding dependency properties to BaseConnection
+>	- Added default focus visuals for base editor controls that can be included by referencing the FocusVisual.xaml file
+>	- Added MaxHotKeys and HotKeysDisplayMode static configuration fields to PendingConnection
+>	- Added HotKeyControl with its corresponding theme resources to display the hotkeys for a pending connection
+
+#### **Version 7.0.4**
+
+> - Features:
+>	- Added AsRef extension method to InputGesture to convert it to an InputGestureRef
+> - Bugfixes:
+>	- Fixed an issue where the gesture used for EditorGestures.Editor.SelectAll extracted from the ApplicationCommands was assumed to be a KeyGesture
+>	- Fixed overrides of DrawDirectionalArrowheadGeometry virtual method not working in subclasses of the built in connections
+>	- Fixed a memory leak caused by the auto panning timer
+
+#### **Version 7.0.3**
+
+> - Bugfixes:
+>	- Fixed an issue where the SelectedEvent and UnselectedEvent events on the ItemContainer were not raised when the selection was completed
+
+#### **Version 7.0.2**
+
+> - Features:
+>	- Added EditorGestures.Editor.SelectAll 
+> - Bugfixes:
+>	- Fixed an issue where the EditorCommands.SelectAll gesture could not be customized
+
+#### **Version 7.0.1**
+
+> - Bugfixes:
+>	- Fixed an issue where connections would not gain focus when selected, which could prevent editor keybindings from functioning in certain scenarios
+>	- Resolved an issue where selecting a node did not deselect connections and vice versa
+>	- Fixed a bug preventing ItemContainers from being selected when the mouse could not be captured
+>	- Fixed an issue with key detection in Japanese IME environments, causing issues with the MouseGesture
+
 #### **Version 7.0.0**
 
 > - Breaking Changes:

@@ -30,7 +30,10 @@ namespace Nodify
         /// <summary>
         /// Select all <see cref="ItemContainer"/>s in the <see cref="NodifyEditor"/>.
         /// </summary>
-        public static RoutedUICommand SelectAll { get; } = ApplicationCommands.SelectAll;
+        public static RoutedUICommand SelectAll { get; } = new RoutedUICommand(ApplicationCommands.SelectAll.Text, nameof(SelectAll), typeof(EditorCommands), new InputGestureCollection
+        {
+            EditorGestures.Mappings.Editor.SelectAll
+        });
 
         /// <summary>
         /// Moves the <see cref="NodifyEditor.ViewportLocation"/> to the specified location.
@@ -38,7 +41,7 @@ namespace Nodify
         /// </summary>
         public static RoutedUICommand BringIntoView { get; } = new RoutedUICommand("Bring location into view", nameof(BringIntoView), typeof(EditorCommands), new InputGestureCollection
         {
-            EditorGestures.Mappings.Editor.ResetViewportLocation
+            EditorGestures.Mappings.Editor.ResetViewport
         });
 
         /// <summary>
@@ -157,7 +160,7 @@ namespace Nodify
                         editor.BringIntoView(Point.Parse(str));
                         break;
                     default:
-                        editor.BringIntoView(new Point());
+                        editor.ResetViewport();
                         break;
                 }
             }
