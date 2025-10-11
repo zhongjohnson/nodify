@@ -52,7 +52,9 @@ namespace Nodify.Events
         /// </summary>
         public bool Canceled { get; set; }
 
+#if !Avalonia
         protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
             => ((PendingConnectionEventHandler)genericHandler)(genericTarget, this);
+#endif
     }
 }

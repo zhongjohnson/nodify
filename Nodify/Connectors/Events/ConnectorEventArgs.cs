@@ -32,7 +32,9 @@ namespace Nodify.Events
         /// </summary>
         public object Connector { get; }
 
+#if !Avalonia
         protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
             => ((ConnectorEventHandler)genericHandler)(genericTarget, this);
+#endif
     }
 }

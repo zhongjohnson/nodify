@@ -16,6 +16,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\Nodify\Connections\Events\ConnectionEventArgs.cs" Link="Connections\Events\ConnectionEventArgs.cs" />
+    <Compile Include="..\..\Nodify\Connectors\Events\ConnectorEventArgs.cs" Link="Connectors\Events\ConnectorEventArgs.cs" />
+    <Compile Include="..\..\Nodify\Connectors\Events\PendingConnectionEventArgs.cs" Link="Connectors\Events\PendingConnectionEventArgs.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.7" />
   </ItemGroup>
 
