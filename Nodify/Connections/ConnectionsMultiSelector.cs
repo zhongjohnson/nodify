@@ -1,12 +1,12 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
+using Avalonia.Input;
 
 namespace Nodify
 {
@@ -14,16 +14,16 @@ namespace Nodify
     {
         #region Dependency Properties
 
-        public static readonly DependencyProperty SelectedItemsProperty = NodifyEditor.SelectedItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(default(IList), OnSelectedItemsSourceChanged));
-        public static readonly DependencyProperty CanSelectMultipleItemsProperty = NodifyEditor.CanSelectMultipleItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(BoxValue.True, OnCanSelectMultipleItemsChanged, CoerceCanSelectMultipleItems));
+        public static readonly StyledProperty SelectedItemsProperty = NodifyEditor.SelectedItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(default(IList), OnSelectedItemsSourceChanged));
+        public static readonly StyledProperty CanSelectMultipleItemsProperty = NodifyEditor.CanSelectMultipleItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(BoxValue.True, OnCanSelectMultipleItemsChanged, CoerceCanSelectMultipleItems));
 
-        private static void OnCanSelectMultipleItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnCanSelectMultipleItemsChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
             => ((ConnectionsMultiSelector)d).CanSelectMultipleItemsBase = (bool)e.NewValue;
 
-        private static object CoerceCanSelectMultipleItems(DependencyObject d, object baseValue)
+        private static object CoerceCanSelectMultipleItems(AvaloniaObject d, object baseValue)
             => ((ConnectionsMultiSelector)d).CanSelectMultipleItemsBase = (bool)baseValue;
 
-        private static void OnSelectedItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnSelectedItemsSourceChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
             => ((ConnectionsMultiSelector)d).OnSelectedItemsSourceChanged((IList)e.OldValue, (IList)e.NewValue);
 
         /// <summary>
@@ -79,11 +79,11 @@ namespace Nodify
 
         static ConnectionsMultiSelector()
         {
-            FocusableProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(BoxValue.False));
+            FocusableProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(BoxValue.False));
 
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(KeyboardNavigationMode.None));
         }
 
         public ConnectionsMultiSelector()
@@ -91,7 +91,7 @@ namespace Nodify
             _focusNavigator = new StatefulFocusNavigator<ConnectionContainer>(OnElementFocused);
         }
 
-        protected override DependencyObject GetContainerForItemOverride()
+        protected override AvaloniaObject GetContainerForItemOverride()
             => new ConnectionContainer(this);
 
         protected override bool IsItemItsOwnContainerOverride(object item)
@@ -112,7 +112,7 @@ namespace Nodify
         #region Keyboard Navigation
 
         public KeyboardNavigationLayerId Id { get; } = KeyboardNavigationLayerId.Connections;
-        public IKeyboardFocusTarget<UIElement>? LastFocusedElement => _focusNavigator.LastFocusedElement;
+        public IKeyboardFocusTarget<Control>? LastFocusedElement => _focusNavigator.LastFocusedElement;
 
         private readonly StatefulFocusNavigator<ConnectionContainer> _focusNavigator;
 
@@ -134,7 +134,7 @@ namespace Nodify
             {
                 containerToFocus = FindNextFocusTarget(focusedContainer, request);
             }
-            else if (currentElement is UIElement elem && elem.GetParentOfType<ConnectionContainer>() is ConnectionContainer parentContainer)
+            else if (currentElement is Control elem && elem.GetParentOfType<ConnectionContainer>() is ConnectionContainer parentContainer)
             {
                 containerToFocus = parentContainer;
             }

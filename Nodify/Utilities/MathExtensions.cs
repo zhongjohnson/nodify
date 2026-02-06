@@ -1,4 +1,4 @@
-﻿namespace Nodify
+namespace Nodify
 {
     internal static class MathExtensions
     {

@@ -1,10 +1,11 @@
-﻿using Nodify.Events;
+using Nodify.Events;
 using Nodify.Interactivity;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Interactivity;
+using Avalonia.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using System.Windows.Media;
+using Avalonia.Input;
+using Avalonia.Media;
 
 namespace Nodify
 {
@@ -15,22 +16,22 @@ namespace Nodify
     {
         #region Dependency Properties
 
-        public static readonly DependencyProperty HighlightBrushProperty = DependencyProperty.Register(nameof(HighlightBrush), typeof(Brush), typeof(ItemContainer));
-        public static readonly DependencyProperty SelectedBrushProperty = DependencyProperty.Register(nameof(SelectedBrush), typeof(Brush), typeof(ItemContainer));
-        public static readonly DependencyProperty SelectedBorderThicknessProperty = DependencyProperty.Register(nameof(SelectedBorderThickness), typeof(Thickness), typeof(ItemContainer), new FrameworkPropertyMetadata(BoxValue.Thickness2));
-        public static readonly DependencyProperty IsSelectableProperty = DependencyProperty.Register(nameof(IsSelectable), typeof(bool), typeof(ItemContainer), new FrameworkPropertyMetadata(BoxValue.True));
-        public static readonly DependencyProperty IsSelectedProperty = Selector.IsSelectedProperty.AddOwner(typeof(ItemContainer), new FrameworkPropertyMetadata(BoxValue.False, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsSelectedChanged));
-        protected static readonly DependencyPropertyKey IsPreviewingSelectionPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsPreviewingSelection), typeof(bool?), typeof(ItemContainer), new FrameworkPropertyMetadata(null));
-        public static readonly DependencyProperty IsPreviewingSelectionProperty = IsPreviewingSelectionPropertyKey.DependencyProperty;
-        public static readonly DependencyProperty LocationProperty = DependencyProperty.Register(nameof(Location), typeof(Point), typeof(ItemContainer), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnLocationChanged));
-        public static readonly DependencyProperty ActualSizeProperty = DependencyProperty.Register(nameof(ActualSize), typeof(Size), typeof(ItemContainer), new FrameworkPropertyMetadata(BoxValue.Size));
-        public static readonly DependencyProperty DesiredSizeForSelectionProperty = DependencyProperty.Register(nameof(DesiredSizeForSelection), typeof(Size?), typeof(ItemContainer), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.NotDataBindable));
-        private static readonly DependencyPropertyKey IsPreviewingLocationPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsPreviewingLocation), typeof(bool), typeof(ItemContainer), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty IsPreviewingLocationProperty = IsPreviewingLocationPropertyKey.DependencyProperty;
-        public static readonly DependencyProperty IsDraggableProperty = DependencyProperty.Register(nameof(IsDraggable), typeof(bool), typeof(ItemContainer), new FrameworkPropertyMetadata(BoxValue.True));
-        public static readonly DependencyProperty HasCustomContextMenuProperty = NodifyEditor.HasCustomContextMenuProperty.AddOwner(typeof(ItemContainer));
+        public static readonly StyledProperty HighlightBrushProperty = StyledProperty.Register(nameof(HighlightBrush), typeof(Brush), typeof(ItemContainer));
+        public static readonly StyledProperty SelectedBrushProperty = StyledProperty.Register(nameof(SelectedBrush), typeof(Brush), typeof(ItemContainer));
+        public static readonly StyledProperty SelectedBorderThicknessProperty = StyledProperty.Register(nameof(SelectedBorderThickness), typeof(Thickness), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.Thickness2));
+        public static readonly StyledProperty IsSelectableProperty = StyledProperty.Register(nameof(IsSelectable), typeof(bool), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.True));
+        public static readonly StyledProperty IsSelectedProperty = Selector.IsSelectedProperty.AddOwner(typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.False, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnIsSelectedChanged));
+        protected static readonly StyledPropertyKey IsPreviewingSelectionPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsPreviewingSelection), typeof(bool?), typeof(ItemContainer), new StyledPropertyMetadata(null));
+        public static readonly StyledProperty IsPreviewingSelectionProperty = IsPreviewingSelectionPropertyKey.StyledProperty;
+        public static readonly StyledProperty LocationProperty = StyledProperty.Register(nameof(Location), typeof(Point), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnLocationChanged));
+        public static readonly StyledProperty ActualSizeProperty = StyledProperty.Register(nameof(ActualSize), typeof(Size), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.Size));
+        public static readonly StyledProperty DesiredSizeForSelectionProperty = StyledProperty.Register(nameof(DesiredSizeForSelection), typeof(Size?), typeof(ItemContainer), new StyledPropertyMetadata(null, StyledPropertyMetadataOptions.NotDataBindable));
+        private static readonly StyledPropertyKey IsPreviewingLocationPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsPreviewingLocation), typeof(bool), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty IsPreviewingLocationProperty = IsPreviewingLocationPropertyKey.StyledProperty;
+        public static readonly StyledProperty IsDraggableProperty = StyledProperty.Register(nameof(IsDraggable), typeof(bool), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.True));
+        public static readonly StyledProperty HasCustomContextMenuProperty = NodifyEditor.HasCustomContextMenuProperty.AddOwner(typeof(ItemContainer));
 
-        private static void OnLocationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnLocationChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var item = (ItemContainer)d;
             item.OnLocationChanged();
@@ -125,7 +126,7 @@ namespace Nodify
 
         /// <summary>
         /// Overrides the size to check against when calculating if this <see cref="ItemContainer"/> can be part of the current <see cref="NodifyEditor.SelectedArea"/>.
-        /// Defaults to <see cref="UIElement.RenderSize"/>.
+        /// Defaults to <see cref="Control.RenderSize"/>.
         /// </summary>
         public Size? DesiredSizeForSelection
         {
@@ -215,7 +216,7 @@ namespace Nodify
             }
         }
 
-        private static void OnIsSelectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIsSelectedChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var elem = (ItemContainer)d;
             bool result = elem.IsSelectable && (bool)e.NewValue;
@@ -273,11 +274,11 @@ namespace Nodify
 
         static ItemContainer()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(ItemContainer), new FrameworkPropertyMetadata(typeof(ItemContainer)));
-            FocusableProperty.OverrideMetadata(typeof(ItemContainer), new FrameworkPropertyMetadata(BoxValue.True));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(ItemContainer), new StyledPropertyMetadata(typeof(ItemContainer)));
+            FocusableProperty.OverrideMetadata(typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.True));
 
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ItemContainer), new FrameworkPropertyMetadata(KeyboardNavigationMode.Cycle));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(ItemContainer), new FrameworkPropertyMetadata(KeyboardNavigationMode.Cycle));
+            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ItemContainer), new StyledPropertyMetadata(KeyboardNavigationMode.Cycle));
+            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(ItemContainer), new StyledPropertyMetadata(KeyboardNavigationMode.Cycle));
         }
 
         /// <summary>
@@ -291,7 +292,7 @@ namespace Nodify
             InputProcessor.AddSharedHandlers(this);
         }
 
-        protected override void OnVisualParentChanged(DependencyObject oldParent)
+        protected override void OnVisualParentChanged(AvaloniaObject oldParent)
         {
             if (VisualTreeHelper.GetParent(this) == null && IsKeyboardFocusWithin)
             {

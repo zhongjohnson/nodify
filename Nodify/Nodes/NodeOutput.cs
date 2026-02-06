@@ -1,5 +1,6 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
 
 namespace Nodify
 {
@@ -10,10 +11,10 @@ namespace Nodify
     {
         #region Dependency Properties
         
-        public static readonly DependencyProperty HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner(typeof(NodeOutput));
-        public static readonly DependencyProperty HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner(typeof(NodeOutput));
-        public static readonly DependencyProperty ConnectorTemplateProperty = NodeInput.ConnectorTemplateProperty.AddOwner(typeof(NodeOutput));
-        public static readonly DependencyProperty OrientationProperty = NodeInput.OrientationProperty.AddOwner(typeof(NodeOutput), new FrameworkPropertyMetadata(Orientation.Horizontal, FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public static readonly StyledProperty HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner(typeof(NodeOutput));
+        public static readonly StyledProperty HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner(typeof(NodeOutput));
+        public static readonly StyledProperty ConnectorTemplateProperty = NodeInput.ConnectorTemplateProperty.AddOwner(typeof(NodeOutput));
+        public static readonly StyledProperty OrientationProperty = NodeInput.OrientationProperty.AddOwner(typeof(NodeOutput), new StyledPropertyMetadata(Orientation.Horizontal, StyledPropertyMetadataOptions.AffectsMeasure));
 
         /// <summary>
         /// Gets of sets the data used for the control's header.
@@ -53,7 +54,7 @@ namespace Nodify
 
         static NodeOutput()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeOutput), new FrameworkPropertyMetadata(typeof(NodeOutput)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeOutput), new StyledPropertyMetadata(typeof(NodeOutput)));
         }
     }
 }

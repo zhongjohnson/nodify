@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Controls;
 
 namespace Nodify
 {
@@ -10,8 +10,8 @@ namespace Nodify
     {
         static KnotNode()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(KnotNode), new FrameworkPropertyMetadata(typeof(KnotNode)));
-            FocusableProperty.OverrideMetadata(typeof(KnotNode), new FrameworkPropertyMetadata(BoxValue.False));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(KnotNode), new StyledPropertyMetadata(typeof(KnotNode)));
+            FocusableProperty.OverrideMetadata(typeof(KnotNode), new StyledPropertyMetadata(BoxValue.False));
         }
     }
 }

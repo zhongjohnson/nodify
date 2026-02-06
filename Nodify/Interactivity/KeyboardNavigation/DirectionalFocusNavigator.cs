@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
     internal readonly struct DirectionalFocusNavigator<TElement>
-        where TElement : UIElement, IKeyboardFocusTarget<TElement>
+        where TElement : Control, IKeyboardFocusTarget<TElement>
     {
         private readonly IEnumerable<IKeyboardFocusTarget<TElement>> _availableTargets;
 

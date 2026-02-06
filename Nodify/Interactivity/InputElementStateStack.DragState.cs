@@ -1,9 +1,10 @@
-﻿using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Interactivity;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
-    public partial class InputElementStateStack<TElement> where TElement : FrameworkElement
+    public partial class InputElementStateStack<TElement> where TElement : Control
     {
         /// <summary>
         /// Represents a specialized state for handling drag interactions.

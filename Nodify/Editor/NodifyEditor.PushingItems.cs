@@ -1,8 +1,9 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System.Diagnostics;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Shapes;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
+using Avalonia.Controls.Shapes;
 
 namespace Nodify
 {
@@ -11,16 +12,16 @@ namespace Nodify
     {
         #region Dependency properties
 
-        public static readonly DependencyProperty PushedAreaStyleProperty = DependencyProperty.Register(nameof(PushedAreaStyle), typeof(Style), typeof(NodifyEditor));
+        public static readonly StyledProperty PushedAreaStyleProperty = StyledProperty.Register(nameof(PushedAreaStyle), typeof(Style), typeof(NodifyEditor));
 
-        protected static readonly DependencyPropertyKey PushedAreaPropertyKey = DependencyProperty.RegisterReadOnly(nameof(PushedArea), typeof(Rect), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Rect));
-        public static readonly DependencyProperty PushedAreaProperty = PushedAreaPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey PushedAreaPropertyKey = StyledProperty.RegisterReadOnly(nameof(PushedArea), typeof(Rect), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Rect));
+        public static readonly StyledProperty PushedAreaProperty = PushedAreaPropertyKey.StyledProperty;
 
-        protected static readonly DependencyPropertyKey IsPushingItemsPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsPushingItems), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty IsPushingItemsProperty = IsPushingItemsPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey IsPushingItemsPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsPushingItems), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty IsPushingItemsProperty = IsPushingItemsPropertyKey.StyledProperty;
 
-        protected static readonly DependencyPropertyKey PushedAreaOrientationPropertyKey = DependencyProperty.RegisterReadOnly(nameof(PushedAreaOrientation), typeof(Orientation), typeof(NodifyEditor), new FrameworkPropertyMetadata(Orientation.Horizontal));
-        public static readonly DependencyProperty PushedAreaOrientationProperty = PushedAreaOrientationPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey PushedAreaOrientationPropertyKey = StyledProperty.RegisterReadOnly(nameof(PushedAreaOrientation), typeof(Orientation), typeof(NodifyEditor), new StyledPropertyMetadata(Orientation.Horizontal));
+        public static readonly StyledProperty PushedAreaOrientationProperty = PushedAreaOrientationPropertyKey.StyledProperty;
 
         /// <summary>
         /// Gets the currently pushed area while <see cref="IsPushingItems"/> is true.

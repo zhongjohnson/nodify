@@ -1,8 +1,8 @@
-﻿using System.Windows;
+using Avalonia;
 
 namespace Nodify.Interactivity
 {
-    public partial class InputElementStateStack<TElement> where TElement : FrameworkElement
+    public partial class InputElementStateStack<TElement> where TElement : Control
     {
         /// <summary>
         /// Base class for defining input element states.

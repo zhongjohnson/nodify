@@ -1,9 +1,9 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
 
 namespace Nodify
 {
@@ -39,11 +39,11 @@ namespace Nodify
 
         static DecoratorsControl()
         {
-            FocusableProperty.OverrideMetadata(typeof(DecoratorsControl), new FrameworkPropertyMetadata(BoxValue.False));
+            FocusableProperty.OverrideMetadata(typeof(DecoratorsControl), new StyledPropertyMetadata(BoxValue.False));
 
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new StyledPropertyMetadata(KeyboardNavigationMode.None));
         }
 
         public DecoratorsControl()
@@ -56,7 +56,7 @@ namespace Nodify
             => item is DecoratorContainer;
 
         /// <inheritdoc />
-        protected override DependencyObject GetContainerForItemOverride()
+        protected override AvaloniaObject GetContainerForItemOverride()
             => new DecoratorContainer(this);
 
         public override void OnApplyTemplate()
@@ -74,7 +74,7 @@ namespace Nodify
         #region Keyboard Navigation
 
         public KeyboardNavigationLayerId Id { get; } = KeyboardNavigationLayerId.Decorators;
-        public IKeyboardFocusTarget<UIElement>? LastFocusedElement => _focusNavigator.LastFocusedElement;
+        public IKeyboardFocusTarget<Control>? LastFocusedElement => _focusNavigator.LastFocusedElement;
 
         private readonly StatefulFocusNavigator<DecoratorContainer> _focusNavigator;
 
@@ -96,7 +96,7 @@ namespace Nodify
             {
                 containerToFocus = FindNextFocusTarget(focusedContainer, request);
             }
-            else if (currentElement is UIElement elem && elem.GetParentOfType<DecoratorContainer>() is DecoratorContainer parentContainer)
+            else if (currentElement is Control elem && elem.GetParentOfType<DecoratorContainer>() is DecoratorContainer parentContainer)
             {
                 containerToFocus = parentContainer;
             }

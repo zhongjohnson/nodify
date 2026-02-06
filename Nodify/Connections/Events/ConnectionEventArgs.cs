@@ -1,5 +1,6 @@
-﻿using System;
-using System.Windows;
+using System;
+using Avalonia;
+using Avalonia.Interactivity;
 
 namespace Nodify.Events
 {
@@ -18,7 +19,7 @@ namespace Nodify.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="ConnectionEventArgs"/> class using the specified <see cref="Connection"/>.
         /// </summary>
-        /// <param name="connection">The <see cref="FrameworkElement.DataContext"/> of a related <see cref="BaseConnection"/>.</param>
+        /// <param name="connection">The <see cref="Control.DataContext"/> of a related <see cref="BaseConnection"/>.</param>
         public ConnectionEventArgs(object connection)
             => Connection = connection;
 
@@ -28,11 +29,8 @@ namespace Nodify.Events
         public Point SplitLocation { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="FrameworkElement.DataContext"/> of the <see cref="BaseConnection"/> associated with this event.
+        /// Gets the DataContext of the <see cref="BaseConnection"/> associated with this event.
         /// </summary>
         public object Connection { get; }
-
-        protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
-            => ((ConnectionEventHandler)genericHandler)(genericTarget, this);
     }
 }

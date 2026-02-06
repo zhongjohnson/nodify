@@ -1,8 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9-windows;net8-windows;net6-windows;net5-windows;netcoreapp3.1;net48;net472</TargetFrameworks>
-    <UseWPF>true</UseWPF>
+    <TargetFrameworks>net9.0;net8.0;net6.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Authors>miroiu</Authors>
@@ -15,7 +14,7 @@
     <PackageProjectUrl>https://github.com/miroiu/nodify</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/miroiu/nodify</RepositoryUrl>
-    <PackageTags>wpf mvvm node network node-editor graph controls</PackageTags>
+    <PackageTags>avalonia mvvm node network node-editor graph controls</PackageTags>
     <Version>7.1.0</Version>
     <PackageReleaseNotes>
       > - Breaking Changes:
@@ -47,14 +46,15 @@
     <AssemblyOriginatorKeyFile>..\build\Nodify.snk</AssemblyOriginatorKeyFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)'=='net472' OR '$(TargetFramework)'=='net48'">
-    <LangVersion>8.0</LangVersion>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SignAssembly>true</SignAssembly>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.2" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="..\icon.png">
       <Pack>True</Pack>

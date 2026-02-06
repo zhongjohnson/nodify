@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System;
-using System.Windows;
+using Avalonia;
 using System.Windows.Input;
-using System.Windows.Media;
+using Avalonia.Input;
+using Avalonia.Media;
 using System.Diagnostics;
 using Nodify.Interactivity;
 
@@ -13,21 +14,21 @@ namespace Nodify
     {
         #region Dependency properties
 
-        protected static readonly DependencyPropertyKey CuttingLineStartPropertyKey = DependencyProperty.RegisterReadOnly(nameof(CuttingLineStart), typeof(Point), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Point));
-        public static readonly DependencyProperty CuttingLineStartProperty = CuttingLineStartPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey CuttingLineStartPropertyKey = StyledProperty.RegisterReadOnly(nameof(CuttingLineStart), typeof(Point), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Point));
+        public static readonly StyledProperty CuttingLineStartProperty = CuttingLineStartPropertyKey.StyledProperty;
 
-        protected static readonly DependencyPropertyKey CuttingLineEndPropertyKey = DependencyProperty.RegisterReadOnly(nameof(CuttingLineEnd), typeof(Point), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Point));
-        public static readonly DependencyProperty CuttingLineEndProperty = CuttingLineEndPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey CuttingLineEndPropertyKey = StyledProperty.RegisterReadOnly(nameof(CuttingLineEnd), typeof(Point), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Point));
+        public static readonly StyledProperty CuttingLineEndProperty = CuttingLineEndPropertyKey.StyledProperty;
 
-        protected static readonly DependencyPropertyKey IsCuttingPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsCutting), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False, OnIsCuttingChanged));
-        public static readonly DependencyProperty IsCuttingProperty = IsCuttingPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey IsCuttingPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsCutting), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False, OnIsCuttingChanged));
+        public static readonly StyledProperty IsCuttingProperty = IsCuttingPropertyKey.StyledProperty;
 
-        public static readonly DependencyProperty CuttingLineStyleProperty = DependencyProperty.Register(nameof(CuttingLineStyle), typeof(Style), typeof(NodifyEditor));
+        public static readonly StyledProperty CuttingLineStyleProperty = StyledProperty.Register(nameof(CuttingLineStyle), typeof(Style), typeof(NodifyEditor));
 
-        public static readonly DependencyProperty CuttingStartedCommandProperty = DependencyProperty.Register(nameof(CuttingStartedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly DependencyProperty CuttingCompletedCommandProperty = DependencyProperty.Register(nameof(CuttingCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty CuttingStartedCommandProperty = StyledProperty.Register(nameof(CuttingStartedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty CuttingCompletedCommandProperty = StyledProperty.Register(nameof(CuttingCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
 
-        private static void OnIsCuttingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIsCuttingChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
             if ((bool)e.NewValue == true)
@@ -114,11 +115,11 @@ namespace Nodify
         public static bool EnableCuttingLinePreview { get; set; } = false;
 
         /// <summary>
-        /// The list of supported connection types for cutting. Type must be derived from <see cref="FrameworkElement" />.
+        /// The list of supported connection types for cutting. Type must be derived from <see cref="Control" />.
         /// </summary>
         public static readonly HashSet<Type> CuttingConnectionTypes = new HashSet<Type>();
 
-        private List<FrameworkElement>? _cuttingLinePreviousConnections;
+        private List<Control>? _cuttingLinePreviousConnections;
         private readonly LineGeometry _cuttingLineGeometry = new LineGeometry();
 
         /// <summary>
@@ -228,7 +229,7 @@ namespace Nodify
             IsCutting = false;
         }
 
-        private static void RemoveSupportedConnections(List<FrameworkElement> connections)
+        private static void RemoveSupportedConnections(List<Control> connections)
         {
             foreach (var connection in connections)
             {

@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Controls;
 
 namespace Nodify
 {
@@ -7,10 +7,10 @@ namespace Nodify
     {
         static MinimapItem()
         {
-            FocusableProperty.OverrideMetadata(typeof(MinimapItem), new FrameworkPropertyMetadata(BoxValue.False));
+            FocusableProperty.OverrideMetadata(typeof(MinimapItem), new StyledPropertyMetadata(BoxValue.False));
         }
 
-        public static readonly DependencyProperty LocationProperty = ItemContainer.LocationProperty.AddOwner(typeof(MinimapItem), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault | FrameworkPropertyMetadataOptions.AffectsParentMeasure));
+        public static readonly StyledProperty LocationProperty = ItemContainer.LocationProperty.AddOwner(typeof(MinimapItem), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.BindsTwoWayByDefault | StyledPropertyMetadataOptions.AffectsParentMeasure));
 
         /// <summary>
         /// Gets or sets the location of this <see cref="MinimapItem"/> inside the <see cref="Minimap"/>.

@@ -1,5 +1,6 @@
-﻿using System;
-using System.Windows;
+using System;
+using Avalonia;
+using Avalonia.Interactivity;
 
 namespace Nodify.Events
 {
@@ -33,8 +34,5 @@ namespace Nodify.Events
         /// Gets the location where the editor should zoom in.
         /// </summary>
         public Point Location { get; }
-
-        protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
-            => ((ZoomEventHandler)genericHandler)(genericTarget, this);
     }
 }

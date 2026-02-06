@@ -1,23 +1,28 @@
-﻿using System.Windows;
-using System.Windows.Media;
-using System.Windows.Shapes;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
+using Avalonia.Media;
 
 namespace Nodify
 {
     public class CuttingLine : Shape
     {
-        public static readonly DependencyProperty StartPointProperty = DependencyProperty.Register(nameof(StartPoint), typeof(Point), typeof(CuttingLine), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.AffectsRender));
-        public static readonly DependencyProperty EndPointProperty = DependencyProperty.Register(nameof(EndPoint), typeof(Point), typeof(CuttingLine), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.AffectsRender));
+        public static readonly StyledProperty<Point> StartPointProperty = 
+            AvaloniaProperty.Register<CuttingLine, Point>(nameof(StartPoint), defaultValue: default(Point));
+
+        public static readonly StyledProperty<Point> EndPointProperty = 
+            AvaloniaProperty.Register<CuttingLine, Point>(nameof(EndPoint), defaultValue: default(Point));
 
         /// <summary>
         /// Will be set for <see cref="BaseConnection"/>s and custom connections when the cutting line intersects with them if <see cref="NodifyEditor.EnableCuttingLinePreview"/> is true.
         /// </summary>
-        public static readonly DependencyProperty IsOverElementProperty = PendingConnection.IsOverElementProperty.AddOwner(typeof(CuttingLine));
+        public static readonly AttachedProperty<bool> IsOverElementProperty = 
+            AvaloniaProperty.RegisterAttached<CuttingLine, Control, bool>("IsOverElement", defaultValue: false);
 
-        public static bool GetIsOverElement(UIElement elem)
-            => (bool)elem.GetValue(IsOverElementProperty);
+        public static bool GetIsOverElement(Control elem)
+            => elem.GetValue(IsOverElementProperty);
 
-        public static void SetIsOverElement(UIElement elem, bool value)
+        public static void SetIsOverElement(Control elem, bool value)
             => elem.SetValue(IsOverElementProperty, value);
 
         /// <summary>
@@ -25,7 +30,7 @@ namespace Nodify
         /// </summary>
         public Point StartPoint
         {
-            get => (Point)GetValue(StartPointProperty);
+            get => GetValue(StartPointProperty);
             set => SetValue(StartPointProperty, value);
         }
 
@@ -34,23 +39,22 @@ namespace Nodify
         /// </summary>
         public Point EndPoint
         {
-            get => (Point)GetValue(EndPointProperty);
+            get => GetValue(EndPointProperty);
             set => SetValue(EndPointProperty, value);
         }
 
-        private readonly StreamGeometry _geometry = new StreamGeometry
-        {
-            FillRule = FillRule.EvenOdd
-        };
+        private StreamGeometry? _geometry;
 
-        protected override Geometry DefiningGeometry
+        protected override Geometry? DefiningGeometry
         {
             get
             {
-                using (StreamGeometryContext context = _geometry.Open())
+                _geometry = new StreamGeometry();
+                using (var context = _geometry.Open())
                 {
-                    context.BeginFigure(StartPoint, false, false);
-                    context.LineTo(EndPoint, true, true);
+                    context.BeginFigure(StartPoint, false);
+                    context.LineTo(EndPoint);
+                    context.EndFigure(false);
                 }
 
                 return _geometry;
@@ -59,17 +63,20 @@ namespace Nodify
 
         static CuttingLine()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(CuttingLine), new FrameworkPropertyMetadata(typeof(CuttingLine)));
-            IsHitTestVisibleProperty.OverrideMetadata(typeof(CuttingLine), new FrameworkPropertyMetadata(BoxValue.False));
-            IsEnabledProperty.OverrideMetadata(typeof(CuttingLine), new FrameworkPropertyMetadata(BoxValue.False));
+            AffectsGeometry<CuttingLine>(StartPointProperty, EndPointProperty);
+            IsHitTestVisibleProperty.OverrideDefaultValue<CuttingLine>(false);
         }
 
-        protected override void OnRender(DrawingContext drawingContext)
+        public override void Render(DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);
+            base.Render(drawingContext);
 
-            drawingContext.DrawEllipse(Fill, null, StartPoint, StrokeThickness * 1.2, StrokeThickness * 1.2);
-            drawingContext.DrawEllipse(Fill, null, EndPoint, StrokeThickness * 1.2, StrokeThickness * 1.2);
+            if (Fill != null && StrokeThickness > 0)
+            {
+                var radius = StrokeThickness * 1.2;
+                drawingContext.DrawEllipse(Fill, null, StartPoint, radius, radius);
+                drawingContext.DrawEllipse(Fill, null, EndPoint, radius, radius);
+            }
         }
     }
 }

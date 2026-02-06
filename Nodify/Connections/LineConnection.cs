@@ -1,7 +1,8 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
+using Avalonia.Media;
 
 namespace Nodify
 {
@@ -10,20 +11,21 @@ namespace Nodify
     /// </summary>
     public class LineConnection : BaseConnection
     {
-        public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.Register(nameof(CornerRadius), typeof(double), typeof(LineConnection), new FrameworkPropertyMetadata(BoxValue.Double5, FrameworkPropertyMetadataOptions.AffectsRender));
+        public static readonly StyledProperty<double> CornerRadiusProperty =
+            AvaloniaProperty.Register<LineConnection, double>(nameof(CornerRadius), defaultValue: 5.0);
 
         /// <summary>
         /// The radius of the corners between the line segments.
         /// </summary>
         public double CornerRadius
         {
-            get => (double)GetValue(CornerRadiusProperty);
+            get => GetValue(CornerRadiusProperty);
             set => SetValue(CornerRadiusProperty, value);
         }
 
         static LineConnection()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(LineConnection), new FrameworkPropertyMetadata(typeof(LineConnection)));
+            AffectsRender<LineConnection>(CornerRadiusProperty);
             NodifyEditor.CuttingConnectionTypes.Add(typeof(LineConnection));
         }
 

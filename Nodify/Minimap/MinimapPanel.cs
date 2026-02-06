@@ -1,16 +1,16 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
+using System;
+using Avalonia;
+using Avalonia.Controls;
 
 namespace Nodify
 {
     internal sealed class MinimapPanel : Panel
     {
-        public static readonly DependencyProperty ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner(typeof(MinimapPanel), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.AffectsMeasure));
-        public static readonly DependencyProperty ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner(typeof(MinimapPanel), new FrameworkPropertyMetadata(BoxValue.Size, FrameworkPropertyMetadataOptions.AffectsMeasure));
-        public static readonly DependencyProperty ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner(typeof(MinimapPanel));
-        public static readonly DependencyProperty ItemsExtentProperty = Minimap.ItemsExtentProperty.AddOwner(typeof(MinimapPanel));
-        public static readonly DependencyProperty ResizeToViewportProperty = Minimap.ResizeToViewportProperty.AddOwner(typeof(MinimapPanel));
+        public static readonly StyledProperty ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner(typeof(MinimapPanel), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.AffectsMeasure));
+        public static readonly StyledProperty ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner(typeof(MinimapPanel), new StyledPropertyMetadata(BoxValue.Size, StyledPropertyMetadataOptions.AffectsMeasure));
+        public static readonly StyledProperty ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner(typeof(MinimapPanel));
+        public static readonly StyledProperty ItemsExtentProperty = Minimap.ItemsExtentProperty.AddOwner(typeof(MinimapPanel));
+        public static readonly StyledProperty ResizeToViewportProperty = Minimap.ResizeToViewportProperty.AddOwner(typeof(MinimapPanel));
 
         /// <inheritdoc cref="Minimap.ViewportLocation" />
         public Point ViewportLocation
@@ -55,7 +55,7 @@ namespace Nodify
             double maxX = double.MinValue;
             double maxY = double.MinValue;
 
-            UIElementCollection children = InternalChildren;
+            ControlCollection children = InternalChildren;
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (MinimapItem)children[i];
@@ -106,7 +106,7 @@ namespace Nodify
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            UIElementCollection children = InternalChildren;
+            ControlCollection children = InternalChildren;
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (MinimapItem)children[i];

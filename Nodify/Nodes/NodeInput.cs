@@ -1,5 +1,6 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
 
 namespace Nodify
 {
@@ -10,10 +11,10 @@ namespace Nodify
     {
         #region Dependency Properties
 
-        public static readonly DependencyProperty HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner(typeof(NodeInput));
-        public static readonly DependencyProperty HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner(typeof(NodeInput));
-        public static readonly DependencyProperty ConnectorTemplateProperty = DependencyProperty.Register(nameof(ConnectorTemplate), typeof(ControlTemplate), typeof(NodeInput));
-        public static readonly DependencyProperty OrientationProperty = StackPanel.OrientationProperty.AddOwner(typeof(NodeInput), new FrameworkPropertyMetadata(Orientation.Horizontal, FrameworkPropertyMetadataOptions.AffectsMeasure));
+        public static readonly StyledProperty HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner(typeof(NodeInput));
+        public static readonly StyledProperty HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner(typeof(NodeInput));
+        public static readonly StyledProperty ConnectorTemplateProperty = StyledProperty.Register(nameof(ConnectorTemplate), typeof(ControlTemplate), typeof(NodeInput));
+        public static readonly StyledProperty OrientationProperty = StackPanel.OrientationProperty.AddOwner(typeof(NodeInput), new StyledPropertyMetadata(Orientation.Horizontal, StyledPropertyMetadataOptions.AffectsMeasure));
 
         /// <summary>
         /// Gets of sets the data used for the control's header.
@@ -53,7 +54,7 @@ namespace Nodify
 
         static NodeInput()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeInput), new FrameworkPropertyMetadata(typeof(NodeInput)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeInput), new StyledPropertyMetadata(typeof(NodeInput)));
         }
     }
 }

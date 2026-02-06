@@ -1,13 +1,14 @@
-﻿using Nodify.Events;
+using Nodify.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
+using Avalonia;
+using Avalonia.Collections;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.Controls.Shapes;
 
 namespace Nodify
 {
@@ -37,26 +38,62 @@ namespace Nodify
     /// </summary>
     public class PendingConnection : ContentControl
     {
-        #region Dependency Properties
+        #region Avalonia Properties
 
-        public static readonly DependencyProperty SourceAnchorProperty = DependencyProperty.Register(nameof(SourceAnchor), typeof(Point), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.AffectsRender));
-        public static readonly DependencyProperty TargetAnchorProperty = DependencyProperty.Register(nameof(TargetAnchor), typeof(Point), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.AffectsRender));
-        public static readonly DependencyProperty SourceProperty = DependencyProperty.Register(nameof(Source), typeof(object), typeof(PendingConnection));
-        public static readonly DependencyProperty TargetProperty = DependencyProperty.Register(nameof(Target), typeof(object), typeof(PendingConnection));
-        public static readonly DependencyProperty PreviewTargetProperty = DependencyProperty.Register(nameof(PreviewTarget), typeof(object), typeof(PendingConnection));
-        public static readonly DependencyProperty EnablePreviewProperty = DependencyProperty.Register(nameof(EnablePreview), typeof(bool), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty StrokeThicknessProperty = Shape.StrokeThicknessProperty.AddOwner(typeof(PendingConnection));
-        public static readonly DependencyProperty StrokeDashArrayProperty = Shape.StrokeDashArrayProperty.AddOwner(typeof(PendingConnection));
-        public static readonly DependencyProperty StrokeProperty = Shape.StrokeProperty.AddOwner(typeof(PendingConnection));
-        public static readonly DependencyProperty AllowOnlyConnectorsProperty = DependencyProperty.Register(nameof(AllowOnlyConnectors), typeof(bool), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.True, OnAllowOnlyConnectorsChanged));
-        public static readonly DependencyProperty EnableSnappingProperty = DependencyProperty.Register(nameof(EnableSnapping), typeof(bool), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty DirectionProperty = BaseConnection.DirectionProperty.AddOwner(typeof(PendingConnection));
-        public new static readonly DependencyProperty IsVisibleProperty = DependencyProperty.Register(nameof(IsVisible), typeof(bool), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.False, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnVisibilityChanged));
+        public static readonly StyledProperty<Point> SourceAnchorProperty =
+            AvaloniaProperty.Register<PendingConnection, Point>(nameof(SourceAnchor), defaultValue: default(Point));
 
-        private static void OnVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static readonly StyledProperty<Point> TargetAnchorProperty =
+            AvaloniaProperty.Register<PendingConnection, Point>(nameof(TargetAnchor), defaultValue: default(Point));
+
+        public static readonly StyledProperty<object?> SourceProperty =
+            AvaloniaProperty.Register<PendingConnection, object?>(nameof(Source));
+
+        public static readonly StyledProperty<object?> TargetProperty =
+            AvaloniaProperty.Register<PendingConnection, object?>(nameof(Target));
+
+        public static readonly StyledProperty<object?> PreviewTargetProperty =
+            AvaloniaProperty.Register<PendingConnection, object?>(nameof(PreviewTarget));
+
+        public static readonly StyledProperty<bool> EnablePreviewProperty =
+            AvaloniaProperty.Register<PendingConnection, bool>(nameof(EnablePreview), defaultValue: false);
+
+        public static readonly StyledProperty<double> StrokeThicknessProperty =
+            Shape.StrokeThicknessProperty.AddOwner<PendingConnection>();
+
+        public static readonly StyledProperty<AvaloniaList<double>?> StrokeDashArrayProperty =
+            Shape.StrokeDashArrayProperty.AddOwner<PendingConnection>();
+
+        public static readonly StyledProperty<IBrush?> StrokeProperty =
+            Shape.StrokeProperty.AddOwner<PendingConnection>();
+
+        public static readonly StyledProperty<bool> AllowOnlyConnectorsProperty =
+            AvaloniaProperty.Register<PendingConnection, bool>(nameof(AllowOnlyConnectors), defaultValue: true);
+
+        public static readonly StyledProperty<bool> EnableSnappingProperty =
+            AvaloniaProperty.Register<PendingConnection, bool>(nameof(EnableSnapping), defaultValue: false);
+
+        public static readonly StyledProperty<ConnectionDirection> DirectionProperty =
+            BaseConnection.DirectionProperty.AddOwner<PendingConnection>();
+
+        public new static readonly StyledProperty<bool> IsVisibleProperty =
+            AvaloniaProperty.Register<PendingConnection, bool>(nameof(IsVisible), defaultValue: false, defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+
+        private static void OnVisibilityChanged(PendingConnection connection, AvaloniaPropertyChangedEventArgs e)
         {
-            var connection = (PendingConnection)d;
-            connection.Visibility = ((bool)e.NewValue) ? Visibility.Visible : Visibility.Collapsed;
+            connection.IsVisible = (bool)e.NewValue!;
+        }
+
+        private static void OnAllowOnlyConnectorsChanged(PendingConnection connection, AvaloniaPropertyChangedEventArgs e)
+        {
+            connection.InvalidateHitTest();
+        }
+
+        static PendingConnection()
+        {
+            IsVisibleProperty.Changed.AddClassHandler<PendingConnection>((x, e) => OnVisibilityChanged(x, e));
+            AllowOnlyConnectorsProperty.Changed.AddClassHandler<PendingConnection>((x, e) => OnAllowOnlyConnectorsChanged(x, e));
+            AffectsRender<PendingConnection>(SourceAnchorProperty, TargetAnchorProperty);
         }
 
         /// <summary>
@@ -64,7 +101,7 @@ namespace Nodify
         /// </summary>
         public Point SourceAnchor
         {
-            get => (Point)GetValue(SourceAnchorProperty);
+            get => GetValue(SourceAnchorProperty);
             set => SetValue(SourceAnchorProperty, value);
         }
 
@@ -73,12 +110,12 @@ namespace Nodify
         /// </summary>
         public Point TargetAnchor
         {
-            get => (Point)GetValue(TargetAnchorProperty);
+            get => GetValue(TargetAnchorProperty);
             set => SetValue(TargetAnchorProperty, value);
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> that started this pending connection.
+        /// Gets or sets the <see cref="Connector"/>'s <see cref="Control.DataContext"/> that started this pending connection.
         /// </summary>
         public object? Source
         {
@@ -87,7 +124,7 @@ namespace Nodify
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> (or potentially an <see cref="ItemContainer"/>'s <see cref="FrameworkElement.DataContext"/> if <see cref="AllowOnlyConnectors"/> is false) that the <see cref="Source"/> can connect to.
+        /// Gets or sets the <see cref="Connector"/>'s <see cref="Control.DataContext"/> (or potentially an <see cref="ItemContainer"/>'s <see cref="Control.DataContext"/> if <see cref="AllowOnlyConnectors"/> is false) that the <see cref="Source"/> can connect to.
         /// Only set when the connection is completed (see <see cref="CompletedCommand"/>).
         /// </summary>
         public object? Target
@@ -97,12 +134,12 @@ namespace Nodify
         }
 
         /// <summary>
-        /// <see cref="PreviewTarget"/> will be updated with a potential <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> if this is true.
+        /// <see cref="PreviewTarget"/> will be updated with a potential <see cref="Connector"/>'s <see cref="Control.DataContext"/> if this is true.
         /// </summary>
         /// <remarks>Requires <see cref="EnableHitTesting"/> to be true.</remarks>
         public bool EnablePreview
         {
-            get => (bool)GetValue(EnablePreviewProperty);
+            get => GetValue(EnablePreviewProperty);
             set => SetValue(EnablePreviewProperty, value);
         }
 
@@ -121,7 +158,7 @@ namespace Nodify
         /// <remarks>Requires <see cref="EnableHitTesting"/> to be true.</remarks>
         public bool EnableSnapping
         {
-            get => (bool)GetValue(EnableSnappingProperty);
+            get => GetValue(EnableSnappingProperty);
             set => SetValue(EnableSnappingProperty, value);
         }
 
@@ -130,7 +167,7 @@ namespace Nodify
         /// </summary>
         public bool AllowOnlyConnectors
         {
-            get => (bool)GetValue(AllowOnlyConnectorsProperty);
+            get => GetValue(AllowOnlyConnectorsProperty);
             set => SetValue(AllowOnlyConnectorsProperty, value);
         }
 
@@ -139,25 +176,25 @@ namespace Nodify
         /// </summary>
         public double StrokeThickness
         {
-            get => (double)GetValue(StrokeThicknessProperty);
+            get => GetValue(StrokeThicknessProperty);
             set => SetValue(StrokeThicknessProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the pattern of dashes and gaps that is used to outline the connection.
         /// </summary>
-        public DoubleCollection StrokeDashArray
+        public AvaloniaList<double>? StrokeDashArray
         {
-            get => (DoubleCollection)GetValue(StrokeDashArrayProperty);
+            get => GetValue(StrokeDashArrayProperty);
             set => SetValue(StrokeDashArrayProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the stroke color of the connection.
         /// </summary>
-        public Brush Stroke
+        public IBrush? Stroke
         {
-            get => (Brush)GetValue(StrokeProperty);
+            get => GetValue(StrokeProperty);
             set => SetValue(StrokeProperty, value);
         }
 
@@ -183,25 +220,25 @@ namespace Nodify
 
         #region Attached Properties
 
-        private static readonly DependencyProperty AllowOnlyConnectorsAttachedProperty = DependencyProperty.RegisterAttached("AllowOnlyConnectorsAttached", typeof(bool), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.True));
+        private static readonly StyledProperty AllowOnlyConnectorsAttachedProperty = StyledProperty.RegisterAttached("AllowOnlyConnectorsAttached", typeof(bool), typeof(PendingConnection), new StyledPropertyMetadata(BoxValue.True));
         /// <summary>
         /// Will be set for <see cref="Connector"/>s and <see cref="ItemContainer"/>s when the pending connection is over the element if <see cref="EnablePreview"/> or <see cref="EnableSnapping"/> is true.
         /// </summary>
-        public static readonly DependencyProperty IsOverElementProperty = DependencyProperty.RegisterAttached("IsOverElement", typeof(bool), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty IsOverElementProperty = StyledProperty.RegisterAttached("IsOverElement", typeof(bool), typeof(PendingConnection), new StyledPropertyMetadata(BoxValue.False));
 
-        internal static bool GetAllowOnlyConnectorsAttached(UIElement elem)
+        internal static bool GetAllowOnlyConnectorsAttached(Control elem)
             => (bool)elem.GetValue(AllowOnlyConnectorsAttachedProperty);
 
-        internal static void SetAllowOnlyConnectorsAttached(UIElement elem, bool value)
+        internal static void SetAllowOnlyConnectorsAttached(Control elem, bool value)
             => elem.SetValue(AllowOnlyConnectorsAttachedProperty, value);
 
-        public static bool GetIsOverElement(UIElement elem)
+        public static bool GetIsOverElement(Control elem)
             => (bool)elem.GetValue(IsOverElementProperty);
 
-        public static void SetIsOverElement(UIElement elem, bool value)
+        public static void SetIsOverElement(Control elem, bool value)
             => elem.SetValue(IsOverElementProperty, value);
 
-        private static void OnAllowOnlyConnectorsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnAllowOnlyConnectorsChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             NodifyEditor? editor = ((PendingConnection)d).Editor;
 
@@ -215,13 +252,13 @@ namespace Nodify
 
         #region Commands
 
-        public static readonly DependencyProperty StartedCommandProperty = DependencyProperty.Register(nameof(StartedCommand), typeof(ICommand), typeof(PendingConnection));
-        public static readonly DependencyProperty CompletedCommandProperty = DependencyProperty.Register(nameof(CompletedCommand), typeof(ICommand), typeof(PendingConnection));
+        public static readonly StyledProperty StartedCommandProperty = StyledProperty.Register(nameof(StartedCommand), typeof(ICommand), typeof(PendingConnection));
+        public static readonly StyledProperty CompletedCommandProperty = StyledProperty.Register(nameof(CompletedCommand), typeof(ICommand), typeof(PendingConnection));
 
         /// <summary>
         /// Gets or sets the command to invoke when the pending connection is started.
         /// Will not be invoked if <see cref="NodifyEditor.ConnectionStartedCommand"/> is used.
-        /// <see cref="Source"/> will be set to the <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> that started this connection and will also be the command's parameter.
+        /// <see cref="Source"/> will be set to the <see cref="Connector"/>'s <see cref="Control.DataContext"/> that started this connection and will also be the command's parameter.
         /// </summary>
         public ICommand? StartedCommand
         {
@@ -232,7 +269,7 @@ namespace Nodify
         /// <summary>
         /// Gets or sets the command to invoke when the pending connection is completed.
         /// Will not be invoked if <see cref="NodifyEditor.ConnectionCompletedCommand"/> is used.
-        /// <see cref="Target"/> will be set to the desired <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/> and will also be the command's parameter.
+        /// <see cref="Target"/> will be set to the desired <see cref="Connector"/>'s <see cref="Control.DataContext"/> and will also be the command's parameter.
         /// </summary>
         public ICommand? CompletedCommand
         {
@@ -270,26 +307,19 @@ namespace Nodify
         /// </summary>
         protected NodifyEditor? Editor { get; private set; }
 
-        private FrameworkElement? _connectionTarget;
+        private Control? _connectionTarget;
         private Connector? _hotKeysSource;
         private readonly List<HotKeyAdorner> _hotKeysAdorners = new List<HotKeyAdorner>();
         private AdornerLayer? _adornerLayer;
 
-        private AdornerLayer AdornerLayer => _adornerLayer ??= AdornerLayer.GetAdornerLayer(this);
+        private AdornerLayer? AdornerLayer => _adornerLayer ??= AdornerLayer.GetAdornerLayer(this);
 
         #endregion
 
-        static PendingConnection()
-        {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(PendingConnection), new FrameworkPropertyMetadata(typeof(PendingConnection)));
-            IsHitTestVisibleProperty.OverrideMetadata(typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.False));
-            IsEnabledProperty.OverrideMetadata(typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.False));
-        }
-
         /// <inheritdoc />
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplateCore()
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplateCore();
 
             if (Editor != null)
             {
@@ -357,7 +387,7 @@ namespace Nodify
                 }
 
                 // Look for a potential connector
-                FrameworkElement? target = FindConnectionTarget(TargetAnchor);
+                Control? target = FindConnectionTarget(TargetAnchor);
 
                 // Update the connector's anchor and snap to it, if snapping is enabled
                 if (EnableSnapping && target is Connector connector)
@@ -407,7 +437,7 @@ namespace Nodify
         /// <summary>
         /// Sets the connection target and updates the visual state of the target element.
         /// </summary>
-        private void SetConnectionTarget(FrameworkElement? target)
+        private void SetConnectionTarget(Control? target)
         {
             if (target == _connectionTarget)
             {
@@ -430,7 +460,7 @@ namespace Nodify
         /// <summary>
         /// Searches for a potential <see cref="Connector"/> or <see cref="ItemContainer"/> at the specified position within the editor.
         /// </summary>
-        public FrameworkElement? FindConnectionTarget(Point position)
+        public Control? FindConnectionTarget(Point position)
         {
             if (Editor != null)
             {
@@ -546,7 +576,7 @@ namespace Nodify
         /// <br /> - The provided <see cref="NodifyEditor"/> itself if neither a <see cref="Connector"/> nor an <see cref="ItemContainer" /> is found, and <paramref name="allowOnlyConnectors"/> is true.
         /// <br /> - Null if no valid element is identified at the specified position.
         /// </returns>
-        internal static FrameworkElement? GetPotentialConnector(NodifyEditor editor, Point position, bool allowOnlyConnectors)
+        internal static Control? GetPotentialConnector(NodifyEditor editor, Point position, bool allowOnlyConnectors)
         {
             Connector? connector = editor.ItemsHost.GetElementAtPosition<Connector>(position);
             if (connector != null && connector.Editor == editor)
@@ -571,7 +601,7 @@ namespace Nodify
         /// <returns>
         /// Returns a <see cref="Connector"/>, an <see cref="ItemContainer"/>, the <see cref="NodifyEditor"/>, or null.
         /// </returns>
-        internal static FrameworkElement? GetPotentialConnector(NodifyEditor editor, Point position)
+        internal static Control? GetPotentialConnector(NodifyEditor editor, Point position)
             => GetPotentialConnector(editor, position, GetAllowOnlyConnectorsAttached(editor));
 
         #endregion

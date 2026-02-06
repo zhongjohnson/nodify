@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
@@ -13,7 +13,7 @@ namespace Nodify.Interactivity
         /// </summary>
         /// <typeparam name="TElement">The type of the UI element that the input handlers will be associated with.</typeparam>
         public sealed class Shared<TElement> : InputProcessor, IInputHandler
-            where TElement : FrameworkElement
+            where TElement : Visual
         {
             private static readonly List<KeyValuePair<Type, Func<TElement, IInputHandler>>> _handlerFactories = new List<KeyValuePair<Type, Func<TElement, IInputHandler>>>();
 
@@ -119,7 +119,7 @@ namespace Nodify.Interactivity
         /// <param name="inputProcessor">The input processor to which the shared handlers will be added.</param>
         /// <param name="instance">The UI element instance associated with the shared handlers.</param>
         public static void AddSharedHandlers<TElement>(this InputProcessor inputProcessor, TElement instance)
-            where TElement : FrameworkElement
+            where TElement : Visual
         {
             inputProcessor.AddHandler(new InputProcessor.Shared<TElement>(instance));
         }

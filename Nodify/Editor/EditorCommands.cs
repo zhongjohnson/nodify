@@ -1,8 +1,10 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System;
 using System.Linq;
-using System.Windows;
+using Avalonia.Input;
+using Avalonia;
 using System.Windows.Input;
+using Avalonia.Input;
 
 namespace Nodify
 {
@@ -11,223 +13,117 @@ namespace Nodify
     /// </summary>
     public static class EditorCommands
     {
+        // Note: Avalonia doesn't have RoutedUICommand, so we use simple ICommand implementations
+        // In a real scenario, you might want to use ReactiveCommand or implement ICommand
+
         /// <summary>
         /// Zoom in relative to the editor's viewport center.
         /// </summary>
-        public static RoutedUICommand ZoomIn { get; } = new RoutedUICommand("Zoom in", nameof(ZoomIn), typeof(EditorCommands), new InputGestureCollection
-        {
-           EditorGestures.Mappings.Editor.ZoomIn
-        });
+        public static ICommand ZoomIn { get; } = CreateCommand(
+            execute: o => (o as NodifyEditor)?.ZoomIn(),
+            canExecute: o => o is NodifyEditor editor && editor.ViewportZoom < editor.MaxViewportZoom);
 
         /// <summary>
         /// Zoom out relative to the editor's viewport center.
         /// </summary>
-        public static RoutedUICommand ZoomOut { get; } = new RoutedUICommand("Zoom out", nameof(ZoomOut), typeof(EditorCommands), new InputGestureCollection
-        {
-            EditorGestures.Mappings.Editor.ZoomOut
-        });
+        public static ICommand ZoomOut { get; } = CreateCommand(
+            execute: o => (o as NodifyEditor)?.ZoomOut(),
+            canExecute: o => o is NodifyEditor editor && editor.ViewportZoom > editor.MinViewportZoom);
 
         /// <summary>
         /// Select all <see cref="ItemContainer"/>s in the <see cref="NodifyEditor"/>.
         /// </summary>
-        public static RoutedUICommand SelectAll { get; } = new RoutedUICommand(ApplicationCommands.SelectAll.Text, nameof(SelectAll), typeof(EditorCommands), new InputGestureCollection
-        {
-            EditorGestures.Mappings.Editor.SelectAll
-        });
+        public static ICommand SelectAll { get; } = CreateCommand(
+            execute: o => (o as NodifyEditor)?.SelectAll(),
+            canExecute: o => o is NodifyEditor editor && !editor.IsSelecting && editor.CanSelectMultipleItems);
 
         /// <summary>
         /// Moves the <see cref="NodifyEditor.ViewportLocation"/> to the specified location.
         /// Parameter is a <see cref="Point"/> or a string that can be converted to a point.
         /// </summary>
-        public static RoutedUICommand BringIntoView { get; } = new RoutedUICommand("Bring location into view", nameof(BringIntoView), typeof(EditorCommands), new InputGestureCollection
-        {
-            EditorGestures.Mappings.Editor.ResetViewport
-        });
-
-        /// <summary>
-        /// Scales the editor's viewport to fit all the <see cref="ItemContainer"/>s if that's possible.
-        /// </summary>
-        public static RoutedUICommand FitToScreen { get; } = new RoutedUICommand("Fit to screen", nameof(FitToScreen), typeof(EditorCommands), new InputGestureCollection
-        {
-            EditorGestures.Mappings.Editor.FitToScreen
-        });
-
-        /// <summary>
-        /// Aligns the <see cref="NodifyEditor.SelectedContainers"/> using the specified alignment method.
-        /// Parameter is of type <see cref="Alignment"/> or a string that can be converted to an alignment.
-        /// </summary>
-        public static RoutedUICommand Align { get; } = new RoutedUICommand("Align", nameof(Align), typeof(EditorCommands));
-
-        /// <summary>
-        /// Locks the position of the <see cref="NodifyEditor.SelectedContainers"/>.
-        /// </summary>
-        public static RoutedUICommand LockSelection { get; } = new RoutedUICommand("Lock selection", nameof(LockSelection), typeof(EditorCommands));
-
-        /// <summary>
-        /// Unlocks the position of the <see cref="NodifyEditor.SelectedContainers"/>.
-        /// </summary>
-        public static RoutedUICommand UnlockSelection { get; } = new RoutedUICommand("Unlock selection", nameof(UnlockSelection), typeof(EditorCommands));
-
-        internal static void RegisterCommandBindings<T>()
-        {
-            CommandManager.RegisterClassCommandBinding(typeof(T), new CommandBinding(ZoomIn, OnZoomIn, OnQueryStatusZoomIn));
-            CommandManager.RegisterClassCommandBinding(typeof(T), new CommandBinding(ZoomOut, OnZoomOut, OnQueryStatusZoomOut));
-            CommandManager.RegisterClassCommandBinding(typeof(T), new CommandBinding(SelectAll, OnSelectAll, OnQuerySelectAllStatus));
-            CommandManager.RegisterClassCommandBinding(typeof(T), new CommandBinding(BringIntoView, OnBringIntoView, OnQueryBringIntoViewStatus));
-            CommandManager.RegisterClassCommandBinding(typeof(T), new CommandBinding(FitToScreen, OnFitToScreen, OnQueryFitToScreenStatus));
-            CommandManager.RegisterClassCommandBinding(typeof(T), new CommandBinding(Align, OnAlign, OnQueryAlignStatus));
-            CommandManager.RegisterClassCommandBinding(typeof(T), new CommandBinding(LockSelection, OnLock, OnQueryLockStatus));
-            CommandManager.RegisterClassCommandBinding(typeof(T), new CommandBinding(UnlockSelection, OnUnlock, OnQueryUnlockStatus));
-        }
-
-        private static void OnQueryLockStatus(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
+        public static ICommand BringIntoView { get; } = CreateCommand(
+            execute: o =>
             {
-                e.CanExecute = editor.SelectedContainers.Any(x => x.IsDraggable);
-            }
-        }
+                if (o is not (NodifyEditor editor, object parameter)) return;
 
-        private static void OnLock(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                editor.LockSelection();
-            }
-        }
-
-        private static void OnQueryUnlockStatus(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                e.CanExecute = editor.SelectedContainers.Any(x => !x.IsDraggable);
-            }
-        }
-
-        private static void OnUnlock(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                editor.UnlockSelection();
-            }
-        }
-
-        private static void OnQueryAlignStatus(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                e.CanExecute = editor.SelectedContainersCount > 1;
-            }
-        }
-
-        private static void OnAlign(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                if (e.Parameter is Alignment alignment)
-                {
-                    editor.AlignSelection(alignment, e.OriginalSource as ItemContainer);
-                }
-                else if (e.Parameter is string str && Enum.TryParse(str, true, out alignment))
-                {
-                    editor.AlignSelection(alignment, e.OriginalSource as ItemContainer);
-                }
-                else
-                {
-                    editor.AlignSelection(Alignment.Top, e.OriginalSource as ItemContainer);
-                }
-            }
-        }
-
-        private static void OnQueryBringIntoViewStatus(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                e.CanExecute = !editor.DisablePanning;
-            }
-        }
-
-        private static void OnBringIntoView(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                switch (e.Parameter)
+                switch (parameter)
                 {
                     case Point location:
                         editor.BringIntoView(location);
                         break;
                     case string str:
-                        editor.BringIntoView(Point.Parse(str));
+                        if (Point.TryParse(str, out var parsed))
+                            editor.BringIntoView(parsed);
                         break;
                     default:
                         editor.ResetViewport();
                         break;
                 }
-            }
-        }
+            },
+            canExecute: o => o is (NodifyEditor editor, _) && !editor.DisablePanning);
 
-        private static void OnQueryFitToScreenStatus(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                e.CanExecute = editor.HasItems;
-            }
-        }
+        /// <summary>
+        /// Scales the editor's viewport to fit all the <see cref="ItemContainer"/>s if that's possible.
+        /// </summary>
+        public static ICommand FitToScreen { get; } = CreateCommand(
+            execute: o => (o as NodifyEditor)?.FitToScreen(),
+            canExecute: o => o is NodifyEditor editor && editor.HasItems);
 
-        private static void OnFitToScreen(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
+        /// <summary>
+        /// Aligns the <see cref="NodifyEditor.SelectedContainers"/> using the specified alignment method.
+        /// Parameter is of type <see cref="Alignment"/> or a string that can be converted to an alignment.
+        /// </summary>
+        public static ICommand Align { get; } = CreateCommand(
+            execute: o =>
             {
-                editor.FitToScreen();
-            }
-        }
+                if (o is not (NodifyEditor editor, object parameter)) return;
 
-        private static void OnQuerySelectAllStatus(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                e.CanExecute = !editor.IsSelecting && editor.CanSelectMultipleItems;
-            }
-        }
+                Alignment alignment = parameter switch
+                {
+                    Alignment a => a,
+                    string str when Enum.TryParse<Alignment>(str, true, out var a) => a,
+                    _ => Alignment.Top
+                };
 
-        private static void OnSelectAll(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                editor.SelectAll();
-            }
-        }
+                editor.AlignSelection(alignment, null);
+            },
+            canExecute: o => o is (NodifyEditor editor, _) && editor.SelectedContainersCount > 1);
 
-        private static void OnQueryStatusZoomIn(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                e.CanExecute = editor.ViewportZoom < editor.MaxViewportZoom;
-            }
-        }
+        /// <summary>
+        /// Locks the position of the <see cref="NodifyEditor.SelectedContainers"/>.
+        /// </summary>
+        public static ICommand LockSelection { get; } = CreateCommand(
+            execute: o => (o as NodifyEditor)?.LockSelection(),
+            canExecute: o => o is NodifyEditor editor && editor.SelectedContainers.Any(x => x.IsDraggable));
 
-        private static void OnZoomIn(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                editor.ZoomIn();
-            }
-        }
+        /// <summary>
+        /// Unlocks the position of the <see cref="NodifyEditor.SelectedContainers"/>.
+        /// </summary>
+        public static ICommand UnlockSelection { get; } = CreateCommand(
+            execute: o => (o as NodifyEditor)?.UnlockSelection(),
+            canExecute: o => o is NodifyEditor editor && editor.SelectedContainers.Any(x => !x.IsDraggable));
 
-        private static void OnQueryStatusZoomOut(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (sender is NodifyEditor editor)
-            {
-                e.CanExecute = editor.ViewportZoom > editor.MinViewportZoom;
-            }
-        }
+        private static ICommand CreateCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
+            => new RelayCommand(execute, canExecute);
 
-        private static void OnZoomOut(object sender, ExecutedRoutedEventArgs e)
+        private class RelayCommand : ICommand
         {
-            if (sender is NodifyEditor editor)
+            private readonly Action<object?> _execute;
+            private readonly Func<object?, bool>? _canExecute;
+
+            public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
             {
-                editor.ZoomOut();
+                _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+                _canExecute = canExecute;
             }
+
+            public event EventHandler? CanExecuteChanged;
+
+            public bool CanExecute(object? parameter) => _canExecute?.Invoke(parameter) ?? true;
+
+            public void Execute(object? parameter) => _execute(parameter);
+
+            public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

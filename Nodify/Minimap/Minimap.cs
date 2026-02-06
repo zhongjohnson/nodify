@@ -1,12 +1,14 @@
-﻿using Nodify.Events;
+using Nodify.Events;
 using Nodify.Interactivity;
 using System;
 using System.Diagnostics;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Metadata;
+using Avalonia.Interactivity;
+using Avalonia.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using System.Windows.Shapes;
+using Avalonia.Input;
+using Avalonia.Controls.Shapes;
 
 namespace Nodify
 {
@@ -20,14 +22,14 @@ namespace Nodify
     {
         private const string ElementItemsHost = "PART_ItemsHost";
 
-        public static readonly DependencyProperty ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner(typeof(Minimap), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-        public static readonly DependencyProperty ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner(typeof(Minimap));
-        public static readonly DependencyProperty ViewportStyleProperty = DependencyProperty.Register(nameof(ViewportStyle), typeof(Style), typeof(Minimap));
-        public static readonly DependencyProperty ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner(typeof(Minimap));
-        public static readonly DependencyProperty ItemsExtentProperty = DependencyProperty.Register(nameof(ItemsExtent), typeof(Rect), typeof(Minimap));
-        public static readonly DependencyProperty MaxViewportOffsetProperty = DependencyProperty.Register(nameof(MaxViewportOffset), typeof(Size), typeof(Minimap), new FrameworkPropertyMetadata(new Size(2000, 2000)));
-        public static readonly DependencyProperty ResizeToViewportProperty = DependencyProperty.Register(nameof(ResizeToViewport), typeof(bool), typeof(Minimap));
-        public static readonly DependencyProperty IsReadOnlyProperty = TextBoxBase.IsReadOnlyProperty.AddOwner(typeof(Minimap));
+        public static readonly StyledProperty ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner(typeof(Minimap), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static readonly StyledProperty ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner(typeof(Minimap));
+        public static readonly StyledProperty ViewportStyleProperty = StyledProperty.Register(nameof(ViewportStyle), typeof(Style), typeof(Minimap));
+        public static readonly StyledProperty ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner(typeof(Minimap));
+        public static readonly StyledProperty ItemsExtentProperty = StyledProperty.Register(nameof(ItemsExtent), typeof(Rect), typeof(Minimap));
+        public static readonly StyledProperty MaxViewportOffsetProperty = StyledProperty.Register(nameof(MaxViewportOffset), typeof(Size), typeof(Minimap), new StyledPropertyMetadata(new Size(2000, 2000)));
+        public static readonly StyledProperty ResizeToViewportProperty = StyledProperty.Register(nameof(ResizeToViewport), typeof(bool), typeof(Minimap));
+        public static readonly StyledProperty IsReadOnlyProperty = TextBoxBase.IsReadOnlyProperty.AddOwner(typeof(Minimap));
 
         public static readonly RoutedEvent ZoomEvent = EventManager.RegisterRoutedEvent(nameof(Zoom), RoutingStrategy.Bubble, typeof(ZoomEventHandler), typeof(Minimap));
 
@@ -125,12 +127,12 @@ namespace Nodify
 
         static Minimap()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(Minimap), new FrameworkPropertyMetadata(typeof(Minimap)));
-            FocusableProperty.OverrideMetadata(typeof(Minimap), new FrameworkPropertyMetadata(BoxValue.True));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(typeof(Minimap)));
+            FocusableProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(BoxValue.True));
 
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(Minimap), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(Minimap), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(Minimap), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(KeyboardNavigationMode.None));
         }
 
         public Minimap()
@@ -145,7 +147,7 @@ namespace Nodify
             ItemsHost = GetTemplateChild(ElementItemsHost) as Panel ?? throw new InvalidOperationException($"{ElementItemsHost} is missing or is not of type {nameof(Panel)}.");
         }
 
-        protected override DependencyObject GetContainerForItemOverride()
+        protected override AvaloniaObject GetContainerForItemOverride()
             => new MinimapItem();
 
         protected override bool IsItemItsOwnContainerOverride(object item)

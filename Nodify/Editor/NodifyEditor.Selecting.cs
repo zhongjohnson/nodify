@@ -1,12 +1,13 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Windows.Controls.Primitives;
-using System.Windows.Controls;
-using System.Windows;
+using Avalonia.Controls;
+using Avalonia;
+using System.Windows.Input;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Collections.Generic;
-using System.Windows.Input;
-using System.Windows.Shapes;
+using Avalonia.Input;
+using Avalonia.Controls.Shapes;
 using Nodify.Interactivity;
 
 namespace Nodify
@@ -29,34 +30,34 @@ namespace Nodify
     {
         #region Dependency properties
 
-        public static readonly DependencyProperty ItemsSelectStartedCommandProperty = DependencyProperty.Register(nameof(ItemsSelectStartedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly DependencyProperty ItemsSelectCompletedCommandProperty = DependencyProperty.Register(nameof(ItemsSelectCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty ItemsSelectStartedCommandProperty = StyledProperty.Register(nameof(ItemsSelectStartedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty ItemsSelectCompletedCommandProperty = StyledProperty.Register(nameof(ItemsSelectCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
 
-        public static readonly DependencyProperty SelectionRectangleStyleProperty = DependencyProperty.Register(nameof(SelectionRectangleStyle), typeof(Style), typeof(NodifyEditor));
+        public static readonly StyledProperty SelectionRectangleStyleProperty = StyledProperty.Register(nameof(SelectionRectangleStyle), typeof(Style), typeof(NodifyEditor));
 
-        protected static readonly DependencyPropertyKey SelectedAreaPropertyKey = DependencyProperty.RegisterReadOnly(nameof(SelectedArea), typeof(Rect), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Rect));
-        public static readonly DependencyProperty SelectedAreaProperty = SelectedAreaPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey SelectedAreaPropertyKey = StyledProperty.RegisterReadOnly(nameof(SelectedArea), typeof(Rect), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Rect));
+        public static readonly StyledProperty SelectedAreaProperty = SelectedAreaPropertyKey.StyledProperty;
 
-        protected static readonly DependencyPropertyKey IsSelectingPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsSelecting), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False, OnIsSelectingChanged));
-        public static readonly DependencyProperty IsSelectingProperty = IsSelectingPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey IsSelectingPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsSelecting), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False, OnIsSelectingChanged));
+        public static readonly StyledProperty IsSelectingProperty = IsSelectingPropertyKey.StyledProperty;
 
-        public static readonly DependencyProperty EnableRealtimeSelectionProperty = DependencyProperty.Register(nameof(EnableRealtimeSelection), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty CanSelectMultipleConnectionsProperty = DependencyProperty.Register(nameof(CanSelectMultipleConnections), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.True));
-        public static readonly DependencyProperty CanSelectMultipleItemsProperty = DependencyProperty.Register(nameof(CanSelectMultipleItems), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.True, OnCanSelectMultipleItemsChanged, CoerceCanSelectMultipleItems));
-        public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register(nameof(SelectedItems), typeof(IList), typeof(NodifyEditor), new FrameworkPropertyMetadata(default(IList), OnSelectedItemsSourceChanged));
-        public static readonly DependencyProperty SelectedConnectionsProperty = DependencyProperty.Register(nameof(SelectedConnections), typeof(IList), typeof(NodifyEditor), new FrameworkPropertyMetadata(default(IList)));
-        public static readonly DependencyProperty SelectedConnectionProperty = DependencyProperty.Register(nameof(SelectedConnection), typeof(object), typeof(NodifyEditor), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+        public static readonly StyledProperty EnableRealtimeSelectionProperty = StyledProperty.Register(nameof(EnableRealtimeSelection), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty CanSelectMultipleConnectionsProperty = StyledProperty.Register(nameof(CanSelectMultipleConnections), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.True));
+        public static readonly StyledProperty CanSelectMultipleItemsProperty = StyledProperty.Register(nameof(CanSelectMultipleItems), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.True, OnCanSelectMultipleItemsChanged, CoerceCanSelectMultipleItems));
+        public static readonly StyledProperty SelectedItemsProperty = StyledProperty.Register(nameof(SelectedItems), typeof(IList), typeof(NodifyEditor), new StyledPropertyMetadata(default(IList), OnSelectedItemsSourceChanged));
+        public static readonly StyledProperty SelectedConnectionsProperty = StyledProperty.Register(nameof(SelectedConnections), typeof(IList), typeof(NodifyEditor), new StyledPropertyMetadata(default(IList)));
+        public static readonly StyledProperty SelectedConnectionProperty = StyledProperty.Register(nameof(SelectedConnection), typeof(object), typeof(NodifyEditor), new StyledPropertyMetadata(null, StyledPropertyMetadataOptions.BindsTwoWayByDefault));
 
-        private static void OnCanSelectMultipleItemsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnCanSelectMultipleItemsChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
             => ((NodifyEditor)d).CanSelectMultipleItemsBase = (bool)e.NewValue;
 
-        private static object CoerceCanSelectMultipleItems(DependencyObject d, object baseValue)
+        private static object CoerceCanSelectMultipleItems(AvaloniaObject d, object baseValue)
             => ((NodifyEditor)d).CanSelectMultipleItemsBase = (bool)baseValue;
 
-        private static void OnSelectedItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnSelectedItemsSourceChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
             => ((NodifyEditor)d).OnSelectedItemsSourceChanged((IList)e.OldValue, (IList)e.NewValue);
 
-        private static void OnIsSelectingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIsSelectingChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
             if ((bool)e.NewValue == true)

@@ -1,21 +1,17 @@
-﻿using System.Windows.Controls;
-using System.Windows;
+using Avalonia.Controls;
+using Avalonia;
 
 namespace Nodify
 {
     public class HotKeyControl : Control
     {
-        public static readonly DependencyProperty NumberProperty = DependencyProperty.Register(nameof(Number), typeof(int), typeof(HotKeyControl), new PropertyMetadata(BoxValue.Int0));
+        public static readonly StyledProperty<int> NumberProperty =
+            AvaloniaProperty.Register<HotKeyControl, int>(nameof(Number), defaultValue: 0);
 
         public int Number
         {
-            get => (int)GetValue(NumberProperty);
+            get => GetValue(NumberProperty);
             set => SetValue(NumberProperty, value);
-        }
-
-        static HotKeyControl()
-        {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(HotKeyControl), new FrameworkPropertyMetadata(typeof(HotKeyControl)));
         }
     }
 }

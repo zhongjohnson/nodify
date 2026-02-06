@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using System.Windows.Input;
+using System.Linq;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {

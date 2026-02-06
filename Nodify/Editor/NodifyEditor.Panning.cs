@@ -1,7 +1,8 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System;
-using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Interactivity;
+using Avalonia.Input;
 using System.Windows.Threading;
 
 namespace Nodify
@@ -10,18 +11,18 @@ namespace Nodify
     {
         #region Dependency properties
 
-        public static readonly DependencyProperty AutoPanSpeedProperty = DependencyProperty.Register(nameof(AutoPanSpeed), typeof(double), typeof(NodifyEditor), new FrameworkPropertyMetadata(15d));
-        public static readonly DependencyProperty AutoPanEdgeDistanceProperty = DependencyProperty.Register(nameof(AutoPanEdgeDistance), typeof(double), typeof(NodifyEditor), new FrameworkPropertyMetadata(15d));
-        public static readonly DependencyProperty DisableAutoPanningProperty = DependencyProperty.Register(nameof(DisableAutoPanning), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False, OnDisableAutoPanningChanged));
-        public static readonly DependencyProperty DisablePanningProperty = DependencyProperty.Register(nameof(DisablePanning), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False, OnDisablePanningChanged));
+        public static readonly StyledProperty AutoPanSpeedProperty = StyledProperty.Register(nameof(AutoPanSpeed), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(15d));
+        public static readonly StyledProperty AutoPanEdgeDistanceProperty = StyledProperty.Register(nameof(AutoPanEdgeDistance), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(15d));
+        public static readonly StyledProperty DisableAutoPanningProperty = StyledProperty.Register(nameof(DisableAutoPanning), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False, OnDisableAutoPanningChanged));
+        public static readonly StyledProperty DisablePanningProperty = StyledProperty.Register(nameof(DisablePanning), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False, OnDisablePanningChanged));
 
-        protected static readonly DependencyPropertyKey IsPanningPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsPanning), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty IsPanningProperty = IsPanningPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey IsPanningPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsPanning), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty IsPanningProperty = IsPanningPropertyKey.StyledProperty;
 
-        private static void OnDisableAutoPanningChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnDisableAutoPanningChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
             => ((NodifyEditor)d).OnDisableAutoPanningChanged((bool)e.NewValue);
 
-        private static void OnDisablePanningChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnDisablePanningChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
             editor.OnDisableAutoPanningChanged(editor.DisableAutoPanning || editor.DisablePanning);

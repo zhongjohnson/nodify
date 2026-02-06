@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
@@ -32,8 +32,8 @@ namespace Nodify.Interactivity
 
         static KeyComboGesture()
         {
-            EventManager.RegisterClassHandler(typeof(UIElement), UIElement.PreviewKeyUpEvent, new KeyEventHandler(HandleKeyUp), true);
-            EventManager.RegisterClassHandler(typeof(UIElement), UIElement.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(HandleFocusLost), true);
+            EventManager.RegisterClassHandler(typeof(Control), Control.PreviewKeyUpEvent, new KeyEventHandler(HandleKeyUp), true);
+            EventManager.RegisterClassHandler(typeof(Control), Control.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(HandleFocusLost), true);
         }
 
         /// <summary>

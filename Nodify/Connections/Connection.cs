@@ -1,7 +1,8 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
+using Avalonia.Media;
 
 namespace Nodify
 {
@@ -12,7 +13,6 @@ namespace Nodify
     {
         static Connection()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(Connection), new FrameworkPropertyMetadata(typeof(Connection)));
             NodifyEditor.CuttingConnectionTypes.Add(typeof(Connection));
         }
 
@@ -101,7 +101,7 @@ namespace Nodify
 
         protected static Point InterpolateCubicBezier(Point P0, Point P1, Point P2, Point P3, double t)
         {
-            // B = (1 − t)^3 * P0 + 3 * t * (1 − t)^2 * P1 + 3 * t^2 * (1 − t) * P2 + t^3 * P3
+            // B = (1 ? t)^3 * P0 + 3 * t * (1 ? t)^2 * P1 + 3 * t^2 * (1 ? t) * P2 + t^3 * P3
             return (Point)
                  ((Vector)P0 * (1 - t) * (1 - t) * (1 - t)
                 + (Vector)P1 * 3 * t * (1 - t) * (1 - t)

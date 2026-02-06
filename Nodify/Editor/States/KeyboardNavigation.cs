@@ -1,6 +1,6 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Input;
+using System;
+using Avalonia;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
@@ -21,7 +21,7 @@ namespace Nodify.Interactivity
 
             protected override void OnKeyDown(KeyEventArgs e)
             {
-                if (!Element.IsKeyboardFocusWithin || !(e.OriginalSource is DependencyObject originalSource))
+                if (!Element.IsKeyboardFocusWithin || !(e.OriginalSource is AvaloniaObject originalSource))
                 {
                     return;
                 }
@@ -31,7 +31,7 @@ namespace Nodify.Interactivity
 
                 if (e.Key == Key.Tab && Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
                 {
-                    var parentContainer = originalSource.GetParent(Element.IsNavigationTrigger) as UIElement;
+                    var parentContainer = originalSource.GetParent(Element.IsNavigationTrigger) as Control;
                     e.Handled = parentContainer?.Focus() is true;
                 }
                 else if (Element.IsNavigationTrigger(originalSource))

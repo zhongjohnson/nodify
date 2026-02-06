@@ -1,7 +1,8 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
+using Avalonia.Media;
 
 namespace Nodify
 {
@@ -12,20 +13,21 @@ namespace Nodify
     {
         protected const double Degrees = Math.PI / 180.0d;
 
-        public static readonly DependencyProperty AngleProperty = DependencyProperty.Register(nameof(Angle), typeof(double), typeof(LineConnection), new FrameworkPropertyMetadata(BoxValue.Double45, FrameworkPropertyMetadataOptions.AffectsRender));
+        public static readonly StyledProperty<double> AngleProperty =
+            AvaloniaProperty.Register<CircuitConnection, double>(nameof(Angle), defaultValue: 45.0);
 
         /// <summary>
         /// The angle of the connection in degrees.
         /// </summary>
         public double Angle
         {
-            get => (double)GetValue(AngleProperty);
+            get => GetValue(AngleProperty);
             set => SetValue(AngleProperty, value);
         }
 
         static CircuitConnection()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(CircuitConnection), new FrameworkPropertyMetadata(typeof(CircuitConnection)));
+            AffectsRender<CircuitConnection>(AngleProperty);
             NodifyEditor.CuttingConnectionTypes.Add(typeof(CircuitConnection));
         }
 

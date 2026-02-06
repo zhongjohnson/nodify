@@ -1,7 +1,8 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Layout;
+using Avalonia.Media;
 
 namespace Nodify
 {
@@ -15,47 +16,38 @@ namespace Nodify
 
     public class StepConnection : LineConnection
     {
-        public static readonly DependencyProperty SourcePositionProperty = DependencyProperty.Register(nameof(SourcePosition), typeof(ConnectorPosition), typeof(StepConnection), new FrameworkPropertyMetadata(ConnectorPosition.Right, FrameworkPropertyMetadataOptions.AffectsRender, OnConnectorPositionChanged));
-        public static readonly DependencyProperty TargetPositionProperty = DependencyProperty.Register(nameof(TargetPosition), typeof(ConnectorPosition), typeof(StepConnection), new FrameworkPropertyMetadata(ConnectorPosition.Left, FrameworkPropertyMetadataOptions.AffectsRender, OnConnectorPositionChanged));
+        public static readonly StyledProperty<ConnectorPosition> SourcePositionProperty =
+            AvaloniaProperty.Register<StepConnection, ConnectorPosition>(nameof(SourcePosition), defaultValue: ConnectorPosition.Right);
 
-        private static void OnConnectorPositionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static readonly StyledProperty<ConnectorPosition> TargetPositionProperty =
+            AvaloniaProperty.Register<StepConnection, ConnectorPosition>(nameof(TargetPosition), defaultValue: ConnectorPosition.Left);
+
+        private static void OnConnectorPositionChanged(StepConnection connection, AvaloniaPropertyChangedEventArgs e)
         {
-            var connection = (StepConnection)d;
-            connection.CoerceValue(DirectionProperty);
-            connection.CoerceValue(SourceOrientationProperty);
-            connection.CoerceValue(TargetOrientationProperty);
+            // Update dependent orientation and direction properties based on connector positions
+            var sourceOrientation = connection.SourcePosition == ConnectorPosition.Left || connection.SourcePosition == ConnectorPosition.Right
+                ? Orientation.Horizontal
+                : Orientation.Vertical;
+
+            var targetOrientation = connection.TargetPosition == ConnectorPosition.Left || connection.TargetPosition == ConnectorPosition.Right
+                ? Orientation.Horizontal
+                : Orientation.Vertical;
+
+            var direction = connection.TargetPosition == ConnectorPosition.Left || connection.TargetPosition == ConnectorPosition.Top
+                ? ConnectionDirection.Forward
+                : ConnectionDirection.Backward;
+
+            connection.SetCurrentValue(SourceOrientationProperty, sourceOrientation);
+            connection.SetCurrentValue(TargetOrientationProperty, targetOrientation);
+            connection.SetCurrentValue(DirectionProperty, direction);
         }
 
         static StepConnection()
         {
-            SourceOrientationProperty.OverrideMetadata(typeof(StepConnection), new FrameworkPropertyMetadata(Orientation.Horizontal, null, CoerceSourceOrientation));
-            TargetOrientationProperty.OverrideMetadata(typeof(StepConnection), new FrameworkPropertyMetadata(Orientation.Horizontal, null, CoerceTargetOrientation));
-            DirectionProperty.OverrideMetadata(typeof(StepConnection), new FrameworkPropertyMetadata(ConnectionDirection.Forward, null, CoerceConnectionDirection));
+            SourcePositionProperty.Changed.AddClassHandler<StepConnection>((x, e) => OnConnectorPositionChanged(x, e));
+            TargetPositionProperty.Changed.AddClassHandler<StepConnection>((x, e) => OnConnectorPositionChanged(x, e));
+            AffectsRender<StepConnection>(SourcePositionProperty, TargetPositionProperty);
             NodifyEditor.CuttingConnectionTypes.Add(typeof(StepConnection));
-        }
-
-        private static object CoerceSourceOrientation(DependencyObject d, object baseValue)
-        {
-            var connection = (StepConnection)d;
-            return connection.SourcePosition == ConnectorPosition.Left || connection.SourcePosition == ConnectorPosition.Right
-                ? Orientation.Horizontal
-                : Orientation.Vertical;
-        }
-
-        private static object CoerceTargetOrientation(DependencyObject d, object baseValue)
-        {
-            var connection = (StepConnection)d;
-            return connection.TargetPosition == ConnectorPosition.Left || connection.TargetPosition == ConnectorPosition.Right
-                ? Orientation.Horizontal
-                : Orientation.Vertical;
-        }
-
-        private static object CoerceConnectionDirection(DependencyObject d, object baseValue)
-        {
-            var connection = (StepConnection)d;
-            return connection.TargetPosition == ConnectorPosition.Left || connection.TargetPosition == ConnectorPosition.Top
-               ? ConnectionDirection.Forward
-               : ConnectionDirection.Backward;
         }
 
         /// <summary>
@@ -63,7 +55,7 @@ namespace Nodify
         /// </summary>
         public ConnectorPosition SourcePosition
         {
-            get => (ConnectorPosition)GetValue(SourcePositionProperty);
+            get => GetValue(SourcePositionProperty);
             set => SetValue(SourcePositionProperty, value);
         }
 
@@ -72,7 +64,7 @@ namespace Nodify
         /// </summary>
         public ConnectorPosition TargetPosition
         {
-            get => (ConnectorPosition)GetValue(TargetPositionProperty);
+            get => GetValue(TargetPositionProperty);
             set => SetValue(TargetPositionProperty, value);
         }
 

@@ -1,5 +1,7 @@
-﻿using System.Windows.Input;
-using System.Windows;
+using Avalonia.Input;
+using Avalonia;
+using System.Windows.Input;
+using Avalonia.Interactivity;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Nodify.Events;
@@ -11,13 +13,13 @@ namespace Nodify
     {
         #region Dependency properties
 
-        public static readonly DependencyProperty ItemsDragStartedCommandProperty = DependencyProperty.Register(nameof(ItemsDragStartedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly DependencyProperty ItemsDragCompletedCommandProperty = DependencyProperty.Register(nameof(ItemsDragCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty ItemsDragStartedCommandProperty = StyledProperty.Register(nameof(ItemsDragStartedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty ItemsDragCompletedCommandProperty = StyledProperty.Register(nameof(ItemsDragCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
 
-        protected static readonly DependencyPropertyKey IsDraggingPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsDragging), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False, OnIsDraggingChanged));
-        public static readonly DependencyProperty IsDraggingProperty = IsDraggingPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey IsDraggingPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsDragging), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False, OnIsDraggingChanged));
+        public static readonly StyledProperty IsDraggingProperty = IsDraggingPropertyKey.StyledProperty;
 
-        private static void OnIsDraggingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIsDraggingChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
 

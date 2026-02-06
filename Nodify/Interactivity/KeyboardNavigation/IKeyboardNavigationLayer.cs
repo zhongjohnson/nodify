@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
@@ -77,7 +77,7 @@ namespace Nodify.Interactivity
         /// <summary>
         /// Gets the last focused element within this layer, if any.
         /// </summary>
-        IKeyboardFocusTarget<UIElement>? LastFocusedElement { get; }
+        IKeyboardFocusTarget<Control>? LastFocusedElement { get; }
 
         /// <summary>
         /// Attempts to move focus within this layer based on the provided traversal request.
@@ -106,9 +106,9 @@ namespace Nodify.Interactivity
     /// <summary>
     /// Represents a target for keyboard focus within a specific layer, providing bounds and the associated UI element.
     /// </summary>
-    /// <typeparam name="TElement">The associated UI element.</typeparam>
+    /// <typeparam name="TElement">The associated UI element (must be a Visual).</typeparam>
     public interface IKeyboardFocusTarget<out TElement>
-        where TElement : UIElement
+        where TElement : Visual
     {
         /// <summary>
         /// Gets the bounds of the focus target within the layer.

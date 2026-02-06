@@ -1,11 +1,11 @@
-﻿using System;
-using System.Windows.Input;
-using System.Windows;
+using System;
+using Avalonia.Input;
+using Avalonia;
 
 namespace Nodify.Interactivity
 {
     internal class StatefulFocusNavigator<TElement>
-        where TElement : UIElement, IKeyboardFocusTarget<TElement>
+        where TElement : Visual, IKeyboardFocusTarget<TElement>
     {
         public delegate bool FindNextFocusTargetDelegate(TElement? currentElement, TraversalRequest request, out TElement? elementToFocus);
 

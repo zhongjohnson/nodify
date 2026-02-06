@@ -1,24 +1,25 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Metadata;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Media;
 
 namespace Nodify
 {
     /// <summary>
     /// Represents a control that acts as a <see cref="Connector"/>.
     /// </summary>
-    [TemplatePart(Name = ElementContent, Type = typeof(UIElement))]
+    [TemplatePart(Name = ElementContent, Type = typeof(Control))]
     public class StateNode : Connector
     {
         protected const string ElementContent = "PART_Content";
 
         #region Dependency Properties
 
-        public static readonly DependencyProperty HighlightBrushProperty = ItemContainer.HighlightBrushProperty.AddOwner(typeof(StateNode));
-        public static readonly DependencyProperty ContentProperty = ContentPresenter.ContentProperty.AddOwner(typeof(StateNode));
-        public static readonly DependencyProperty ContentTemplateProperty = ContentPresenter.ContentTemplateProperty.AddOwner(typeof(StateNode));
-        public static readonly DependencyProperty CornerRadiusProperty = Border.CornerRadiusProperty.AddOwner(typeof(StateNode));
+        public static readonly StyledProperty HighlightBrushProperty = ItemContainer.HighlightBrushProperty.AddOwner(typeof(StateNode));
+        public static readonly StyledProperty ContentProperty = ContentPresenter.ContentProperty.AddOwner(typeof(StateNode));
+        public static readonly StyledProperty ContentTemplateProperty = ContentPresenter.ContentTemplateProperty.AddOwner(typeof(StateNode));
+        public static readonly StyledProperty CornerRadiusProperty = Border.CornerRadiusProperty.AddOwner(typeof(StateNode));
 
         /// <summary>
         /// Gets or sets the brush used when the <see cref="PendingConnection.IsOverElementProperty"/> attached property is true for this <see cref="StateNode"/>.
@@ -61,12 +62,12 @@ namespace Nodify
         /// <summary>
         /// Gets the <see cref="ContentControl"/> control of this <see cref="StateNode"/>.
         /// </summary>
-        protected UIElement? ContentControl { get; private set; }
+        protected Control? ContentControl { get; private set; }
 
         static StateNode()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(StateNode), new FrameworkPropertyMetadata(typeof(StateNode)));
-            FocusableProperty.OverrideMetadata(typeof(StateNode), new FrameworkPropertyMetadata(BoxValue.False));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(StateNode), new StyledPropertyMetadata(typeof(StateNode)));
+            FocusableProperty.OverrideMetadata(typeof(StateNode), new StyledPropertyMetadata(BoxValue.False));
         }
 
         /// <inheritdoc />
@@ -74,7 +75,7 @@ namespace Nodify
         {
             base.OnApplyTemplate();
 
-            ContentControl = Template.FindName(ElementContent, this) as UIElement;
+            ContentControl = Template.FindName(ElementContent, this) as Control;
         }
 
         /// <inheritdoc />

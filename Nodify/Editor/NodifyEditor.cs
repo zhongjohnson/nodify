@@ -1,14 +1,16 @@
-﻿using Nodify.Events;
+using Nodify.Events;
 using Nodify.Interactivity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
 using System.Windows.Input;
-using System.Windows.Markup;
-using System.Windows.Media;
+using Avalonia.Interactivity;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Metadata;
+using Avalonia.Media;
 
 namespace Nodify
 {
@@ -29,7 +31,7 @@ namespace Nodify
     /// Groups <see cref="ItemContainer"/>s and <see cref="Connection"/>s in an area that you can drag, zoom and select.
     /// </summary>
     [TemplatePart(Name = ElementItemsHost, Type = typeof(Panel))]
-    [TemplatePart(Name = ElementConnectionsHost, Type = typeof(FrameworkElement))]
+    [TemplatePart(Name = ElementConnectionsHost, Type = typeof(Control))]
     [StyleTypedProperty(Property = nameof(ItemContainerStyle), StyleTargetType = typeof(ItemContainer))]
     [StyleTypedProperty(Property = nameof(DecoratorContainerStyle), StyleTargetType = typeof(DecoratorContainer))]
     [ContentProperty(nameof(Decorators))]
@@ -41,26 +43,26 @@ namespace Nodify
 
         #region Viewport
 
-        public static readonly DependencyProperty ViewportZoomProperty = DependencyProperty.Register(nameof(ViewportZoom), typeof(double), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Double1, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnViewportZoomChanged, ConstrainViewportZoomToRange));
-        public static readonly DependencyProperty MinViewportZoomProperty = DependencyProperty.Register(nameof(MinViewportZoom), typeof(double), typeof(NodifyEditor), new FrameworkPropertyMetadata(0.1d, OnMinViewportZoomChanged, CoerceMinViewportZoom));
-        public static readonly DependencyProperty MaxViewportZoomProperty = DependencyProperty.Register(nameof(MaxViewportZoom), typeof(double), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Double2, OnMaxViewportZoomChanged, CoerceMaxViewportZoom));
-        public static readonly DependencyProperty ViewportLocationProperty = DependencyProperty.Register(nameof(ViewportLocation), typeof(Point), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Point, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnViewportLocationChanged));
-        public static readonly DependencyProperty ViewportSizeProperty = DependencyProperty.Register(nameof(ViewportSize), typeof(Size), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Size));
-        public static readonly DependencyProperty ItemsExtentProperty = DependencyProperty.Register(nameof(ItemsExtent), typeof(Rect), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Rect, OnItemsExtentChanged));
-        public static readonly DependencyProperty DecoratorsExtentProperty = DependencyProperty.Register(nameof(DecoratorsExtent), typeof(Rect), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Rect));
+        public static readonly StyledProperty ViewportZoomProperty = StyledProperty.Register(nameof(ViewportZoom), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Double1, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnViewportZoomChanged, ConstrainViewportZoomToRange));
+        public static readonly StyledProperty MinViewportZoomProperty = StyledProperty.Register(nameof(MinViewportZoom), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(0.1d, OnMinViewportZoomChanged, CoerceMinViewportZoom));
+        public static readonly StyledProperty MaxViewportZoomProperty = StyledProperty.Register(nameof(MaxViewportZoom), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Double2, OnMaxViewportZoomChanged, CoerceMaxViewportZoom));
+        public static readonly StyledProperty ViewportLocationProperty = StyledProperty.Register(nameof(ViewportLocation), typeof(Point), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnViewportLocationChanged));
+        public static readonly StyledProperty ViewportSizeProperty = StyledProperty.Register(nameof(ViewportSize), typeof(Size), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Size));
+        public static readonly StyledProperty ItemsExtentProperty = StyledProperty.Register(nameof(ItemsExtent), typeof(Rect), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Rect, OnItemsExtentChanged));
+        public static readonly StyledProperty DecoratorsExtentProperty = StyledProperty.Register(nameof(DecoratorsExtent), typeof(Rect), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Rect));
 
-        protected static readonly DependencyPropertyKey ViewportTransformPropertyKey = DependencyProperty.RegisterReadOnly(nameof(ViewportTransform), typeof(Transform), typeof(NodifyEditor), new FrameworkPropertyMetadata(new TransformGroup()));
-        public static readonly DependencyProperty ViewportTransformProperty = ViewportTransformPropertyKey.DependencyProperty;
+        protected static readonly StyledPropertyKey ViewportTransformPropertyKey = StyledProperty.RegisterReadOnly(nameof(ViewportTransform), typeof(Transform), typeof(NodifyEditor), new StyledPropertyMetadata(new TransformGroup()));
+        public static readonly StyledProperty ViewportTransformProperty = ViewportTransformPropertyKey.StyledProperty;
 
         #region Callbacks
 
-        private static void OnItemsExtentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnItemsExtentChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
             editor.UpdateScrollbars();
         }
 
-        private static void OnViewportLocationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnViewportLocationChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
             var translate = (Point)e.NewValue;
@@ -71,7 +73,7 @@ namespace Nodify
             editor.OnViewportUpdated();
         }
 
-        private static void OnViewportZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnViewportZoomChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
             double zoom = (double)e.NewValue;
@@ -85,23 +87,23 @@ namespace Nodify
             editor.OnViewportUpdated();
         }
 
-        private static void OnMinViewportZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnMinViewportZoomChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var zoom = (NodifyEditor)d;
             zoom.CoerceValue(MaxViewportZoomProperty);
             zoom.CoerceValue(ViewportZoomProperty);
         }
 
-        private static object CoerceMinViewportZoom(DependencyObject d, object value)
+        private static object CoerceMinViewportZoom(AvaloniaObject d, object value)
             => (double)value > 0.1d ? value : 0.1d;
 
-        private static void OnMaxViewportZoomChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnMaxViewportZoomChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var zoom = (NodifyEditor)d;
             zoom.CoerceValue(ViewportZoomProperty);
         }
 
-        private static object CoerceMaxViewportZoom(DependencyObject d, object value)
+        private static object CoerceMaxViewportZoom(AvaloniaObject d, object value)
         {
             var editor = (NodifyEditor)d;
             double min = editor.MinViewportZoom;
@@ -109,7 +111,7 @@ namespace Nodify
             return (double)value < min ? min : value;
         }
 
-        private static object ConstrainViewportZoomToRange(DependencyObject d, object value)
+        private static object ConstrainViewportZoomToRange(AvaloniaObject d, object value)
         {
             var editor = (NodifyEditor)d;
 
@@ -140,7 +142,7 @@ namespace Nodify
 
         /// <summary>
         /// Updates the <see cref="ViewportSize"/> and raises the <see cref="ViewportUpdatedEvent"/>.
-        /// Called when the <see cref="UIElement.RenderSize"/> or <see cref="ViewportZoom"/> is changed.
+        /// Called when the <see cref="Control.RenderSize"/> or <see cref="ViewportZoom"/> is changed.
         /// </summary>
         protected void OnViewportUpdated()
         {
@@ -255,16 +257,16 @@ namespace Nodify
 
         #region Cosmetic Dependency Properties
 
-        public static readonly DependencyProperty BringIntoViewSpeedProperty = DependencyProperty.Register(nameof(BringIntoViewSpeed), typeof(double), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Double1000));
-        public static readonly DependencyProperty BringIntoViewMaxDurationProperty = DependencyProperty.Register(nameof(BringIntoViewMaxDuration), typeof(double), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Double1));
-        public static readonly DependencyProperty DisplayConnectionsOnTopProperty = DependencyProperty.Register(nameof(DisplayConnectionsOnTop), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty ConnectionTemplateProperty = DependencyProperty.Register(nameof(ConnectionTemplate), typeof(DataTemplate), typeof(NodifyEditor));
-        public static readonly DependencyProperty ConnectionTemplateSelectorProperty = DependencyProperty.Register(nameof(ConnectionTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
-        public static readonly DependencyProperty DecoratorTemplateProperty = DependencyProperty.Register(nameof(DecoratorTemplate), typeof(DataTemplate), typeof(NodifyEditor));
-        public static readonly DependencyProperty DecoratorTemplateSelectorProperty = DependencyProperty.Register(nameof(DecoratorTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
-        public static readonly DependencyProperty PendingConnectionTemplateProperty = DependencyProperty.Register(nameof(PendingConnectionTemplate), typeof(DataTemplate), typeof(NodifyEditor));
-        public static readonly DependencyProperty PendingConnectionTemplateSelectorProperty = DependencyProperty.Register(nameof(PendingConnectionTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
-        public static readonly DependencyProperty DecoratorContainerStyleProperty = DependencyProperty.Register(nameof(DecoratorContainerStyle), typeof(Style), typeof(NodifyEditor));
+        public static readonly StyledProperty BringIntoViewSpeedProperty = StyledProperty.Register(nameof(BringIntoViewSpeed), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Double1000));
+        public static readonly StyledProperty BringIntoViewMaxDurationProperty = StyledProperty.Register(nameof(BringIntoViewMaxDuration), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Double1));
+        public static readonly StyledProperty DisplayConnectionsOnTopProperty = StyledProperty.Register(nameof(DisplayConnectionsOnTop), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty ConnectionTemplateProperty = StyledProperty.Register(nameof(ConnectionTemplate), typeof(DataTemplate), typeof(NodifyEditor));
+        public static readonly StyledProperty ConnectionTemplateSelectorProperty = StyledProperty.Register(nameof(ConnectionTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
+        public static readonly StyledProperty DecoratorTemplateProperty = StyledProperty.Register(nameof(DecoratorTemplate), typeof(DataTemplate), typeof(NodifyEditor));
+        public static readonly StyledProperty DecoratorTemplateSelectorProperty = StyledProperty.Register(nameof(DecoratorTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
+        public static readonly StyledProperty PendingConnectionTemplateProperty = StyledProperty.Register(nameof(PendingConnectionTemplate), typeof(DataTemplate), typeof(NodifyEditor));
+        public static readonly StyledProperty PendingConnectionTemplateSelectorProperty = StyledProperty.Register(nameof(PendingConnectionTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
+        public static readonly StyledProperty DecoratorContainerStyleProperty = StyledProperty.Register(nameof(DecoratorContainerStyle), typeof(Style), typeof(NodifyEditor));
 
         /// <summary>
         /// Gets or sets the maximum animation duration in seconds for bringing a location into view.
@@ -361,8 +363,8 @@ namespace Nodify
 
         #region Readonly Dependency Properties
 
-        private static readonly DependencyPropertyKey MouseLocationPropertyKey = DependencyProperty.RegisterReadOnly(nameof(MouseLocation), typeof(Point), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.Point));
-        public static readonly DependencyProperty MouseLocationProperty = MouseLocationPropertyKey.DependencyProperty;
+        private static readonly StyledPropertyKey MouseLocationPropertyKey = StyledProperty.RegisterReadOnly(nameof(MouseLocation), typeof(Point), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Point));
+        public static readonly StyledProperty MouseLocationProperty = MouseLocationPropertyKey.StyledProperty;
 
         /// <summary>
         /// Gets the current mouse location in graph space coordinates (relative to the <see cref="ItemsHost" />).
@@ -377,17 +379,17 @@ namespace Nodify
 
         #region Dependency Properties
 
-        public static readonly DependencyProperty ConnectionsProperty = DependencyProperty.Register(nameof(Connections), typeof(IEnumerable), typeof(NodifyEditor));
-        public static readonly DependencyProperty PendingConnectionProperty = DependencyProperty.Register(nameof(PendingConnection), typeof(object), typeof(NodifyEditor));
-        public static readonly DependencyProperty GridCellSizeProperty = DependencyProperty.Register(nameof(GridCellSize), typeof(uint), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.UInt1, OnGridCellSizeChanged, OnCoerceGridCellSize));
-        public static readonly DependencyProperty DisableZoomingProperty = DependencyProperty.Register(nameof(DisableZooming), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty HasCustomContextMenuProperty = DependencyProperty.Register(nameof(HasCustomContextMenu), typeof(bool), typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty DecoratorsProperty = DependencyProperty.Register(nameof(Decorators), typeof(IEnumerable), typeof(NodifyEditor));
+        public static readonly StyledProperty ConnectionsProperty = StyledProperty.Register(nameof(Connections), typeof(IEnumerable), typeof(NodifyEditor));
+        public static readonly StyledProperty PendingConnectionProperty = StyledProperty.Register(nameof(PendingConnection), typeof(object), typeof(NodifyEditor));
+        public static readonly StyledProperty GridCellSizeProperty = StyledProperty.Register(nameof(GridCellSize), typeof(uint), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.UInt1, OnGridCellSizeChanged, OnCoerceGridCellSize));
+        public static readonly StyledProperty DisableZoomingProperty = StyledProperty.Register(nameof(DisableZooming), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty HasCustomContextMenuProperty = StyledProperty.Register(nameof(HasCustomContextMenu), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty DecoratorsProperty = StyledProperty.Register(nameof(Decorators), typeof(IEnumerable), typeof(NodifyEditor));
 
-        private static object OnCoerceGridCellSize(DependencyObject d, object value)
+        private static object OnCoerceGridCellSize(AvaloniaObject d, object value)
             => (uint)value > 0u ? value : BoxValue.UInt1;
 
-        private static void OnGridCellSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) { }
+        private static void OnGridCellSizeChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e) { }
 
         /// <summary>
         /// Gets or sets the items that will be rendered in the decorators layer via <see cref="DecoratorContainer"/>s.
@@ -417,7 +419,7 @@ namespace Nodify
         }
 
         /// <summary>
-        /// Gets of sets the <see cref="FrameworkElement.DataContext"/> of the <see cref="Nodify.PendingConnection"/>.
+        /// Gets of sets the <see cref="Control.DataContext"/> of the <see cref="Nodify.PendingConnection"/>.
         /// </summary>
         public object PendingConnection
         {
@@ -453,10 +455,10 @@ namespace Nodify
 
         #region Command Dependency Properties
 
-        public static readonly DependencyProperty ConnectionCompletedCommandProperty = DependencyProperty.Register(nameof(ConnectionCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly DependencyProperty ConnectionStartedCommandProperty = DependencyProperty.Register(nameof(ConnectionStartedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly DependencyProperty DisconnectConnectorCommandProperty = DependencyProperty.Register(nameof(DisconnectConnectorCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly DependencyProperty RemoveConnectionCommandProperty = DependencyProperty.Register(nameof(RemoveConnectionCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty ConnectionCompletedCommandProperty = StyledProperty.Register(nameof(ConnectionCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty ConnectionStartedCommandProperty = StyledProperty.Register(nameof(ConnectionStartedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty DisconnectConnectorCommandProperty = StyledProperty.Register(nameof(DisconnectConnectorCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty RemoveConnectionCommandProperty = StyledProperty.Register(nameof(RemoveConnectionCommand), typeof(ICommand), typeof(NodifyEditor));
 
         /// <summary>
         /// Invoked when the <see cref="Nodify.PendingConnection"/> is completed. <br />
@@ -483,7 +485,7 @@ namespace Nodify
         /// <summary>
         /// Invoked when the <see cref="Connector.Disconnect"/> event is raised. <br />
         /// Can also be handled at the <see cref="Connector"/> level using the <see cref="Connector.DisconnectCommand"/> command. <br />
-        /// Parameter is the <see cref="Connector"/>'s <see cref="FrameworkElement.DataContext"/>.
+        /// Parameter is the <see cref="Connector"/>'s <see cref="Control.DataContext"/>.
         /// </summary>
         public ICommand? DisconnectConnectorCommand
         {
@@ -494,7 +496,7 @@ namespace Nodify
         /// <summary>
         /// Invoked when the <see cref="BaseConnection.Disconnect"/> event is raised. <br />
         /// Can also be handled at the <see cref="BaseConnection"/> level using the <see cref="BaseConnection.DisconnectCommand"/> command. <br />
-        /// Parameter is the <see cref="BaseConnection"/>'s <see cref="FrameworkElement.DataContext"/>.
+        /// Parameter is the <see cref="BaseConnection"/>'s <see cref="Control.DataContext"/>.
         /// </summary>
         public ICommand? RemoveConnectionCommand
         {
@@ -551,7 +553,7 @@ namespace Nodify
         /// <summary>
         /// Gets the element that holds all the <see cref="BaseConnection"/>s and custom connections.
         /// </summary>
-        protected internal UIElement ConnectionsHost { get; private set; } = default!;
+        protected internal Control ConnectionsHost { get; private set; } = default!;
 
         /// <summary>
         /// Gets a list of all <see cref="ItemContainer"/>s.
@@ -579,12 +581,12 @@ namespace Nodify
 
         static NodifyEditor()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodifyEditor), new FrameworkPropertyMetadata(typeof(NodifyEditor)));
-            FocusableProperty.OverrideMetadata(typeof(NodifyEditor), new FrameworkPropertyMetadata(BoxValue.True));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(typeof(NodifyEditor)));
+            FocusableProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.True));
 
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new FrameworkPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(KeyboardNavigationMode.None));
 
             EditorCommands.RegisterCommandBindings<NodifyEditor>();
         }
@@ -620,7 +622,7 @@ namespace Nodify
             base.OnApplyTemplate();
 
             ItemsHost = GetTemplateChild(ElementItemsHost) as Panel ?? throw new InvalidOperationException($"{ElementItemsHost} is missing or is not of type Panel.");
-            ConnectionsHost = GetTemplateChild(ElementConnectionsHost) as UIElement ?? throw new InvalidOperationException($"{ElementConnectionsHost} is missing or is not of type UIElement.");
+            ConnectionsHost = GetTemplateChild(ElementConnectionsHost) as Control ?? throw new InvalidOperationException($"{ElementConnectionsHost} is missing or is not of type Control.");
 
             OnDisableAutoPanningChanged(DisableAutoPanning);
         }
@@ -638,7 +640,7 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override DependencyObject GetContainerForItemOverride()
+        protected override AvaloniaObject GetContainerForItemOverride()
             => new ItemContainer(this)
             {
                 RenderTransform = new TranslateTransform()
@@ -1012,7 +1014,7 @@ namespace Nodify
         /// <param name="location">The location coordinates relative to <paramref name="relativeTo"/></param>
         /// <param name="relativeTo">The element where the <paramref name="location"/> was calculated from.</param>
         /// <returns>A location inside the graph.</returns>
-        public Point GetLocationInsideEditor(Point location, UIElement relativeTo)
+        public Point GetLocationInsideEditor(Point location, Control relativeTo)
             => relativeTo.TranslatePoint(location, ItemsHost);
 
         /// <summary>
@@ -1053,17 +1055,17 @@ namespace Nodify
         {
             var viewport = new Rect(ViewportLocation, ViewportSize);
 
-            var stack = new Stack<DependencyObject>();
+            var stack = new Stack<AvaloniaObject>();
             stack.Push(this);
 
             while (stack.Count > 0)
             {
-                DependencyObject current = stack.Pop();
+                AvaloniaObject current = stack.Pop();
                 int childrenCount = VisualTreeHelper.GetChildrenCount(current);
 
                 for (int i = 0; i < childrenCount; i++)
                 {
-                    DependencyObject child = VisualTreeHelper.GetChild(current, i);
+                    AvaloniaObject child = VisualTreeHelper.GetChild(current, i);
 
                     if (child is Connector connector && connector.Container != null && connector.Container.IsSelectableInArea(viewport, isContained: false))
                     {

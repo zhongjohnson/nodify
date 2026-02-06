@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Input;
+using System.Collections.Generic;
+using Avalonia;
+using Avalonia.Interactivity;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
     /// <summary>
     /// Manages a stack of input states for a UI element, enabling complex input interactions.
     /// </summary>
-    /// <typeparam name="TElement">The type of the associated FrameworkElement.</typeparam>
+    /// <typeparam name="TElement">The type of the associated Control.</typeparam>
     public partial class InputElementStateStack<TElement> : IInputHandler
-        where TElement : FrameworkElement
+        where TElement : Control
     {
         private readonly Stack<IInputElementState> _states = new Stack<IInputElementState>();
 
@@ -78,7 +79,7 @@ namespace Nodify.Interactivity
         {
             State.HandleEvent(e);
 
-            if (e.RoutedEvent == UIElement.LostMouseCaptureEvent)
+            if (e.RoutedEvent == Control.LostMouseCaptureEvent)
             {
                 PopAllStates();
             }

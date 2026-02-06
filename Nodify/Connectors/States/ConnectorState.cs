@@ -1,4 +1,4 @@
-﻿namespace Nodify.Interactivity
+namespace Nodify.Interactivity
 {
     public static partial class ConnectorState
     {

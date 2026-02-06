@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Controls;
 
 namespace Nodify
 {
@@ -12,14 +12,14 @@ namespace Nodify
         /// <summary>The desired size of the item.</summary>
         Size DesiredSize { get; }
 
-        /// <inheritdoc cref="UIElement.Arrange(Rect)" />
+        /// <inheritdoc cref="Control.Arrange(Rect)" />
         void Arrange(Rect rect);
     }
 
     /// <summary>A canvas like panel that works with <see cref="INodifyCanvasItem"/>s.</summary>
     public class NodifyCanvas : Panel
     {
-        public static readonly DependencyProperty ExtentProperty = DependencyProperty.Register(nameof(Extent), typeof(Rect), typeof(NodifyCanvas), new FrameworkPropertyMetadata(BoxValue.Rect));
+        public static readonly StyledProperty ExtentProperty = StyledProperty.Register(nameof(Extent), typeof(Rect), typeof(NodifyCanvas), new StyledPropertyMetadata(BoxValue.Rect));
 
         /// <summary>The area covered by the children of this panel.</summary>
         public Rect Extent
@@ -37,7 +37,7 @@ namespace Nodify
             double maxX = double.MinValue;
             double maxY = double.MinValue;
 
-            UIElementCollection children = InternalChildren;
+            ControlCollection children = InternalChildren;
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (INodifyCanvasItem)children[i];
@@ -79,7 +79,7 @@ namespace Nodify
         protected override Size MeasureOverride(Size constraint)
         {
             var availableSize = new Size(double.PositiveInfinity, double.PositiveInfinity);
-            UIElementCollection children = InternalChildren;
+            ControlCollection children = InternalChildren;
 
             for (int i = 0; i < children.Count; i++)
             {

@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -10,12 +11,12 @@ namespace Nodify.Interactivity
         /// <summary>
         /// Handles a given input event, such as a mouse or keyboard interaction.
         /// </summary>
-        /// <param name="e">The <see cref="InputEventArgs"/> representing the input event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> representing the input event.</param>
         /// <remarks>
         /// This method is invoked when an input event is dispatched to the handler. Implementations should 
         /// handle the event logic and optionally mark the event as handled.
         /// </remarks>
-        void HandleEvent(InputEventArgs e);
+        void HandleEvent(RoutedEventArgs e);
 
         /// <summary>
         /// Gets a value indicating whether the handler requires input capture to remain active.

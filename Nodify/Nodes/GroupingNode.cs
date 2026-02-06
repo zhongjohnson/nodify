@@ -1,12 +1,15 @@
-﻿using Nodify.Events;
+using Nodify.Events;
 using Nodify.Interactivity;
 using System;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
+using Avalonia;
+using Avalonia.Metadata;
 using System.Windows.Input;
-using System.Windows.Media;
+using Avalonia.Interactivity;
+using Avalonia.Controls;
+using System.Windows.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Media;
 
 namespace Nodify
 {
@@ -29,9 +32,9 @@ namespace Nodify
     /// <summary>
     /// Defines a panel with a header that groups <see cref="ItemContainer"/>s inside it and can be resized.
     /// </summary>
-    [TemplatePart(Name = ElementResizeThumb, Type = typeof(FrameworkElement))]
-    [TemplatePart(Name = ElementHeader, Type = typeof(FrameworkElement))]
-    [TemplatePart(Name = ElementContent, Type = typeof(FrameworkElement))]
+    [TemplatePart(Name = ElementResizeThumb, Type = typeof(Control))]
+    [TemplatePart(Name = ElementHeader, Type = typeof(Control))]
+    [TemplatePart(Name = ElementContent, Type = typeof(Control))]
     public class GroupingNode : HeaderedContentControl
     {
         protected static readonly object GroupMovementBoxed = GroupingMovementMode.Group;
@@ -67,14 +70,14 @@ namespace Nodify
 
         #region Dependency Properties
 
-        public static readonly DependencyProperty HeaderBrushProperty = Node.HeaderBrushProperty.AddOwner(typeof(GroupingNode));
-        public static readonly DependencyProperty CanResizeProperty = DependencyProperty.Register(nameof(CanResize), typeof(bool), typeof(GroupingNode), new FrameworkPropertyMetadata(BoxValue.True));
-        public static readonly DependencyProperty ActualSizeProperty = DependencyProperty.Register(nameof(ActualSize), typeof(Size), typeof(GroupingNode), new FrameworkPropertyMetadata(BoxValue.Size, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnActualSizeChanged));
-        public static readonly DependencyProperty MovementModeProperty = DependencyProperty.Register(nameof(MovementMode), typeof(GroupingMovementMode), typeof(GroupingNode), new FrameworkPropertyMetadata(GroupMovementBoxed));
-        public static readonly DependencyProperty ResizeCompletedCommandProperty = DependencyProperty.Register(nameof(ResizeCompletedCommand), typeof(ICommand), typeof(GroupingNode));
-        public static readonly DependencyProperty ResizeStartedCommandProperty = DependencyProperty.Register(nameof(ResizeStartedCommand), typeof(ICommand), typeof(GroupingNode));
+        public static readonly StyledProperty HeaderBrushProperty = Node.HeaderBrushProperty.AddOwner(typeof(GroupingNode));
+        public static readonly StyledProperty CanResizeProperty = StyledProperty.Register(nameof(CanResize), typeof(bool), typeof(GroupingNode), new StyledPropertyMetadata(BoxValue.True));
+        public static readonly StyledProperty ActualSizeProperty = StyledProperty.Register(nameof(ActualSize), typeof(Size), typeof(GroupingNode), new StyledPropertyMetadata(BoxValue.Size, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnActualSizeChanged));
+        public static readonly StyledProperty MovementModeProperty = StyledProperty.Register(nameof(MovementMode), typeof(GroupingMovementMode), typeof(GroupingNode), new StyledPropertyMetadata(GroupMovementBoxed));
+        public static readonly StyledProperty ResizeCompletedCommandProperty = StyledProperty.Register(nameof(ResizeCompletedCommand), typeof(ICommand), typeof(GroupingNode));
+        public static readonly StyledProperty ResizeStartedCommandProperty = StyledProperty.Register(nameof(ResizeStartedCommand), typeof(ICommand), typeof(GroupingNode));
 
-        private static void OnActualSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnActualSizeChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var node = (GroupingNode)d;
             var newSize = (Size)e.NewValue;
@@ -153,19 +156,19 @@ namespace Nodify
         protected ItemContainer? Container { get; private set; }
 
         /// <summary>
-        /// Gets the <see cref="FrameworkElement"/> used to resize this <see cref="GroupingNode"/>.
+        /// Gets the <see cref="Control"/> used to resize this <see cref="GroupingNode"/>.
         /// </summary>
-        protected FrameworkElement? ResizeThumb;
+        protected Control? ResizeThumb;
 
         /// <summary>
         /// Gets the <see cref="HeaderedContentControl.Header"/> control of this <see cref="GroupingNode"/>.
         /// </summary>
-        protected FrameworkElement? HeaderControl;
+        protected Control? HeaderControl;
 
         /// <summary>
         /// Gets the <see cref="System.Windows.Controls.ContentControl"/> control of this <see cref="GroupingNode"/>.
         /// </summary>
-        protected FrameworkElement? ContentControl;
+        protected Control? ContentControl;
 
         private double _minHeight = 30;
         private double _minWidth = 30;
@@ -174,12 +177,12 @@ namespace Nodify
 
         static GroupingNode()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(GroupingNode), new FrameworkPropertyMetadata(typeof(GroupingNode)));
-            FocusableProperty.OverrideMetadata(typeof(GroupingNode), new FrameworkPropertyMetadata(BoxValue.False));
-            Panel.ZIndexProperty.OverrideMetadata(typeof(GroupingNode), new FrameworkPropertyMetadata(-1, OnZIndexPropertyChanged));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(GroupingNode), new StyledPropertyMetadata(typeof(GroupingNode)));
+            FocusableProperty.OverrideMetadata(typeof(GroupingNode), new StyledPropertyMetadata(BoxValue.False));
+            Panel.ZIndexProperty.OverrideMetadata(typeof(GroupingNode), new StyledPropertyMetadata(-1, OnZIndexPropertyChanged));
         }
 
-        private static void OnZIndexPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnZIndexPropertyChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var node = (GroupingNode)d;
             if (node.Container != null)
@@ -300,9 +303,9 @@ namespace Nodify
         {
             base.OnApplyTemplate();
 
-            ResizeThumb = Template.FindName(ElementResizeThumb, this) as FrameworkElement;
-            HeaderControl = Template.FindName(ElementHeader, this) as FrameworkElement;
-            ContentControl = Template.FindName(ElementContent, this) as FrameworkElement;
+            ResizeThumb = Template.FindName(ElementResizeThumb, this) as Control;
+            HeaderControl = Template.FindName(ElementHeader, this) as Control;
+            ContentControl = Template.FindName(ElementContent, this) as Control;
 
             Container = this.GetParentOfType<ItemContainer>();
             Editor = Container?.Editor ?? this.GetParentOfType<NodifyEditor>();

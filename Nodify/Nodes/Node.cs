@@ -1,9 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Metadata;
+using Avalonia.Controls;
+using Avalonia.Media;
 
 namespace Nodify
 {
@@ -22,20 +23,20 @@ namespace Nodify
 
         #region Dependency Properties
 
-        public static readonly DependencyProperty ContentBrushProperty = DependencyProperty.Register(nameof(ContentBrush), typeof(Brush), typeof(Node));
-        public static readonly DependencyProperty HeaderBrushProperty = DependencyProperty.Register(nameof(HeaderBrush), typeof(Brush), typeof(Node));
-        public static readonly DependencyProperty FooterBrushProperty = DependencyProperty.Register(nameof(FooterBrush), typeof(Brush), typeof(Node));
-        public static readonly DependencyProperty FooterProperty = DependencyProperty.Register(nameof(Footer), typeof(object), typeof(Node), new FrameworkPropertyMetadata(OnFooterChanged));
-        public static readonly DependencyProperty FooterTemplateProperty = DependencyProperty.Register(nameof(FooterTemplate), typeof(DataTemplate), typeof(Node));
-        public static readonly DependencyProperty InputConnectorTemplateProperty = DependencyProperty.Register(nameof(InputConnectorTemplate), typeof(DataTemplate), typeof(Node));
-        protected static readonly DependencyPropertyKey HasFooterPropertyKey = DependencyProperty.RegisterReadOnly(nameof(HasFooter), typeof(bool), typeof(Node), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty HasFooterProperty = HasFooterPropertyKey.DependencyProperty;
-        public static readonly DependencyProperty OutputConnectorTemplateProperty = DependencyProperty.Register(nameof(OutputConnectorTemplate), typeof(DataTemplate), typeof(Node));
-        public static readonly DependencyProperty InputProperty = DependencyProperty.Register(nameof(Input), typeof(IEnumerable), typeof(Node));
-        public static readonly DependencyProperty OutputProperty = DependencyProperty.Register(nameof(Output), typeof(IEnumerable), typeof(Node));
-        public static readonly DependencyProperty ContentContainerStyleProperty = DependencyProperty.Register(nameof(ContentContainerStyle), typeof(Style), typeof(Node));
-        public static readonly DependencyProperty HeaderContainerStyleProperty = DependencyProperty.Register(nameof(HeaderContainerStyle), typeof(Style), typeof(Node));
-        public static readonly DependencyProperty FooterContainerStyleProperty = DependencyProperty.Register(nameof(FooterContainerStyle), typeof(Style), typeof(Node));
+        public static readonly StyledProperty ContentBrushProperty = StyledProperty.Register(nameof(ContentBrush), typeof(Brush), typeof(Node));
+        public static readonly StyledProperty HeaderBrushProperty = StyledProperty.Register(nameof(HeaderBrush), typeof(Brush), typeof(Node));
+        public static readonly StyledProperty FooterBrushProperty = StyledProperty.Register(nameof(FooterBrush), typeof(Brush), typeof(Node));
+        public static readonly StyledProperty FooterProperty = StyledProperty.Register(nameof(Footer), typeof(object), typeof(Node), new StyledPropertyMetadata(OnFooterChanged));
+        public static readonly StyledProperty FooterTemplateProperty = StyledProperty.Register(nameof(FooterTemplate), typeof(DataTemplate), typeof(Node));
+        public static readonly StyledProperty InputConnectorTemplateProperty = StyledProperty.Register(nameof(InputConnectorTemplate), typeof(DataTemplate), typeof(Node));
+        protected static readonly StyledPropertyKey HasFooterPropertyKey = StyledProperty.RegisterReadOnly(nameof(HasFooter), typeof(bool), typeof(Node), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly StyledProperty HasFooterProperty = HasFooterPropertyKey.StyledProperty;
+        public static readonly StyledProperty OutputConnectorTemplateProperty = StyledProperty.Register(nameof(OutputConnectorTemplate), typeof(DataTemplate), typeof(Node));
+        public static readonly StyledProperty InputProperty = StyledProperty.Register(nameof(Input), typeof(IEnumerable), typeof(Node));
+        public static readonly StyledProperty OutputProperty = StyledProperty.Register(nameof(Output), typeof(IEnumerable), typeof(Node));
+        public static readonly StyledProperty ContentContainerStyleProperty = StyledProperty.Register(nameof(ContentContainerStyle), typeof(Style), typeof(Node));
+        public static readonly StyledProperty HeaderContainerStyleProperty = StyledProperty.Register(nameof(HeaderContainerStyle), typeof(Style), typeof(Node));
+        public static readonly StyledProperty FooterContainerStyleProperty = StyledProperty.Register(nameof(FooterContainerStyle), typeof(Style), typeof(Node));
 
         /// <summary>
         /// Gets or sets the brush used for the background of the <see cref="ContentControl.Content"/> of this <see cref="Node"/>.
@@ -150,7 +151,7 @@ namespace Nodify
         /// </summary>
         public bool HasFooter => (bool)GetValue(HasFooterProperty);
 
-        private static void OnFooterChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnFooterChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             Node node = (Node)d;
             node.SetValue(HasFooterPropertyKey, e.NewValue != null ? BoxValue.True : BoxValue.False);
@@ -168,8 +169,8 @@ namespace Nodify
 
         static Node()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(Node), new FrameworkPropertyMetadata(typeof(Node)));
-            FocusableProperty.OverrideMetadata(typeof(Node), new FrameworkPropertyMetadata(BoxValue.False));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(Node), new StyledPropertyMetadata(typeof(Node)));
+            FocusableProperty.OverrideMetadata(typeof(Node), new StyledPropertyMetadata(BoxValue.False));
         }
 
         public Node()

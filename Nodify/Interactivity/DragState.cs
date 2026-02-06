@@ -1,5 +1,6 @@
-﻿using System.Windows;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Interactivity;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {
@@ -7,9 +8,9 @@ namespace Nodify.Interactivity
     /// Represents an abstract base class for managing drag interactions within a UI element.
     /// Provides a framework for handling input gestures such as starting, canceling, and completing drag interactions.
     /// </summary>
-    /// <typeparam name="TElement">The type of <see cref="FrameworkElement"/> that owns the state.</typeparam>
+    /// <typeparam name="TElement">The type of <see cref="Visual"/> that owns the state.</typeparam>
     public abstract class DragState<TElement> : InputElementState<TElement>, IInputHandler
-        where TElement : FrameworkElement
+        where TElement : Visual
     {
         private enum InteractionState
         {
@@ -46,12 +47,12 @@ namespace Nodify.Interactivity
         protected virtual bool HasContextMenu => Element.ContextMenu != null;
 
         /// <summary>
-        /// Determines if the drag interaction can begin (see <see cref="OnBegin(InputEventArgs)"/>).
+        /// Determines if the drag interaction can begin (see <see cref="OnBegin(RoutedEventArgs)"/>).
         /// </summary>
         protected virtual bool CanBegin { get; } = true;
 
         /// <summary>
-        /// Determines if the drag interaction can be canceled (see <see cref="OnCancel(InputEventArgs)"/>).
+        /// Determines if the drag interaction can be canceled (see <see cref="OnCancel(RoutedEventArgs)"/>).
         /// </summary>
         protected virtual bool CanCancel { get; } = true;
 
@@ -91,7 +92,7 @@ namespace Nodify.Interactivity
             CancelGesture = cancelGesture;
         }
 
-        void IInputHandler.HandleEvent(InputEventArgs e)
+        void IInputHandler.HandleEvent(RoutedEventArgs e)
         {
             if (_interactionState == InteractionState.Ready && TryBeginDragging(e))
             {
@@ -117,7 +118,7 @@ namespace Nodify.Interactivity
         #region Interaction logic
 
         // Begin the interaction on gesture press
-        private bool TryBeginDragging(InputEventArgs e)
+        private bool TryBeginDragging(RoutedEventArgs e)
         {
             if (IsInputEventPressed(e) && CanBegin && BeginGesture.Matches(e.Source, e))
             {
@@ -128,7 +129,7 @@ namespace Nodify.Interactivity
             return false;
         }
 
-        private bool TryEndDragging(InputEventArgs e)
+        private bool TryEndDragging(RoutedEventArgs e)
         {
             if (IsInputCaptureLost(e))
             {
@@ -145,7 +146,7 @@ namespace Nodify.Interactivity
         }
 
         // Delay ending toggle interaction until the gesture is released
-        private bool TryDeferToggleInteractionEnd(InputEventArgs e)
+        private bool TryDeferToggleInteractionEnd(RoutedEventArgs e)
         {
             if (IsInputEventPressed(e) && BeginGesture.Matches(e.Source, e))
             {
@@ -158,7 +159,7 @@ namespace Nodify.Interactivity
         }
 
         // End the interaction on gesture release
-        private bool TryEndInteraction(InputEventArgs e)
+        private bool TryEndInteraction(RoutedEventArgs e)
         {
             if (IsInputEventReleased(e) && BeginGesture.Matches(e.Source, e))
             {
@@ -170,7 +171,7 @@ namespace Nodify.Interactivity
         }
 
         // Cancel the interaction
-        private bool TryCancelDragging(InputEventArgs e)
+        private bool TryCancelDragging(RoutedEventArgs e)
         {
             if (CanCancel && IsInputEventReleased(e) && CancelGesture?.Matches(e.Source, e) is true)
             {
@@ -182,7 +183,7 @@ namespace Nodify.Interactivity
         }
 
         // Suppress the context menu if a toggle interaction is in progress
-        private bool TrySuppressContextMenu(InputEventArgs e)
+        private bool TrySuppressContextMenu(RoutedEventArgs e)
         {
             if (IsToggle && e is MouseButtonEventArgs mbe && mbe.ChangedButton == MouseButton.Right)
             {
@@ -194,7 +195,7 @@ namespace Nodify.Interactivity
             return false;
         }
 
-        private void TryHandleEvent(InputEventArgs e)
+        private void TryHandleEvent(RoutedEventArgs e)
         {
             if (_interactionState == InteractionState.InProgress || _interactionState == InteractionState.Ending)
             {
@@ -202,7 +203,7 @@ namespace Nodify.Interactivity
             }
         }
 
-        internal void BeginDrag(InputEventArgs e)
+        internal void BeginDrag(RoutedEventArgs e)
         {
             // Avoid stealing mouse capture from other elements
             if (CanCaptureInput(e))
@@ -222,7 +223,7 @@ namespace Nodify.Interactivity
             }
         }
 
-        private void EndDrag(InputEventArgs e)
+        private void EndDrag(RoutedEventArgs e)
         {
             _interactionState = InteractionState.Ready;
             HandleEvent(e);
@@ -252,7 +253,7 @@ namespace Nodify.Interactivity
             RequiresInputCapture = false;
         }
 
-        private void CancelDrag(InputEventArgs e)
+        private void CancelDrag(RoutedEventArgs e)
         {
             _interactionState = InteractionState.Ready;
             HandleEvent(e);
@@ -267,13 +268,13 @@ namespace Nodify.Interactivity
         /// <summary>
         /// Retrieves the initial position of the input event relative to the <see cref="PositionElement"/>.
         /// </summary>
-        /// <param name="e">The <see cref="InputEventArgs"/> representing the input event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> representing the input event.</param>
         /// <remarks>
         /// This position is used to calculate the drag distance, to determine whether 
         /// the context menu can appear or if the action is considered a drag operation. The behavior is influenced 
         /// by the <see cref="NodifyEditor.MouseActionSuppressionThreshold"/>.
         /// </remarks>
-        protected virtual Point GetInitialPosition(InputEventArgs e)
+        protected virtual Point GetInitialPosition(RoutedEventArgs e)
         {
             if (e is MouseEventArgs me)
             {
@@ -286,31 +287,31 @@ namespace Nodify.Interactivity
         /// <summary>
         /// Determines whether input capture can be acquired for the <see cref="InputElementState{TElement}.Element" />.
         /// </summary>
-        /// <param name="e">The <see cref="InputEventArgs"/> representing the input event.</param>
+        /// <param name="e">The <see cref="RoutedEventArgs"/> representing the input event.</param>
         /// <remarks>Must return true if the input is already captured by the current element.</remarks>
-        protected virtual bool CanCaptureInput(InputEventArgs e)
+        protected virtual bool CanCaptureInput(RoutedEventArgs e)
             => Mouse.Captured == null || Element.IsMouseCaptured;
 
         /// <summary>
         /// Captures input for the element.
         /// </summary>
-        /// <param name="e">The <see cref="InputEventArgs"/> representing the input event.</param>
-        protected virtual void CaptureInput(InputEventArgs e)
+        /// <param name="e">The <see cref="RoutedEventArgs"/> representing the input event.</param>
+        protected virtual void CaptureInput(RoutedEventArgs e)
             => Element.CaptureMouse();
 
         /// <summary>
         /// Determines whether input capture has been lost.
         /// </summary>
-        /// <param name="e">The <see cref="InputEventArgs"/> representing the input event.</param>
-        protected virtual bool IsInputCaptureLost(InputEventArgs e)
-            => e.RoutedEvent == UIElement.LostMouseCaptureEvent;
+        /// <param name="e">The <see cref="RoutedEventArgs"/> representing the input event.</param>
+        protected virtual bool IsInputCaptureLost(RoutedEventArgs e)
+            => e.RoutedEvent == Control.LostMouseCaptureEvent;
 
         /// <summary>
         /// Determines if the given input event represents the release of an input gesture.
         /// </summary>
         /// <param name="e">The input event to evaluate.</param>
         /// <returns>True if the event represents the release of a gesture; otherwise, false.</returns>
-        protected virtual bool IsInputEventReleased(InputEventArgs e)
+        protected virtual bool IsInputEventReleased(RoutedEventArgs e)
         {
             if (e is MouseButtonEventArgs mbe && mbe.ButtonState == MouseButtonState.Released)
                 return true;
@@ -329,7 +330,7 @@ namespace Nodify.Interactivity
         /// </summary>
         /// <param name="e">The input event to evaluate.</param>
         /// <returns>True if the event represents the press of a gesture; otherwise, false.</returns>
-        protected virtual bool IsInputEventPressed(InputEventArgs e)
+        protected virtual bool IsInputEventPressed(RoutedEventArgs e)
         {
             if (e is MouseButtonEventArgs mbe && mbe.ButtonState == MouseButtonState.Pressed)
                 return true;
@@ -347,7 +348,7 @@ namespace Nodify.Interactivity
         /// Called when the drag interaction begins. Override to provide custom behavior.
         /// </summary>
         /// <param name="e">The input event that started the interaction.</param>
-        protected virtual void OnBegin(InputEventArgs e)
+        protected virtual void OnBegin(RoutedEventArgs e)
         {
         }
 
@@ -355,7 +356,7 @@ namespace Nodify.Interactivity
         /// Called when the drag interaction ends. Override to provide custom behavior.
         /// </summary>
         /// <param name="e">The input event that ended the interaction.</param>
-        protected virtual void OnEnd(InputEventArgs e)
+        protected virtual void OnEnd(RoutedEventArgs e)
         {
         }
 
@@ -363,7 +364,7 @@ namespace Nodify.Interactivity
         /// Called when the drag interaction is canceled. Override to provide custom behavior.
         /// </summary>
         /// <param name="e">The input event that canceled the interaction.</param>
-        protected virtual void OnCancel(InputEventArgs e)
+        protected virtual void OnCancel(RoutedEventArgs e)
         {
         }
     }

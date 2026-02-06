@@ -1,20 +1,24 @@
-﻿using System;
+using System;
 using System.Globalization;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 
 namespace Nodify
 {
     internal sealed class UnscaleTransformConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            Transform result = (Transform)((TransformGroup)value).Children[0].Inverse;
-            return result;
+            if (value is TransformGroup group && group.Children.Count > 0)
+            {
+                var inverse = group.Children[0].Value.Invert();
+                return new MatrixTransform(inverse);
+            }
+            return null;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             return value;
         }
@@ -22,29 +26,25 @@ namespace Nodify
 
     internal sealed class ScaleDoubleConverter : IMultiValueConverter
     {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            double result = (double)values[0] * (double)values[1];
-            return result;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
+            if (values.Count >= 2 && values[0] is double d1 && values[1] is double d2)
+            {
+                return d1 * d2;
+            }
+            return 0.0;
         }
     }
 
     internal sealed class ScalePointConverter : IMultiValueConverter
     {
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {
-            Point result = (Point)((Vector)(Point)values[0] * (double)values[1]);
-            return result;
-        }
-
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
+            if (values.Count >= 2 && values[0] is Point p && values[1] is double scale)
+            {
+                return new Point(p.X * scale, p.Y * scale);
+            }
+            return new Point();
         }
     }
 }

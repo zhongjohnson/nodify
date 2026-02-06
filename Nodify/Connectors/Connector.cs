@@ -1,9 +1,14 @@
-﻿using Nodify.Events;
+using System;
+using Nodify.Events;
 using Nodify.Interactivity;
 using System.Diagnostics;
-using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Controls.Primitives;
+using Avalonia.Metadata;
 using System.Windows.Input;
+using Avalonia.Interactivity;
+using Avalonia.Controls;
+using Avalonia.Input;
 
 namespace Nodify
 {
@@ -11,27 +16,34 @@ namespace Nodify
     /// Represents a connector control that can start and complete a <see cref="PendingConnection"/>.
     /// Has a <see cref="ElementConnector"/> that the <see cref="Anchor"/> is calculated from for the <see cref="PendingConnection"/>. Center of this control is used if missing.
     /// </summary>
-    [TemplatePart(Name = ElementConnector, Type = typeof(FrameworkElement))]
+    [TemplatePart(Name = ElementConnector, Type = typeof(Control))]
     public class Connector : Control
     {
         protected const string ElementConnector = "PART_Connector";
 
         #region Routed Events
 
-        public static readonly RoutedEvent PendingConnectionStartedEvent = EventManager.RegisterRoutedEvent(nameof(PendingConnectionStarted), RoutingStrategy.Bubble, typeof(PendingConnectionEventHandler), typeof(Connector));
-        public static readonly RoutedEvent PendingConnectionCompletedEvent = EventManager.RegisterRoutedEvent(nameof(PendingConnectionCompleted), RoutingStrategy.Bubble, typeof(PendingConnectionEventHandler), typeof(Connector));
-        public static readonly RoutedEvent PendingConnectionDragEvent = EventManager.RegisterRoutedEvent(nameof(PendingConnectionDrag), RoutingStrategy.Bubble, typeof(PendingConnectionEventHandler), typeof(Connector));
-        public static readonly RoutedEvent DisconnectEvent = EventManager.RegisterRoutedEvent(nameof(Disconnect), RoutingStrategy.Bubble, typeof(ConnectorEventHandler), typeof(Connector));
+        public static readonly RoutedEvent<PendingConnectionEventArgs> PendingConnectionStartedEvent =
+            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionStarted), RoutingStrategy.Bubble);
+
+        public static readonly RoutedEvent<PendingConnectionEventArgs> PendingConnectionCompletedEvent =
+            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionCompleted), RoutingStrategy.Bubble);
+
+        public static readonly RoutedEvent<PendingConnectionEventArgs> PendingConnectionDragEvent =
+            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionDrag), RoutingStrategy.Bubble);
+
+        public static readonly RoutedEvent<ConnectorEventArgs> DisconnectEvent =
+            RoutedEvent.Register<Connector, ConnectorEventArgs>(nameof(Disconnect), RoutingStrategy.Bubble);
 
         /// <summary>Triggered by the <see cref="EditorGestures.ConnectorGestures.Connect"/> gesture.</summary>
-        public event PendingConnectionEventHandler PendingConnectionStarted
+        public event EventHandler<PendingConnectionEventArgs> PendingConnectionStarted
         {
             add => AddHandler(PendingConnectionStartedEvent, value);
             remove => RemoveHandler(PendingConnectionStartedEvent, value);
         }
 
         /// <summary>Triggered by the <see cref="EditorGestures.ConnectorGestures.Connect"/> gesture.</summary>
-        public event PendingConnectionEventHandler PendingConnectionCompleted
+        public event EventHandler<PendingConnectionEventArgs> PendingConnectionCompleted
         {
             add => AddHandler(PendingConnectionCompletedEvent, value);
             remove => RemoveHandler(PendingConnectionCompletedEvent, value);
@@ -40,14 +52,14 @@ namespace Nodify
         /// <summary>
         /// Occurs when the mouse is changing position and the <see cref="Connector"/> has mouse capture.
         /// </summary>
-        public event PendingConnectionEventHandler PendingConnectionDrag
+        public event EventHandler<PendingConnectionEventArgs> PendingConnectionDrag
         {
             add => AddHandler(PendingConnectionDragEvent, value);
             remove => RemoveHandler(PendingConnectionDragEvent, value);
         }
 
         /// <summary>Triggered by the <see cref="EditorGestures.ConnectorGestures.Disconnect"/> gesture.</summary>
-        public event ConnectorEventHandler Disconnect
+        public event EventHandler<ConnectorEventArgs> Disconnect
         {
             add => AddHandler(DisconnectEvent, value);
             remove => RemoveHandler(DisconnectEvent, value);
@@ -55,22 +67,33 @@ namespace Nodify
 
         #endregion
 
-        #region Dependency Properties
+        #region Avalonia Properties
 
-        public static readonly DependencyProperty AnchorProperty = DependencyProperty.Register(nameof(Anchor), typeof(Point), typeof(Connector), new FrameworkPropertyMetadata(BoxValue.Point));
-        public static readonly DependencyProperty IsConnectedProperty = DependencyProperty.Register(nameof(IsConnected), typeof(bool), typeof(Connector), new FrameworkPropertyMetadata(BoxValue.False, OnIsConnectedChanged));
-        public static readonly DependencyProperty DisconnectCommandProperty = DependencyProperty.Register(nameof(DisconnectCommand), typeof(ICommand), typeof(Connector));
-        private static readonly DependencyPropertyKey IsPendingConnectionPropertyKey = DependencyProperty.RegisterReadOnly(nameof(IsPendingConnection), typeof(bool), typeof(Connector), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty IsPendingConnectionProperty = IsPendingConnectionPropertyKey.DependencyProperty;
-        public static readonly DependencyProperty HasCustomContextMenuProperty = NodifyEditor.HasCustomContextMenuProperty.AddOwner(typeof(Connector));
+        public static readonly StyledProperty<Point> AnchorProperty =
+            AvaloniaProperty.Register<Connector, Point>(nameof(Anchor), defaultValue: default(Point));
+
+        public static readonly StyledProperty<bool> IsConnectedProperty =
+            AvaloniaProperty.Register<Connector, bool>(nameof(IsConnected), defaultValue: false);
+
+        public static readonly StyledProperty<ICommand?> DisconnectCommandProperty =
+            AvaloniaProperty.Register<Connector, ICommand?>(nameof(DisconnectCommand));
+
+        public static readonly DirectProperty<Connector, bool> IsPendingConnectionProperty =
+            AvaloniaProperty.RegisterDirect<Connector, bool>(
+                nameof(IsPendingConnection),
+                o => o.IsPendingConnection,
+                (o, v) => o.IsPendingConnection = v);
+
+        public static readonly StyledProperty<bool> HasCustomContextMenuProperty =
+            AvaloniaProperty.Register<Connector, bool>(nameof(HasCustomContextMenu), defaultValue: false);
 
         /// <summary>
         /// Gets the location in graph space coordinates where <see cref="Connection"/>s can be attached to. 
-        /// Bind with <see cref="System.Windows.Data.BindingMode.OneWayToSource"/>
+        /// Bind with <see cref="Avalonia.Data.BindingMode.OneWayToSource"/>
         /// </summary>
         public Point Anchor
         {
-            get => (Point)GetValue(AnchorProperty);
+            get => GetValue(AnchorProperty);
             set => SetValue(AnchorProperty, value);
         }
 
@@ -79,26 +102,27 @@ namespace Nodify
         /// </summary>
         public bool IsConnected
         {
-            get => (bool)GetValue(IsConnectedProperty);
+            get => GetValue(IsConnectedProperty);
             set => SetValue(IsConnectedProperty, value);
         }
 
+        private bool _isPendingConnection;
         /// <summary>
         /// Gets a value that indicates whether a <see cref="PendingConnection"/> is in progress for this <see cref="Connector"/>.
         /// </summary>
         public bool IsPendingConnection
         {
-            get => (bool)GetValue(IsPendingConnectionProperty);
-            protected set => SetValue(IsPendingConnectionPropertyKey, value);
+            get => _isPendingConnection;
+            protected set => SetAndRaise(IsPendingConnectionProperty, ref _isPendingConnection, value);
         }
 
         /// <summary>
         /// Invoked if the <see cref="Disconnect"/> event is not handled.
-        /// Parameter is the <see cref="FrameworkElement.DataContext"/> of this control.
+        /// Parameter is the <see cref="Control.DataContext"/> of this control.
         /// </summary>
         public ICommand? DisconnectCommand
         {
-            get => (ICommand?)GetValue(DisconnectCommandProperty);
+            get => GetValue(DisconnectCommandProperty);
             set => SetValue(DisconnectCommandProperty, value);
         }
 
@@ -108,7 +132,7 @@ namespace Nodify
         /// <remarks>When set to true, the connector handles the right-click event for specific interactions.</remarks>
         public bool HasCustomContextMenu
         {
-            get => (bool)GetValue(HasCustomContextMenuProperty);
+            get => GetValue(HasCustomContextMenuProperty);
             set => SetValue(HasCustomContextMenuProperty, value);
         }
 
@@ -121,11 +145,11 @@ namespace Nodify
 
         #region Fields
 
-        private FrameworkElement? _thumb;
+        private Control? _thumb;
         /// <summary>
-        /// Gets the <see cref="FrameworkElement"/> used to calculate the <see cref="Anchor"/>.
+        /// Gets the <see cref="Control"/> used to calculate the <see cref="Anchor"/>.
         /// </summary>
-        protected internal FrameworkElement Thumb => _thumb ??= Template.FindName(ElementConnector, this) as FrameworkElement ?? this;
+        protected internal Control Thumb => _thumb ?? this;
 
         /// <summary>
         /// Gets the <see cref="ItemContainer"/> that contains this <see cref="Connector"/>.
@@ -165,8 +189,13 @@ namespace Nodify
 
         static Connector()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(Connector), new FrameworkPropertyMetadata(typeof(Connector)));
-            FocusableProperty.OverrideMetadata(typeof(Connector), new FrameworkPropertyMetadata(BoxValue.True));
+            IsConnectedProperty.Changed.AddClassHandler<Connector>((x, e) => x.OnIsConnectedChanged(e));
+            FocusableProperty.OverrideDefaultValue<Connector>(true);
+        }
+
+        private void OnIsConnectedChanged(AvaloniaPropertyChangedEventArgs e)
+        {
+            UpdateAnchor();
         }
 
         public Connector()
@@ -178,9 +207,12 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
+
+            // Find the PART_Connector from template
+            _thumb = e.NameScope.Find<Control>(ElementConnector);
 
             Container = this.GetParentOfType<ItemContainer>();
             Editor = Container?.Editor ?? this.GetParentOfType<NodifyEditor>();
@@ -223,7 +255,7 @@ namespace Nodify
         private void OnConnectorUnloaded(object sender, RoutedEventArgs e)
             => TrySetAnchorUpdateEvents(false);
 
-        private static void OnIsConnectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnIsConnectedChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
         {
             var con = (Connector)d;
 
@@ -482,7 +514,7 @@ namespace Nodify
                 return;
             }
 
-            FrameworkElement? elem = FindConnectionTarget(_pendingConnectionEndPosition);
+            Control? elem = FindConnectionTarget(_pendingConnectionEndPosition);
             EndConnecting(elem?.DataContext);
         }
 
@@ -573,7 +605,7 @@ namespace Nodify
         /// Searches for a potential <see cref="Connector"/> or <see cref="ItemContainer"/> at the specified position within the editor.
         /// </summary>
         /// <param name="position">The position in the editor to check for a potential connection target.</param>
-        public FrameworkElement? FindConnectionTarget(Point position)
+        public Control? FindConnectionTarget(Point position)
         {
             if (Editor != null)
             {

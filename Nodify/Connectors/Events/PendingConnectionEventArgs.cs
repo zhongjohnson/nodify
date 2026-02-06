@@ -1,5 +1,6 @@
-﻿using System;
-using System.Windows;
+using System;
+using Avalonia;
+using Avalonia.Interactivity;
 
 namespace Nodify.Events
 {
@@ -18,7 +19,7 @@ namespace Nodify.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="PendingConnectionEventArgs"/> class using the specified <see cref="SourceConnector"/>.
         /// </summary>
-        /// <param name="sourceConnector">The <see cref="FrameworkElement.DataContext"/> of a related <see cref="Connector"/>.</param>
+        /// <param name="sourceConnector">The <see cref="Control.DataContext"/> of a related <see cref="Connector"/>.</param>
         public PendingConnectionEventArgs(object sourceConnector)
             => SourceConnector = sourceConnector;
         
@@ -28,12 +29,12 @@ namespace Nodify.Events
         public Point Anchor { get; set; }
         
         /// <summary>
-        /// Gets the <see cref="FrameworkElement.DataContext"/> of the <see cref="Connector"/> that started this <see cref="PendingConnection"/>.
+        /// Gets the <see cref="Control.DataContext"/> of the <see cref="Connector"/> that started this <see cref="PendingConnection"/>.
         /// </summary>
         public object SourceConnector { get; }
         
         /// <summary>
-        /// Gets or sets the <see cref="FrameworkElement.DataContext"/> of the target <see cref="Connector"/> when the <see cref="PendingConnection"/> is completed.
+        /// Gets or sets the <see cref="Control.DataContext"/> of the target <see cref="Connector"/> when the <see cref="PendingConnection"/> is completed.
         /// </summary>
         public object? TargetConnector { get; set; }
 
@@ -51,8 +52,5 @@ namespace Nodify.Events
         /// Gets or sets a value that indicates whether this <see cref="PendingConnection"/> was cancelled.
         /// </summary>
         public bool Canceled { get; set; }
-
-        protected override void InvokeEventHandler(Delegate genericHandler, object genericTarget)
-            => ((PendingConnectionEventHandler)genericHandler)(genericTarget, this);
     }
 }

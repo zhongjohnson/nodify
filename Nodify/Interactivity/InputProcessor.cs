@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Windows.Input;
+using System.Collections.Generic;
+using Avalonia.Input;
 
 namespace Nodify.Interactivity
 {

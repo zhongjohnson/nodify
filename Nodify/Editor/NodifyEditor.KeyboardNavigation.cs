@@ -1,9 +1,9 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
-using System.Windows;
+using Avalonia.Input;
+using Avalonia;
 using System.Collections;
 using System.Diagnostics;
 
@@ -51,7 +51,7 @@ namespace Nodify
         public IKeyboardNavigationLayer KeyboardNavigationLayer => this;
 
         KeyboardNavigationLayerId IKeyboardNavigationLayer.Id => KeyboardNavigationLayerId.Nodes;
-        IKeyboardFocusTarget<UIElement>? IKeyboardNavigationLayer.LastFocusedElement => _focusNavigator.LastFocusedElement;
+        IKeyboardFocusTarget<Control>? IKeyboardNavigationLayer.LastFocusedElement => _focusNavigator.LastFocusedElement;
 
         int IReadOnlyCollection<IKeyboardNavigationLayer>.Count => _navigationLayers.Count;
 
@@ -83,7 +83,7 @@ namespace Nodify
                 containerToFocus = FindNextFocusTarget(focusedContainer, request);
             }
             // The current element is not a nested editor, but a focusable element inside an ItemContainer
-            else if (currentElement is UIElement elem && elem != this && elem.GetParentOfType<ItemContainer>() is ItemContainer parentContainer)
+            else if (currentElement is Control elem && elem != this && elem.GetParentOfType<ItemContainer>() is ItemContainer parentContainer)
             {
                 containerToFocus = parentContainer;
             }
@@ -135,10 +135,10 @@ namespace Nodify
 
             // When any focusable elements inside the editor - that are most likely inside containers (textbox, checkbox etc) - lose focus,
             // and the focus goes outside the editor, we must focus its container first, otherwise focus the editor (don't allow focus to escape)
-            if (isKeyboardInitiated && e.OldFocus is DependencyObject oldFocus && !IsNavigationTrigger(oldFocus) && IsAncestorOf(oldFocus) && (e.NewFocus is DependencyObject newFocus && !IsAncestorOf(newFocus)))
+            if (isKeyboardInitiated && e.OldFocus is AvaloniaObject oldFocus && !IsNavigationTrigger(oldFocus) && IsAncestorOf(oldFocus) && (e.NewFocus is AvaloniaObject newFocus && !IsAncestorOf(newFocus)))
             {
                 var container = oldFocus.GetParent(IsNavigationTrigger);
-                if (container is UIElement elem && elem.Focus())
+                if (container is Control elem && elem.Focus())
                 {
                     e.Handled = true;
                 }
@@ -155,7 +155,7 @@ namespace Nodify
 
             if (isKeyboardInitiated && ActiveNavigationLayer != null)
             {
-                bool isFocusComingFromOutside = e.OldFocus is null || e.OldFocus is DependencyObject dpo && !IsAncestorOf(dpo);
+                bool isFocusComingFromOutside = e.OldFocus is null || e.OldFocus is AvaloniaObject dpo && !IsAncestorOf(dpo);
 
                 if (isFocusComingFromOutside && ActiveNavigationLayer.TryRestoreFocus())
                 {
@@ -168,7 +168,7 @@ namespace Nodify
             }
         }
 
-        protected internal virtual bool IsNavigationTrigger(DependencyObject? dp)
+        protected internal virtual bool IsNavigationTrigger(AvaloniaObject? dp)
         {
             return dp is NodifyEditor || dp is ItemContainer || dp is ConnectionContainer || dp is DecoratorContainer;
         }
