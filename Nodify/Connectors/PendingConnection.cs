@@ -87,6 +87,7 @@ namespace Nodify
         private static void OnAllowOnlyConnectorsChanged(PendingConnection connection, AvaloniaPropertyChangedEventArgs e)
         {
             connection.InvalidateHitTest();
+            OnAllowOnlyConnectorsChangedInternal(connection, e);
         }
 
         static PendingConnection()
@@ -220,31 +221,34 @@ namespace Nodify
 
         #region Attached Properties
 
-        private static readonly StyledProperty AllowOnlyConnectorsAttachedProperty = StyledProperty.RegisterAttached("AllowOnlyConnectorsAttached", typeof(bool), typeof(PendingConnection), new StyledPropertyMetadata(BoxValue.True));
+        private static readonly AttachedProperty<bool> AllowOnlyConnectorsAttachedProperty =
+            AvaloniaProperty.RegisterAttached<PendingConnection, Control, bool>("AllowOnlyConnectorsAttached", defaultValue: true);
+
         /// <summary>
         /// Will be set for <see cref="Connector"/>s and <see cref="ItemContainer"/>s when the pending connection is over the element if <see cref="EnablePreview"/> or <see cref="EnableSnapping"/> is true.
         /// </summary>
-        public static readonly StyledProperty IsOverElementProperty = StyledProperty.RegisterAttached("IsOverElement", typeof(bool), typeof(PendingConnection), new StyledPropertyMetadata(BoxValue.False));
+        public static readonly AttachedProperty<bool> IsOverElementProperty =
+            AvaloniaProperty.RegisterAttached<PendingConnection, Control, bool>("IsOverElement", defaultValue: false);
 
         internal static bool GetAllowOnlyConnectorsAttached(Control elem)
-            => (bool)elem.GetValue(AllowOnlyConnectorsAttachedProperty);
+            => elem.GetValue(AllowOnlyConnectorsAttachedProperty);
 
         internal static void SetAllowOnlyConnectorsAttached(Control elem, bool value)
             => elem.SetValue(AllowOnlyConnectorsAttachedProperty, value);
 
         public static bool GetIsOverElement(Control elem)
-            => (bool)elem.GetValue(IsOverElementProperty);
+            => elem.GetValue(IsOverElementProperty);
 
         public static void SetIsOverElement(Control elem, bool value)
             => elem.SetValue(IsOverElementProperty, value);
 
-        private static void OnAllowOnlyConnectorsChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnAllowOnlyConnectorsChangedInternal(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
         {
             NodifyEditor? editor = ((PendingConnection)d).Editor;
 
             if (editor != null)
             {
-                SetAllowOnlyConnectorsAttached(editor, (bool)e.NewValue);
+                SetAllowOnlyConnectorsAttached(editor, (bool)e.NewValue!);
             }
         }
 
@@ -252,8 +256,11 @@ namespace Nodify
 
         #region Commands
 
-        public static readonly StyledProperty StartedCommandProperty = StyledProperty.Register(nameof(StartedCommand), typeof(ICommand), typeof(PendingConnection));
-        public static readonly StyledProperty CompletedCommandProperty = StyledProperty.Register(nameof(CompletedCommand), typeof(ICommand), typeof(PendingConnection));
+        public static readonly StyledProperty<ICommand?> StartedCommandProperty =
+            AvaloniaProperty.Register<PendingConnection, ICommand?>(nameof(StartedCommand));
+
+        public static readonly StyledProperty<ICommand?> CompletedCommandProperty =
+            AvaloniaProperty.Register<PendingConnection, ICommand?>(nameof(CompletedCommand));
 
         /// <summary>
         /// Gets or sets the command to invoke when the pending connection is started.
@@ -262,7 +269,7 @@ namespace Nodify
         /// </summary>
         public ICommand? StartedCommand
         {
-            get => (ICommand?)GetValue(StartedCommandProperty);
+            get => GetValue(StartedCommandProperty);
             set => SetValue(StartedCommandProperty, value);
         }
 
@@ -273,7 +280,7 @@ namespace Nodify
         /// </summary>
         public ICommand? CompletedCommand
         {
-            get => (ICommand?)GetValue(CompletedCommandProperty);
+            get => GetValue(CompletedCommandProperty);
             set => SetValue(CompletedCommandProperty, value);
         }
 

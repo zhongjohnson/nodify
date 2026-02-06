@@ -1,9 +1,9 @@
 using Nodify.Events;
 using Nodify.Interactivity;
+using System;
 using Avalonia;
 using Avalonia.Interactivity;
 using Avalonia.Controls;
-using System.Windows.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Media;
 
@@ -14,26 +14,54 @@ namespace Nodify
     /// </summary>
     public class ItemContainer : ContentControl, INodifyCanvasItem, IKeyboardFocusTarget<ItemContainer>
     {
-        #region Dependency Properties
+        #region Avalonia Properties
 
-        public static readonly StyledProperty HighlightBrushProperty = StyledProperty.Register(nameof(HighlightBrush), typeof(Brush), typeof(ItemContainer));
-        public static readonly StyledProperty SelectedBrushProperty = StyledProperty.Register(nameof(SelectedBrush), typeof(Brush), typeof(ItemContainer));
-        public static readonly StyledProperty SelectedBorderThicknessProperty = StyledProperty.Register(nameof(SelectedBorderThickness), typeof(Thickness), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.Thickness2));
-        public static readonly StyledProperty IsSelectableProperty = StyledProperty.Register(nameof(IsSelectable), typeof(bool), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.True));
-        public static readonly StyledProperty IsSelectedProperty = Selector.IsSelectedProperty.AddOwner(typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.False, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnIsSelectedChanged));
-        protected static readonly StyledPropertyKey IsPreviewingSelectionPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsPreviewingSelection), typeof(bool?), typeof(ItemContainer), new StyledPropertyMetadata(null));
-        public static readonly StyledProperty IsPreviewingSelectionProperty = IsPreviewingSelectionPropertyKey.StyledProperty;
-        public static readonly StyledProperty LocationProperty = StyledProperty.Register(nameof(Location), typeof(Point), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnLocationChanged));
-        public static readonly StyledProperty ActualSizeProperty = StyledProperty.Register(nameof(ActualSize), typeof(Size), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.Size));
-        public static readonly StyledProperty DesiredSizeForSelectionProperty = StyledProperty.Register(nameof(DesiredSizeForSelection), typeof(Size?), typeof(ItemContainer), new StyledPropertyMetadata(null, StyledPropertyMetadataOptions.NotDataBindable));
-        private static readonly StyledPropertyKey IsPreviewingLocationPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsPreviewingLocation), typeof(bool), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.False));
-        public static readonly StyledProperty IsPreviewingLocationProperty = IsPreviewingLocationPropertyKey.StyledProperty;
-        public static readonly StyledProperty IsDraggableProperty = StyledProperty.Register(nameof(IsDraggable), typeof(bool), typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.True));
-        public static readonly StyledProperty HasCustomContextMenuProperty = NodifyEditor.HasCustomContextMenuProperty.AddOwner(typeof(ItemContainer));
+        public static readonly StyledProperty<IBrush?> HighlightBrushProperty =
+            AvaloniaProperty.Register<ItemContainer, IBrush?>(nameof(HighlightBrush));
 
-        private static void OnLocationChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        public static readonly StyledProperty<IBrush?> SelectedBrushProperty =
+            AvaloniaProperty.Register<ItemContainer, IBrush?>(nameof(SelectedBrush));
+
+        public static readonly StyledProperty<Thickness> SelectedBorderThicknessProperty =
+            AvaloniaProperty.Register<ItemContainer, Thickness>(nameof(SelectedBorderThickness), defaultValue: new Thickness(2));
+
+        public static readonly StyledProperty<bool> IsSelectableProperty =
+            AvaloniaProperty.Register<ItemContainer, bool>(nameof(IsSelectable), defaultValue: true);
+
+        public static readonly StyledProperty<bool> IsSelectedProperty =
+            AvaloniaProperty.Register<ItemContainer, bool>(nameof(IsSelected), defaultValue: false, defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+
+        private bool? _isPreviewingSelection;
+        public static readonly DirectProperty<ItemContainer, bool?> IsPreviewingSelectionProperty =
+            AvaloniaProperty.RegisterDirect<ItemContainer, bool?>(
+                nameof(IsPreviewingSelection),
+                o => o.IsPreviewingSelection,
+                (o, v) => o.IsPreviewingSelection = v);
+
+        public static readonly StyledProperty<Point> LocationProperty =
+            AvaloniaProperty.Register<ItemContainer, Point>(nameof(Location), defaultValue: default(Point), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+
+        public static readonly StyledProperty<Size> ActualSizeProperty =
+            AvaloniaProperty.Register<ItemContainer, Size>(nameof(ActualSize), defaultValue: default(Size));
+
+        public static readonly StyledProperty<Size?> DesiredSizeForSelectionProperty =
+            AvaloniaProperty.Register<ItemContainer, Size?>(nameof(DesiredSizeForSelection));
+
+        private bool _isPreviewingLocation;
+        public static readonly DirectProperty<ItemContainer, bool> IsPreviewingLocationProperty =
+            AvaloniaProperty.RegisterDirect<ItemContainer, bool>(
+                nameof(IsPreviewingLocation),
+                o => o.IsPreviewingLocation,
+                (o, v) => o.IsPreviewingLocation = v);
+
+        public static readonly StyledProperty<bool> IsDraggableProperty =
+            AvaloniaProperty.Register<ItemContainer, bool>(nameof(IsDraggable), defaultValue: true);
+
+        public static readonly StyledProperty<bool> HasCustomContextMenuProperty =
+            AvaloniaProperty.Register<ItemContainer, bool>(nameof(HasCustomContextMenu), defaultValue: false);
+
+        private static void OnLocationChanged(ItemContainer item, AvaloniaPropertyChangedEventArgs e)
         {
-            var item = (ItemContainer)d;
             item.OnLocationChanged();
 
             if (item.Editor.IsLoaded && !item.Editor.IsBulkUpdatingItems)
@@ -42,21 +70,27 @@ namespace Nodify
             }
         }
 
+        private static void OnIsSelectedChanged(ItemContainer item, AvaloniaPropertyChangedEventArgs e)
+        {
+            var value = (bool)e.NewValue!;
+            item.OnSelectedChanged(value);
+        }
+
         /// <summary>
         /// Gets or sets the brush used when the <see cref="PendingConnection.IsOverElementProperty"/> attached property is true for this <see cref="ItemContainer"/>.
         /// </summary>
-        public Brush HighlightBrush
+        public IBrush? HighlightBrush
         {
-            get => (Brush)GetValue(HighlightBrushProperty);
+            get => GetValue(HighlightBrushProperty);
             set => SetValue(HighlightBrushProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the brush used when <see cref="IsSelected"/> or <see cref="IsPreviewingSelection"/> is true.
         /// </summary>
-        public Brush SelectedBrush
+        public IBrush? SelectedBrush
         {
-            get => (Brush)GetValue(SelectedBrushProperty);
+            get => GetValue(SelectedBrushProperty);
             set => SetValue(SelectedBrushProperty, value);
         }
 
@@ -65,7 +99,7 @@ namespace Nodify
         /// </summary>
         public Thickness SelectedBorderThickness
         {
-            get => (Thickness)GetValue(SelectedBorderThicknessProperty);
+            get => GetValue(SelectedBorderThicknessProperty);
             set => SetValue(SelectedBorderThicknessProperty, value);
         }
 
@@ -74,7 +108,7 @@ namespace Nodify
         /// </summary>
         public Point Location
         {
-            get => (Point)GetValue(LocationProperty);
+            get => GetValue(LocationProperty);
             set => SetValue(LocationProperty, value);
         }
 
@@ -84,7 +118,7 @@ namespace Nodify
         /// </summary>
         public bool IsSelected
         {
-            get => (bool)GetValue(IsSelectedProperty);
+            get => GetValue(IsSelectedProperty);
             set => SetValue(IsSelectedProperty, value);
         }
 
@@ -93,8 +127,8 @@ namespace Nodify
         /// </summary>
         public bool? IsPreviewingSelection
         {
-            get => (bool?)GetValue(IsPreviewingSelectionProperty);
-            internal set => SetValue(IsPreviewingSelectionPropertyKey, value);
+            get => _isPreviewingSelection;
+            internal set => SetAndRaise(IsPreviewingSelectionProperty, ref _isPreviewingSelection, value);
         }
 
         /// <summary>
@@ -102,7 +136,7 @@ namespace Nodify
         /// </summary>
         public bool IsSelectable
         {
-            get => (bool)GetValue(IsSelectableProperty);
+            get => GetValue(IsSelectableProperty);
             set => SetValue(IsSelectableProperty, value);
         }
 
@@ -111,8 +145,8 @@ namespace Nodify
         /// </summary>
         public bool IsPreviewingLocation
         {
-            get => (bool)GetValue(IsPreviewingLocationProperty);
-            protected internal set => SetValue(IsPreviewingLocationPropertyKey, value);
+            get => _isPreviewingLocation;
+            protected internal set => SetAndRaise(IsPreviewingLocationProperty, ref _isPreviewingLocation, value);
         }
 
         /// <summary>
@@ -120,7 +154,7 @@ namespace Nodify
         /// </summary>
         public Size ActualSize
         {
-            get => (Size)GetValue(ActualSizeProperty);
+            get => GetValue(ActualSizeProperty);
             set => SetValue(ActualSizeProperty, value);
         }
 
@@ -130,7 +164,7 @@ namespace Nodify
         /// </summary>
         public Size? DesiredSizeForSelection
         {
-            get => (Size?)GetValue(DesiredSizeForSelectionProperty);
+            get => GetValue(DesiredSizeForSelectionProperty);
             set => SetValue(DesiredSizeForSelectionProperty, value);
         }
 
@@ -139,7 +173,7 @@ namespace Nodify
         /// </summary>
         public bool IsDraggable
         {
-            get => (bool)GetValue(IsDraggableProperty);
+            get => GetValue(IsDraggableProperty);
             set => SetValue(IsDraggableProperty, value);
         }
 
@@ -149,7 +183,7 @@ namespace Nodify
         /// <remarks>When set to true, the container handles the right-click event for specific interactions.</remarks>
         public bool HasCustomContextMenu
         {
-            get => (bool)GetValue(HasCustomContextMenuProperty);
+            get => GetValue(HasCustomContextMenuProperty);
             set => SetValue(HasCustomContextMenuProperty, value);
         }
 
@@ -162,14 +196,19 @@ namespace Nodify
 
         #region Routed Events
 
-        public static readonly RoutedEvent SelectedEvent = Selector.SelectedEvent.AddOwner(typeof(ItemContainer));
-        public static readonly RoutedEvent UnselectedEvent = Selector.UnselectedEvent.AddOwner(typeof(ItemContainer));
-        public static readonly RoutedEvent LocationChangedEvent = EventManager.RegisterRoutedEvent(nameof(LocationChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ItemContainer));
+        public static readonly RoutedEvent<RoutedEventArgs> SelectedEvent =
+            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(Selected), RoutingStrategy.Bubble);
+
+        public static readonly RoutedEvent<RoutedEventArgs> UnselectedEvent =
+            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(Unselected), RoutingStrategy.Bubble);
+
+        public static readonly RoutedEvent<RoutedEventArgs> LocationChangedEvent =
+            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(LocationChanged), RoutingStrategy.Bubble);
 
         /// <summary>
         /// Occurs when the <see cref="Location"/> of this <see cref="ItemContainer"/> is changed.
         /// </summary>
-        public event RoutedEventHandler LocationChanged
+        public event EventHandler<RoutedEventArgs> LocationChanged
         {
             add => AddHandler(LocationChangedEvent, value);
             remove => RemoveHandler(LocationChangedEvent, value);
@@ -178,7 +217,7 @@ namespace Nodify
         /// <summary>
         /// Occurs when this <see cref="ItemContainer"/> is selected.
         /// </summary>
-        public event RoutedEventHandler Selected
+        public event EventHandler<RoutedEventArgs> Selected
         {
             add => AddHandler(SelectedEvent, value);
             remove => RemoveHandler(SelectedEvent, value);
@@ -187,7 +226,7 @@ namespace Nodify
         /// <summary>
         /// Occurs when this <see cref="ItemContainer"/> is unselected.
         /// </summary>
-        public event RoutedEventHandler Unselected
+        public event EventHandler<RoutedEventArgs> Unselected
         {
             add => AddHandler(UnselectedEvent, value);
             remove => RemoveHandler(UnselectedEvent, value);
@@ -274,11 +313,9 @@ namespace Nodify
 
         static ItemContainer()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(ItemContainer), new StyledPropertyMetadata(typeof(ItemContainer)));
-            FocusableProperty.OverrideMetadata(typeof(ItemContainer), new StyledPropertyMetadata(BoxValue.True));
-
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ItemContainer), new StyledPropertyMetadata(KeyboardNavigationMode.Cycle));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(ItemContainer), new StyledPropertyMetadata(KeyboardNavigationMode.Cycle));
+            LocationProperty.Changed.AddClassHandler<ItemContainer>((x, e) => OnLocationChanged(x, e));
+            IsSelectedProperty.Changed.AddClassHandler<ItemContainer>((x, e) => OnIsSelectedChanged(x, e));
+            FocusableProperty.OverrideDefaultValue<ItemContainer>(true);
         }
 
         /// <summary>

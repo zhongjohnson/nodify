@@ -8,9 +8,9 @@ namespace Nodify.Interactivity
     /// <summary>
     /// Manages a stack of input states for a UI element, enabling complex input interactions.
     /// </summary>
-    /// <typeparam name="TElement">The type of the associated Control.</typeparam>
+    /// <typeparam name="TElement">The type of the associated Visual element.</typeparam>
     public partial class InputElementStateStack<TElement> : IInputHandler
-        where TElement : Control
+        where TElement : Visual
     {
         private readonly Stack<IInputElementState> _states = new Stack<IInputElementState>();
 

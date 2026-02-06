@@ -45,20 +45,17 @@ namespace Nodify
 
         private StreamGeometry? _geometry;
 
-        protected override Geometry? DefiningGeometry
+        protected override Geometry? CreateDefiningGeometry()
         {
-            get
+            _geometry = new StreamGeometry();
+            using (var context = _geometry.Open())
             {
-                _geometry = new StreamGeometry();
-                using (var context = _geometry.Open())
-                {
-                    context.BeginFigure(StartPoint, false);
-                    context.LineTo(EndPoint);
-                    context.EndFigure(false);
-                }
-
-                return _geometry;
+                context.BeginFigure(StartPoint, false);
+                context.LineTo(EndPoint);
+                context.EndFigure(false);
             }
+
+            return _geometry;
         }
 
         static CuttingLine()
@@ -67,9 +64,9 @@ namespace Nodify
             IsHitTestVisibleProperty.OverrideDefaultValue<CuttingLine>(false);
         }
 
-        public override void Render(DrawingContext drawingContext)
+        protected override void OnRender(DrawingContext drawingContext)
         {
-            base.Render(drawingContext);
+            base.OnRender(drawingContext);
 
             if (Fill != null && StrokeThickness > 0)
             {
