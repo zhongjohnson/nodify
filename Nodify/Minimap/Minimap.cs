@@ -138,11 +138,11 @@ namespace Nodify
             InputProcessor.AddSharedHandlers(this);
         }
 
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
-            ItemsHost = GetTemplateChild(ElementItemsHost) as Panel ?? throw new InvalidOperationException($"{ElementItemsHost} is missing or is not of type {nameof(Panel)}.");
+            ItemsHost = e.NameScope.Find<Panel>(ElementItemsHost) ?? throw new InvalidOperationException($"{ElementItemsHost} is missing or is not of type {nameof(Panel)}.");
         }
 
         protected override AvaloniaObject GetContainerForItemOverride()
@@ -156,41 +156,41 @@ namespace Nodify
         protected InputProcessor InputProcessor { get; } = new InputProcessor();
 
         /// <inheritdoc />
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             MouseLocation = e.GetPosition(ItemsHost);
             InputProcessor.ProcessEvent(e);
         }
 
         /// <inheritdoc />
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             MouseLocation = e.GetPosition(ItemsHost);
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released and there's no interaction in progress
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && e.RightButton == MouseButtonState.Released && e.LeftButton == MouseButtonState.Released && e.MiddleButton == MouseButtonState.Released)
+            // Release the pointer capture if there's no interaction in progress
+            if (!InputProcessor.RequiresInputCapture && e.Pointer.Captured == this)
             {
-                ReleaseMouseCapture();
+                e.Pointer.Capture(null);
             }
         }
 
         /// <inheritdoc />
-        protected override void OnMouseMove(MouseEventArgs e)
+        protected override void OnPointerMoved(PointerEventArgs e)
         {
             MouseLocation = e.GetPosition(ItemsHost);
             InputProcessor.ProcessEvent(e);
         }
 
         /// <inheritdoc />
-        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
         {
             MouseLocation = e.GetPosition(ItemsHost);
             InputProcessor.ProcessEvent(e);
         }
 
         /// <inheritdoc />
-        protected override void OnLostMouseCapture(MouseEventArgs e)
+        protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
@@ -198,11 +198,7 @@ namespace Nodify
         {
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released and there's no interaction in progress
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && Mouse.RightButton == MouseButtonState.Released && Mouse.LeftButton == MouseButtonState.Released && Mouse.MiddleButton == MouseButtonState.Released)
-            {
-                ReleaseMouseCapture();
-            }
+            // TODO: Need to track pointer state differently - Avalonia doesn't have Mouse.LeftButton static properties
         }
 
         /// <inheritdoc />

@@ -78,27 +78,27 @@ namespace Nodify
         /// <summary>
         /// Gets or sets the template used to display the content of the control's footer.
         /// </summary>
-        public DataTemplate FooterTemplate
+        public IDataTemplate? FooterTemplate
         {
-            get => (DataTemplate)GetValue(FooterTemplateProperty);
+            get => GetValue(FooterTemplateProperty);
             set => SetValue(FooterTemplateProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the template used to display the content of the control's <see cref="Input"/> connectors.
         /// </summary>
-        public DataTemplate InputConnectorTemplate
+        public IDataTemplate? InputConnectorTemplate
         {
-            get => (DataTemplate)GetValue(InputConnectorTemplateProperty);
+            get => GetValue(InputConnectorTemplateProperty);
             set => SetValue(InputConnectorTemplateProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the template used to display the content of the control's <see cref="Output"/> connectors.
         /// </summary>
-        public DataTemplate OutputConnectorTemplate
+        public IDataTemplate? OutputConnectorTemplate
         {
-            get => (DataTemplate)GetValue(OutputConnectorTemplateProperty);
+            get => GetValue(OutputConnectorTemplateProperty);
             set => SetValue(OutputConnectorTemplateProperty, value);
         }
 

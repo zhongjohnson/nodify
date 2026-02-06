@@ -23,16 +23,16 @@ namespace Nodify
         #region Routed Events
 
         public static readonly RoutedEvent<PendingConnectionEventArgs> PendingConnectionStartedEvent =
-            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionStarted), RoutingStrategy.Bubble);
+            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionStarted), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         public static readonly RoutedEvent<PendingConnectionEventArgs> PendingConnectionCompletedEvent =
-            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionCompleted), RoutingStrategy.Bubble);
+            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionCompleted), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         public static readonly RoutedEvent<PendingConnectionEventArgs> PendingConnectionDragEvent =
-            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionDrag), RoutingStrategy.Bubble);
+            RoutedEvent.Register<Connector, PendingConnectionEventArgs>(nameof(PendingConnectionDrag), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         public static readonly RoutedEvent<ConnectorEventArgs> DisconnectEvent =
-            RoutedEvent.Register<Connector, ConnectorEventArgs>(nameof(Disconnect), RoutingStrategy.Bubble);
+            RoutedEvent.Register<Connector, ConnectorEventArgs>(nameof(Disconnect), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         /// <summary>Triggered by the <see cref="EditorGestures.ConnectorGestures.Connect"/> gesture.</summary>
         public event EventHandler<PendingConnectionEventArgs> PendingConnectionStarted
@@ -208,8 +208,6 @@ namespace Nodify
         /// <inheritdoc />
         protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate(e);
-
             // Find the PART_Connector from template
             _thumb = e.NameScope.Find<Control>(ElementConnector);
 
@@ -265,11 +263,13 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        protected override void OnSizeChanged(SizeChangedEventArgs e)
         {
+            base.OnSizeChanged(e);
+
             // Subscribe to events if not already subscribed 
             // Useful for advanced connectors that start collapsed because the loaded event is not called
-            Size newSize = sizeInfo.NewSize;
+            Size newSize = e.NewSize;
             if (newSize.Width > 0d || newSize.Height > 0d)
             {
                 TrySetAnchorUpdateEvents(true);
@@ -318,7 +318,11 @@ namespace Nodify
             var viewport = new Rect(editor.ViewportLocation, editor.ViewportSize);
             double offset = OptimizeSafeZone / editor.ViewportZoom;
 
-            Rect area = Rect.Inflate(viewport, offset, offset);
+            Rect area = new Rect(
+                viewport.X - offset,
+                viewport.Y - offset,
+                viewport.Width + 2 * offset,
+                viewport.Height + 2 * offset);
 
             // Update only the connectors that are in the viewport or will be in the viewport
             if (area.Contains(location))
@@ -337,9 +341,19 @@ namespace Nodify
 
             if (Thumb != null && Container != null)
             {
-                var thumbSize = (Vector)Thumb.RenderSize;
-                Vector containerMargin = (Vector)Container.RenderSize - (Vector)Container.DesiredSize;
-                Point relativeLocation = Thumb.TranslatePoint((Point)(thumbSize / 2 - containerMargin / 2), Container);
+                var thumbSize = Thumb.Bounds.Size;
+                var thumbDesired = Thumb.DesiredSize;
+                var containerBounds = Container.Bounds.Size;
+                var containerDesired = Container.DesiredSize;
+                Vector containerMargin = new Vector(
+                    containerBounds.Width - containerDesired.Width,
+                    containerBounds.Height - containerDesired.Height);
+                Point? relativeLocationNullable = Thumb.TranslatePoint(
+                    new Point(
+                        thumbSize.Width / 2 - containerMargin.X / 2,
+                        thumbSize.Height / 2 - containerMargin.Y / 2),
+                    Container);
+                Point relativeLocation = relativeLocationNullable ?? default;
                 Anchor = new Point(location.X + relativeLocation.X, location.Y + relativeLocation.Y);
             }
         }
@@ -362,31 +376,31 @@ namespace Nodify
         protected InputProcessor InputProcessor { get; } = new InputProcessor();
 
         /// <inheritdoc />
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released and there's no interaction in progress
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && e.RightButton == MouseButtonState.Released && e.LeftButton == MouseButtonState.Released && e.MiddleButton == MouseButtonState.Released)
+            // Release the pointer capture if there's no interaction in progress
+            if (!InputProcessor.RequiresInputCapture && e.Pointer.Captured == this)
             {
-                ReleaseMouseCapture();
+                e.Pointer.Capture(null);
             }
         }
 
         /// <inheritdoc />
-        protected override void OnMouseMove(MouseEventArgs e)
+        protected override void OnPointerMoved(PointerEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnLostMouseCapture(MouseEventArgs e)
+        protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
@@ -394,11 +408,7 @@ namespace Nodify
         {
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released and there's no interaction in progress
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && Mouse.RightButton == MouseButtonState.Released && Mouse.LeftButton == MouseButtonState.Released && Mouse.MiddleButton == MouseButtonState.Released)
-            {
-                ReleaseMouseCapture();
-            }
+            // TODO: Need to track pointer state differently - Avalonia doesn't have Mouse.LeftButton static properties
         }
 
         /// <inheritdoc />

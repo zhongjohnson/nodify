@@ -953,31 +953,31 @@ namespace Nodify
         private InputProcessor InputProcessor { get; } = new InputProcessor();
 
         /// <inheritdoc />
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && e.RightButton == MouseButtonState.Released && e.LeftButton == MouseButtonState.Released && e.MiddleButton == MouseButtonState.Released)
+            // Release the pointer capture if there's no interaction in progress
+            if (!InputProcessor.RequiresInputCapture && e.Pointer.Captured == this)
             {
-                ReleaseMouseCapture();
+                e.Pointer.Capture(null);
             }
         }
 
         /// <inheritdoc />
-        protected override void OnMouseMove(MouseEventArgs e)
+        protected override void OnPointerMoved(PointerEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnLostMouseCapture(MouseEventArgs e)
+        protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
@@ -985,11 +985,7 @@ namespace Nodify
         {
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && Mouse.RightButton == MouseButtonState.Released && Mouse.LeftButton == MouseButtonState.Released && Mouse.MiddleButton == MouseButtonState.Released)
-            {
-                ReleaseMouseCapture();
-            }
+            // TODO: Need to track pointer state differently - Avalonia doesn't have Mouse.LeftButton static properties
         }
 
         /// <inheritdoc />
@@ -1053,14 +1049,14 @@ namespace Nodify
             return _outlinePen ??= new Pen(OutlineBrush, StrokeThickness + OutlineThickness * 2d);
         }
 
-        protected override void OnRender(DrawingContext drawingContext)
+        public override void Render(DrawingContext drawingContext)
         {
             if (OutlineBrush != null)
             {
                 drawingContext.DrawGeometry(OutlineBrush, GetOutlinePen(), DefiningGeometry);
             }
 
-            base.OnRender(drawingContext);
+            base.Render(drawingContext);
 
             if (!string.IsNullOrEmpty(Text))
             {

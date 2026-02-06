@@ -344,10 +344,10 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        protected override void OnSizeChanged(SizeChangedEventArgs e)
         {
-            ActualSize = sizeInfo.NewSize;
-            base.OnRenderSizeChanged(sizeInfo);
+            base.OnSizeChanged(e);
+            ActualSize = e.NewSize;
         }
 
         /// <summary>
@@ -424,31 +424,31 @@ namespace Nodify
         protected InputProcessor InputProcessor { get; } = new InputProcessor();
 
         /// <inheritdoc />
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released and there's no interaction in progress
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && e.RightButton == MouseButtonState.Released && e.LeftButton == MouseButtonState.Released && e.MiddleButton == MouseButtonState.Released)
+            // Release the pointer capture if there's no interaction in progress
+            if (!InputProcessor.RequiresInputCapture && e.Pointer.Captured == this)
             {
-                ReleaseMouseCapture();
+                e.Pointer.Capture(null);
             }
         }
 
         /// <inheritdoc />
-        protected override void OnMouseMove(MouseEventArgs e)
+        protected override void OnPointerMoved(PointerEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnLostMouseCapture(MouseEventArgs e)
+        protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
@@ -456,11 +456,7 @@ namespace Nodify
         {
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released and there's no interaction in progress
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && Mouse.RightButton == MouseButtonState.Released && Mouse.LeftButton == MouseButtonState.Released && Mouse.MiddleButton == MouseButtonState.Released)
-            {
-                ReleaseMouseCapture();
-            }
+            // TODO: Need to track pointer state differently - Avalonia doesn't have Mouse.LeftButton static properties
         }
 
         /// <inheritdoc />

@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 
 namespace Nodify
@@ -11,10 +13,10 @@ namespace Nodify
     {
         #region Dependency Properties
 
-        public static readonly StyledProperty HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner(typeof(NodeInput));
-        public static readonly StyledProperty HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner(typeof(NodeInput));
-        public static readonly StyledProperty ConnectorTemplateProperty = StyledProperty.Register(nameof(ConnectorTemplate), typeof(ControlTemplate), typeof(NodeInput));
-        public static readonly StyledProperty OrientationProperty = StackPanel.OrientationProperty.AddOwner(typeof(NodeInput), new StyledPropertyMetadata(Orientation.Horizontal, StyledPropertyMetadataOptions.AffectsMeasure));
+        public static readonly StyledProperty<object?> HeaderProperty = HeaderedContentControl.HeaderProperty.AddOwner<NodeInput>();
+        public static readonly StyledProperty<IDataTemplate?> HeaderTemplateProperty = HeaderedContentControl.HeaderTemplateProperty.AddOwner<NodeInput>();
+        public static readonly StyledProperty<ITemplate<Control>?> ConnectorTemplateProperty = AvaloniaProperty.Register<NodeInput, ITemplate<Control>?>(nameof(ConnectorTemplate));
+        public static readonly StyledProperty<Orientation> OrientationProperty = StackPanel.OrientationProperty.AddOwner<NodeInput>();
 
         /// <summary>
         /// Gets of sets the data used for the control's header.
@@ -28,18 +30,18 @@ namespace Nodify
         /// <summary>
         /// Gets or sets the template used to display the content of the control's header.
         /// </summary>
-        public DataTemplate HeaderTemplate
+        public IDataTemplate? HeaderTemplate
         {
-            get => (DataTemplate)GetValue(HeaderTemplateProperty);
+            get => GetValue(HeaderTemplateProperty);
             set => SetValue(HeaderTemplateProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the template used to display the connecting point of this <see cref="Connector"/>.
         /// </summary>
-        public ControlTemplate ConnectorTemplate
+        public ITemplate<Control>? ConnectorTemplate
         {
-            get => (ControlTemplate)GetValue(ConnectorTemplateProperty);
+            get => GetValue(ConnectorTemplateProperty);
             set => SetValue(ConnectorTemplateProperty, value);
         }
 
@@ -54,7 +56,7 @@ namespace Nodify
 
         static NodeInput()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodeInput), new StyledPropertyMetadata(typeof(NodeInput)));
+            // In Avalonia, use StyledElement.StyleKeyProperty instead of DefaultStyleKeyProperty
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -43,7 +44,7 @@ namespace Nodify.Interactivity
         /// Processes an input event and delegates it to the registered handlers.
         /// </summary>
         /// <param name="e">The input event arguments to process.</param>
-        public void ProcessEvent(InputEventArgs e)
+        public void ProcessEvent(RoutedEventArgs e)
         {
             RequiresInputCapture = false;
 

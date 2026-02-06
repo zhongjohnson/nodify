@@ -1,4 +1,5 @@
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -23,16 +24,16 @@ namespace Nodify.Interactivity
             {
             }
 
-            protected override void OnBegin(InputEventArgs e)
+            protected override void OnBegin(RoutedEventArgs e)
                 => Element.BeginCutting();
 
-            protected override void OnMouseMove(MouseEventArgs e)
+            protected override void OnPointerMoved(PointerEventArgs e)
                 => Element.UpdateCuttingLine(Element.MouseLocation);
 
-            protected override void OnEnd(InputEventArgs e)
+            protected override void OnEnd(RoutedEventArgs e)
                 => Element.EndCutting();
 
-            protected override void OnCancel(InputEventArgs e)
+            protected override void OnCancel(RoutedEventArgs e)
                 => Element.CancelCutting();
         }
     }

@@ -8,11 +8,11 @@ namespace Nodify.Interactivity
     /// </summary>
     public class TraversalRequest
     {
-        public TraversalRequest(FocusNavigationDirection direction)
+        public TraversalRequest(NavigationDirection direction)
         {
             FocusNavigationDirection = direction;
         }
 
-        public FocusNavigationDirection FocusNavigationDirection { get; }
+        public NavigationDirection FocusNavigationDirection { get; }
     }
 }

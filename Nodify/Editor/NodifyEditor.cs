@@ -145,7 +145,7 @@ namespace Nodify
         #region Routed Events
 
         public static readonly RoutedEvent<RoutedEventArgs> ViewportUpdatedEvent =
-            RoutedEvent.Register<NodifyEditor, RoutedEventArgs>(nameof(ViewportUpdated), RoutingStrategy.Bubble);
+            RoutedEvent.Register<NodifyEditor, RoutedEventArgs>(nameof(ViewportUpdated), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         /// <summary>
         /// Occurs whenever the viewport updates.
@@ -285,20 +285,24 @@ namespace Nodify
         public static readonly StyledProperty<IDataTemplate?> ConnectionTemplateProperty =
             AvaloniaProperty.Register<NodifyEditor, IDataTemplate?>(nameof(ConnectionTemplate));
 
-        public static readonly StyledProperty<DataTemplateSelector?> ConnectionTemplateSelectorProperty =
-            AvaloniaProperty.Register<NodifyEditor, DataTemplateSelector?>(nameof(ConnectionTemplateSelector));
+        // TODO: DataTemplateSelector doesn't exist in Avalonia - use custom template selection logic
+        // In Avalonia, template selection is typically done via FuncDataTemplate or custom logic
+        public static readonly StyledProperty<object?> ConnectionTemplateSelectorProperty =
+            AvaloniaProperty.Register<NodifyEditor, object?>(nameof(ConnectionTemplateSelector));
 
         public static readonly StyledProperty<IDataTemplate?> DecoratorTemplateProperty =
             AvaloniaProperty.Register<NodifyEditor, IDataTemplate?>(nameof(DecoratorTemplate));
 
-        public static readonly StyledProperty<DataTemplateSelector?> DecoratorTemplateSelectorProperty =
-            AvaloniaProperty.Register<NodifyEditor, DataTemplateSelector?>(nameof(DecoratorTemplateSelector));
+        // TODO: DataTemplateSelector doesn't exist in Avalonia
+        public static readonly StyledProperty<object?> DecoratorTemplateSelectorProperty =
+            AvaloniaProperty.Register<NodifyEditor, object?>(nameof(DecoratorTemplateSelector));
 
         public static readonly StyledProperty<IDataTemplate?> PendingConnectionTemplateProperty =
             AvaloniaProperty.Register<NodifyEditor, IDataTemplate?>(nameof(PendingConnectionTemplate));
 
-        public static readonly StyledProperty<DataTemplateSelector?> PendingConnectionTemplateSelectorProperty =
-            AvaloniaProperty.Register<NodifyEditor, DataTemplateSelector?>(nameof(PendingConnectionTemplateSelector));
+        // TODO: DataTemplateSelector doesn't exist in Avalonia
+        public static readonly StyledProperty<object?> PendingConnectionTemplateSelectorProperty =
+            AvaloniaProperty.Register<NodifyEditor, object?>(nameof(PendingConnectionTemplateSelector));
 
         public static readonly StyledProperty<Style?> DecoratorContainerStyleProperty =
             AvaloniaProperty.Register<NodifyEditor, Style?>(nameof(DecoratorContainerStyle));
@@ -343,7 +347,8 @@ namespace Nodify
         /// <summary>
         /// Gets or sets the custom logic for choosing a template for <see cref="BaseConnection"/>.
         /// </summary>
-        public DataTemplateSelector? ConnectionTemplateSelector
+        /// <remarks>In Avalonia, use custom template selection logic instead of DataTemplateSelector.</remarks>
+        public object? ConnectionTemplateSelector
         {
             get => GetValue(ConnectionTemplateSelectorProperty);
             set => SetValue(ConnectionTemplateSelectorProperty, value);
@@ -361,7 +366,8 @@ namespace Nodify
         /// <summary>
         /// Gets or sets the custom logic for choosing a template for <see cref="DecoratorContainer"/>.
         /// </summary>
-        public DataTemplateSelector? DecoratorTemplateSelector
+        /// <remarks>In Avalonia, use custom template selection logic instead of DataTemplateSelector.</remarks>
+        public object? DecoratorTemplateSelector
         {
             get => GetValue(DecoratorTemplateSelectorProperty);
             set => SetValue(DecoratorTemplateSelectorProperty, value);
@@ -379,9 +385,10 @@ namespace Nodify
         /// <summary>
         /// Gets or sets the custom logic for choosing a template for <see cref="PendingConnection"/>.
         /// </summary>
-        public DataTemplateSelector? PendingConnectionTemplateSelector
+        /// <remarks>In Avalonia, use custom template selection logic instead of DataTemplateSelector.</remarks>
+        public object? PendingConnectionTemplateSelector
         {
-            get => (DataTemplateSelector)GetValue(PendingConnectionTemplateSelectorProperty);
+            get => GetValue(PendingConnectionTemplateSelectorProperty);
             set => SetValue(PendingConnectionTemplateSelectorProperty, value);
         }
 
@@ -398,33 +405,37 @@ namespace Nodify
 
         #region Readonly Dependency Properties
 
-        private static readonly StyledPropertyKey MouseLocationPropertyKey = StyledProperty.RegisterReadOnly(nameof(MouseLocation), typeof(Point), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Point));
-        public static readonly StyledProperty MouseLocationProperty = MouseLocationPropertyKey.StyledProperty;
+        private Point _mouseLocation;
+        public static readonly DirectProperty<NodifyEditor, Point> MouseLocationProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, Point>(
+                nameof(MouseLocation),
+                o => o._mouseLocation,
+                (o, v) => o._mouseLocation = v);
 
         /// <summary>
         /// Gets the current mouse location in graph space coordinates (relative to the <see cref="ItemsHost" />).
         /// </summary>
         public Point MouseLocation
         {
-            get => (Point)GetValue(MouseLocationProperty);
-            protected set => SetValue(MouseLocationPropertyKey, value);
+            get => _mouseLocation;
+            protected set => SetAndRaise(MouseLocationProperty, ref _mouseLocation, value);
         }
 
         #endregion
 
         #region Dependency Properties
 
-        public static readonly StyledProperty ConnectionsProperty = StyledProperty.Register(nameof(Connections), typeof(IEnumerable), typeof(NodifyEditor));
-        public static readonly StyledProperty PendingConnectionProperty = StyledProperty.Register(nameof(PendingConnection), typeof(object), typeof(NodifyEditor));
-        public static readonly StyledProperty GridCellSizeProperty = StyledProperty.Register(nameof(GridCellSize), typeof(uint), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.UInt1, OnGridCellSizeChanged, OnCoerceGridCellSize));
-        public static readonly StyledProperty DisableZoomingProperty = StyledProperty.Register(nameof(DisableZooming), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
-        public static readonly StyledProperty HasCustomContextMenuProperty = StyledProperty.Register(nameof(HasCustomContextMenu), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
-        public static readonly StyledProperty DecoratorsProperty = StyledProperty.Register(nameof(Decorators), typeof(IEnumerable), typeof(NodifyEditor));
+        public static readonly StyledProperty<IEnumerable> ConnectionsProperty = AvaloniaProperty.Register<NodifyEditor, IEnumerable>(nameof(Connections));
+        public static readonly StyledProperty<object> PendingConnectionProperty = AvaloniaProperty.Register<NodifyEditor, object>(nameof(PendingConnection));
+        public static readonly StyledProperty<uint> GridCellSizeProperty = AvaloniaProperty.Register<NodifyEditor, uint>(nameof(GridCellSize), defaultValue: 1u, coerce: OnCoerceGridCellSize);
+        public static readonly StyledProperty<bool> DisableZoomingProperty = AvaloniaProperty.Register<NodifyEditor, bool>(nameof(DisableZooming), defaultValue: false);
+        public static readonly StyledProperty<bool> HasCustomContextMenuProperty = AvaloniaProperty.Register<NodifyEditor, bool>(nameof(HasCustomContextMenu), defaultValue: false);
+        public static readonly StyledProperty<IEnumerable> DecoratorsProperty = AvaloniaProperty.Register<NodifyEditor, IEnumerable>(nameof(Decorators));
 
-        private static object OnCoerceGridCellSize(AvaloniaObject d, object value)
-            => (uint)value > 0u ? value : BoxValue.UInt1;
+        private static uint OnCoerceGridCellSize(AvaloniaObject d, uint value)
+            => value > 0u ? value : 1u;
 
-        private static void OnGridCellSizeChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e) { }
+        private static void OnGridCellSizeChanged(NodifyEditor editor, AvaloniaPropertyChangedEventArgs<uint> e) { }
 
         /// <summary>
         /// Gets or sets the items that will be rendered in the decorators layer via <see cref="DecoratorContainer"/>s.
@@ -490,10 +501,10 @@ namespace Nodify
 
         #region Command Dependency Properties
 
-        public static readonly StyledProperty ConnectionCompletedCommandProperty = StyledProperty.Register(nameof(ConnectionCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly StyledProperty ConnectionStartedCommandProperty = StyledProperty.Register(nameof(ConnectionStartedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly StyledProperty DisconnectConnectorCommandProperty = StyledProperty.Register(nameof(DisconnectConnectorCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly StyledProperty RemoveConnectionCommandProperty = StyledProperty.Register(nameof(RemoveConnectionCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty<ICommand?> ConnectionCompletedCommandProperty = AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(ConnectionCompletedCommand));
+        public static readonly StyledProperty<ICommand?> ConnectionStartedCommandProperty = AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(ConnectionStartedCommand));
+        public static readonly StyledProperty<ICommand?> DisconnectConnectorCommandProperty = AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(DisconnectConnectorCommand));
+        public static readonly StyledProperty<ICommand?> RemoveConnectionCommandProperty = AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(RemoveConnectionCommand));
 
         /// <summary>
         /// Invoked when the <see cref="Nodify.PendingConnection"/> is completed. <br />
@@ -668,6 +679,7 @@ namespace Nodify
             ViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnViewportZoomChanged);
             MinViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnMinViewportZoomChanged);
             MaxViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnMaxViewportZoomChanged);
+            GridCellSizeProperty.Changed.AddClassHandler<NodifyEditor>((x, e) => x.OnGridCellSizeChanged(x, e));
         }
 
         /// <summary>
@@ -696,12 +708,12 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
-            ItemsHost = GetTemplateChild(ElementItemsHost) as Panel ?? throw new InvalidOperationException($"{ElementItemsHost} is missing or is not of type Panel.");
-            ConnectionsHost = GetTemplateChild(ElementConnectionsHost) as Control ?? throw new InvalidOperationException($"{ElementConnectionsHost} is missing or is not of type Control.");
+            ItemsHost = e.NameScope.Find<Panel>(ElementItemsHost) ?? throw new InvalidOperationException($"{ElementItemsHost} is missing or is not of type Panel.");
+            ConnectionsHost = e.NameScope.Find<Control>(ElementConnectionsHost) ?? throw new InvalidOperationException($"{ElementConnectionsHost} is missing or is not of type Control.");
 
             OnDisableAutoPanningChanged(DisableAutoPanning);
         }
@@ -719,15 +731,18 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override AvaloniaObject GetContainerForItemOverride()
+        protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
             => new ItemContainer(this)
             {
                 RenderTransform = new TranslateTransform()
             };
 
         /// <inheritdoc />
-        protected override bool IsItemItsOwnContainerOverride(object item)
-            => item is ItemContainer;
+        protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey)
+        {
+            recycleKey = null;
+            return item is not ItemContainer;
+        }
 
         #endregion
 
@@ -1019,41 +1034,41 @@ namespace Nodify
         protected InputProcessor InputProcessor { get; } = new InputProcessor();
 
         /// <inheritdoc />
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             MouseLocation = e.GetPosition(ItemsHost);
             InputProcessor.ProcessEvent(e);
         }
 
         /// <inheritdoc />
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             MouseLocation = e.GetPosition(ItemsHost);
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released and there's no interaction in progress
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && e.RightButton == MouseButtonState.Released && e.LeftButton == MouseButtonState.Released && e.MiddleButton == MouseButtonState.Released)
+            // Release the pointer capture if all buttons are released and there's no interaction in progress
+            if (!InputProcessor.RequiresInputCapture && e.Pointer.Captured == this)
             {
-                ReleaseMouseCapture();
+                e.Pointer.Capture(null);
             }
         }
 
         /// <inheritdoc />
-        protected override void OnMouseMove(MouseEventArgs e)
+        protected override void OnPointerMoved(PointerEventArgs e)
         {
             MouseLocation = e.GetPosition(ItemsHost);
             InputProcessor.ProcessEvent(e);
         }
 
         /// <inheritdoc />
-        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
         {
             MouseLocation = e.GetPosition(ItemsHost);
             InputProcessor.ProcessEvent(e);
         }
 
         /// <inheritdoc />
-        protected override void OnLostMouseCapture(MouseEventArgs e)
+        protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
@@ -1061,11 +1076,8 @@ namespace Nodify
         {
             InputProcessor.ProcessEvent(e);
 
-            // Release the mouse capture if all the mouse buttons are released and there's no interaction in progress
-            if (!InputProcessor.RequiresInputCapture && IsMouseCaptured && Mouse.RightButton == MouseButtonState.Released && Mouse.LeftButton == MouseButtonState.Released && Mouse.MiddleButton == MouseButtonState.Released)
-            {
-                ReleaseMouseCapture();
-            }
+            // TODO: Need to check pointer state - Avalonia doesn't have Mouse.LeftButton static properties
+            // Will need to track pointer state differently or remove this check
         }
 
         /// <inheritdoc />
@@ -1075,12 +1087,12 @@ namespace Nodify
         #endregion
 
         /// <inheritdoc />
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        protected override void OnSizeChanged(SizeChangedEventArgs e)
         {
-            base.OnRenderSizeChanged(sizeInfo);
+            base.OnSizeChanged(e);
 
             double zoom = ViewportZoom;
-            ViewportSize = new Size(ActualWidth / zoom, ActualHeight / zoom);
+            ViewportSize = new Size(e.NewSize.Width / zoom, e.NewSize.Height / zoom);
 
             OnViewportUpdated();
         }
