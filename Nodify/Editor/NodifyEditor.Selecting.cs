@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia;
 using System.Windows.Input;
 using System.Collections;
@@ -7,6 +8,7 @@ using System.Collections.Specialized;
 using System.Collections.Generic;
 using Avalonia.Input;
 using Avalonia.Controls.Shapes;
+using Avalonia.Styling;
 using Nodify.Interactivity;
 
 namespace Nodify
@@ -115,8 +117,8 @@ namespace Nodify
 
         private bool CanSelectMultipleItemsBase
         {
-            get => base.CanSelectMultipleItems;
-            set => base.CanSelectMultipleItems = value;
+            get => base.SelectionMode == SelectionMode.Multiple || base.SelectionMode == SelectionMode.Toggle;
+            set => base.SelectionMode = value ? SelectionMode.Multiple : SelectionMode.Single;
         }
 
         /// <summary>
@@ -161,8 +163,8 @@ namespace Nodify
         /// </summary>
         public Rect SelectedArea
         {
-            get => (Rect)GetValue(SelectedAreaProperty);
-            private set => SetValue(SelectedAreaPropertyKey, value);
+            get => _selectedArea;
+            private set => SetAndRaise(SelectedAreaProperty, ref _selectedArea, value);
         }
 
         /// <summary>
@@ -170,8 +172,8 @@ namespace Nodify
         /// </summary>
         public bool IsSelecting
         {
-            get => (bool)GetValue(IsSelectingProperty);
-            private set => SetValue(IsSelectingPropertyKey, value);
+            get => _isSelecting;
+            private set => SetAndRaise(IsSelectingProperty, ref _isSelecting, value);
         }
 
         /// <summary>
@@ -198,8 +200,16 @@ namespace Nodify
 
                 for (var i = 0; i < selectedItems.Count; i++)
                 {
-                    var container = (ItemContainer)ItemContainerGenerator.ContainerFromItem(selectedItems[i]);
-                    selectedContainers.Add(container);
+                    // In Avalonia, we need to find the index first
+                    int index = Items.IndexOf(selectedItems[i]);
+                    if (index >= 0)
+                    {
+                        var container = (ItemContainer)ItemContainerGenerator.ContainerFromIndex(index);
+                        if (container != null)
+                        {
+                            selectedContainers.Add(container);
+                        }
+                    }
                 }
 
                 return selectedContainers;
@@ -232,7 +242,7 @@ namespace Nodify
             IList selected = base.SelectedItems;
 
             IsSelecting = true;
-            BeginUpdateSelectedItems();
+            // In Avalonia, we don't need Begin/EndUpdateSelectedItems
             for (var i = 0; i < items.Count; i++)
             {
                 var container = (ItemContainer)ItemContainerGenerator.ContainerFromIndex(i);
@@ -250,7 +260,6 @@ namespace Nodify
                     }
                 }
             }
-            EndUpdateSelectedItems();
             IsSelecting = false;
         }
 
@@ -263,7 +272,7 @@ namespace Nodify
         public void SelectArea(Rect area, bool append = false, bool fit = false)
         {
             IsSelecting = true;
-            BeginUpdateSelectedItems();
+            // In Avalonia, we don't need Begin/EndUpdateSelectedItems
 
             IList selected = base.SelectedItems;
             if (!append)
@@ -281,7 +290,6 @@ namespace Nodify
                 }
             }
 
-            EndUpdateSelectedItems();
             IsSelecting = false;
         }
 
@@ -291,11 +299,10 @@ namespace Nodify
         /// <param name="container"></param>
         public void Select(ItemContainer container)
         {
-            BeginUpdateSelectedItems();
+            // In Avalonia, we don't need Begin/EndUpdateSelectedItems
             var selected = base.SelectedItems;
             selected.Clear();
             selected.Add(container.DataContext);
-            EndUpdateSelectedItems();
 
             UnselectAllConnections();
         }
@@ -310,16 +317,15 @@ namespace Nodify
             IList items = base.SelectedItems;
 
             IsSelecting = true;
-            BeginUpdateSelectedItems();
+            // In Avalonia, we don't need Begin/EndUpdateSelectedItems
             for (var i = 0; i < items.Count; i++)
             {
-                var container = (ItemContainer)ItemContainerGenerator.ContainerFromItem(items[i]);
+                var container = (ItemContainer)ItemContainerGenerator.ContainerFromIndex(i);
                 if (container.IsSelectableInArea(area, fit))
                 {
                     items.Remove(items[i]);
                 }
             }
-            EndUpdateSelectedItems();
             IsSelecting = false;
         }
 
@@ -328,9 +334,9 @@ namespace Nodify
         /// </summary>
         public void UnselectAllConnections()
         {
-            if (ConnectionsHost is MultiSelector selector)
+            if (ConnectionsHost is SelectingItemsControl selector)
             {
-                selector.UnselectAll();
+                selector.SelectedItems.Clear();
             }
         }
 
@@ -339,9 +345,16 @@ namespace Nodify
         /// </summary>
         public void SelectAllConnections()
         {
-            if (ConnectionsHost is MultiSelector selector)
+            if (ConnectionsHost is SelectingItemsControl selector)
             {
-                selector.SelectAll();
+                // Select all items in the connections host
+                foreach (var item in selector.Items)
+                {
+                    if (!selector.SelectedItems.Contains(item))
+                    {
+                        selector.SelectedItems.Add(item);
+                    }
+                }
             }
         }
 
@@ -436,7 +449,7 @@ namespace Nodify
             ItemCollection items = Items;
             IList selected = base.SelectedItems;
 
-            BeginUpdateSelectedItems();
+            // In Avalonia, we don't need Begin/EndUpdateSelectedItems
             for (var i = 0; i < items.Count; i++)
             {
                 var container = (ItemContainer)ItemContainerGenerator.ContainerFromIndex(i);
@@ -450,14 +463,13 @@ namespace Nodify
                 }
                 container.IsPreviewingSelection = null;
             }
-            EndUpdateSelectedItems();
         }
 
         #endregion
 
         #region Selection Handlers
 
-        private void OnSelectedItemsSourceChanged(IList oldValue, IList newValue)
+        private void OnSelectedItemsSourceChanged(object? oldValue, object? newValue)
         {
             if (oldValue is INotifyCollectionChanged oc)
             {
@@ -471,16 +483,15 @@ namespace Nodify
 
             IList selectedItems = base.SelectedItems;
 
-            BeginUpdateSelectedItems();
+            // In Avalonia, we don't need Begin/EndUpdateSelectedItems
             selectedItems.Clear();
-            if (newValue != null)
+            if (newValue is IList newList)
             {
-                for (var i = 0; i < newValue.Count; i++)
+                for (var i = 0; i < newList.Count; i++)
                 {
-                    selectedItems.Add(newValue[i]);
+                    selectedItems.Add(newList[i]);
                 }
             }
-            EndUpdateSelectedItems();
         }
 
         private void OnSelectedItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -520,10 +531,8 @@ namespace Nodify
             }
         }
 
-        protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+        private void OnSelectionChangedHandler(object? sender, SelectionChangedEventArgs e)
         {
-            base.OnSelectionChanged(e);
-
             IList? selected = SelectedItems;
             if (selected != null)
             {

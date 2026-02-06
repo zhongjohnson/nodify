@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 
 namespace Nodify
@@ -18,15 +19,6 @@ namespace Nodify
 
         public static readonly StyledProperty<bool> CanSelectMultipleItemsProperty =
             NodifyEditor.CanSelectMultipleItemsProperty.AddOwner<ConnectionsMultiSelector>();
-
-        static ConnectionsMultiSelector()
-        {
-            CanSelectMultipleItemsProperty.Changed.AddClassHandler<ConnectionsMultiSelector>((selector, e) =>
-                selector.CanSelectMultipleItemsBase = e.NewValue.GetValueOrDefault());
-
-            SelectedItemsProperty.Changed.AddClassHandler<ConnectionsMultiSelector>((selector, e) =>
-                selector.OnSelectedItemsSourceChanged(e.OldValue.Value, e.NewValue.Value));
-        }
 
         /// <summary>
         /// Gets or sets the selected connections in the <see cref="NodifyEditor"/>.
@@ -48,8 +40,8 @@ namespace Nodify
 
         private bool CanSelectMultipleItemsBase
         {
-            get => base.CanSelectMultipleItems;
-            set => base.CanSelectMultipleItems = value;
+            get => base.SelectionMode == SelectionMode.Multiple || base.SelectionMode == SelectionMode.Toggle;
+            set => base.SelectionMode = value ? SelectionMode.Multiple : SelectionMode.Single;
         }
 
         #endregion
@@ -81,27 +73,39 @@ namespace Nodify
 
         static ConnectionsMultiSelector()
         {
-            FocusableProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(BoxValue.False));
+            // Property change handlers
+            CanSelectMultipleItemsProperty.Changed.AddClassHandler<ConnectionsMultiSelector>((selector, e) =>
+                selector.CanSelectMultipleItemsBase = (bool)e.NewValue!);
 
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            SelectedItemsProperty.Changed.AddClassHandler<ConnectionsMultiSelector>((selector, e) =>
+                selector.OnSelectedItemsSourceChanged(e.OldValue, e.NewValue));
+
+            // Metadata overrides
+            FocusableProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata<bool>(false));
+
+            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata<KeyboardNavigationMode>(KeyboardNavigationMode.None));
         }
 
         public ConnectionsMultiSelector()
         {
             _focusNavigator = new StatefulFocusNavigator<ConnectionContainer>(OnElementFocused);
+
+            // Subscribe to SelectionChanged event instead of overriding OnSelectionChanged
+            SelectionChanged += OnSelectionChangedHandler;
         }
 
-        protected override AvaloniaObject GetContainerForItemOverride()
+        protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
             => new ConnectionContainer(this);
 
-        protected override bool IsItemItsOwnContainerOverride(object item)
-            => item is ConnectionContainer;
-
-        public override void OnApplyTemplate()
+        protected override bool NeedsContainerOverride(object? item, int index, out object? recycleKey)
         {
-            base.OnApplyTemplate();
+            recycleKey = null;
+            return item is not ConnectionContainer;
+        }
+
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
 
             Editor = this.GetParentOfType<NodifyEditor>();
 
@@ -144,7 +148,7 @@ namespace Nodify
             {
                 var viewport = new Rect(Editor.ViewportLocation, Editor.ViewportSize);
                 var containers = ConnectionContainers;
-                containerToFocus = containers.FirstOrDefault(container => viewport.IntersectsWith(((IKeyboardFocusTarget<ConnectionContainer>)container).Bounds))
+                containerToFocus = containers.FirstOrDefault(container => viewport.Intersects(((IKeyboardFocusTarget<ConnectionContainer>)container).Bounds))
                     ?? containers.First();
             }
 
@@ -180,27 +184,25 @@ namespace Nodify
 
         public void Select(ConnectionContainer container)
         {
-            BeginUpdateSelectedItems();
+            // In Avalonia, we don't need Begin/EndUpdateSelectedItems
             var selected = base.SelectedItems;
             selected.Clear();
             selected.Add(container.DataContext);
 
 #if NETCOREAPP3_0_OR_GREATER
             // For some reason the ConnectionContainer.IsSelected property change is not triggered, which prevents the visual update of the child connection.
-            // To address this, we manually set the IsSelected property before it is automatically set to true by EndUpdateSelectedItems.
+            // To address this, we manually set the IsSelected property before it is automatically set to true.
             // Note: This approach will cause bindings to update out of order.
             // It is recommended to handle undo/redo operations using the SelectionChanged event in this case.
             container.IsSelected = true;
 #endif
-
-            EndUpdateSelectedItems();
 
             Editor?.UnselectAll();
         }
 
         #region Selection Handlers
 
-        private void OnSelectedItemsSourceChanged(IList oldValue, IList newValue)
+        private void OnSelectedItemsSourceChanged(object? oldValue, object? newValue)
         {
             if (oldValue is INotifyCollectionChanged oc)
             {
@@ -214,16 +216,15 @@ namespace Nodify
 
             IList selectedItems = base.SelectedItems;
 
-            BeginUpdateSelectedItems();
+            // In Avalonia, we don't need Begin/EndUpdateSelectedItems
             selectedItems.Clear();
-            if (newValue != null)
+            if (newValue is IList newList)
             {
-                for (var i = 0; i < newValue.Count; i++)
+                for (var i = 0; i < newList.Count; i++)
                 {
-                    selectedItems.Add(newValue[i]);
+                    selectedItems.Add(newList[i]);
                 }
             }
-            EndUpdateSelectedItems();
         }
 
         private void OnSelectedItemsChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -263,10 +264,8 @@ namespace Nodify
             }
         }
 
-        protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+        private void OnSelectionChangedHandler(object? sender, SelectionChangedEventArgs e)
         {
-            base.OnSelectionChanged(e);
-
             IList? selected = SelectedItems;
             if (selected != null)
             {

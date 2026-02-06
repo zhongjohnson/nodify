@@ -690,6 +690,9 @@ namespace Nodify
             Unloaded += OnEditorUnloaded;
 
             _focusNavigator = new StatefulFocusNavigator<ItemContainer>(OnElementFocused);
+
+            // Subscribe to SelectionChanged event instead of overriding OnSelectionChanged
+            SelectionChanged += OnSelectionChangedHandler;
         }
 
         /// <inheritdoc />
