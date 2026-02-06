@@ -1,4 +1,5 @@
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -22,16 +23,16 @@ namespace Nodify.Interactivity
             {
             }
 
-            protected override void OnBegin(InputEventArgs e)
+            protected override void OnBegin(RoutedEventArgs e)
                 => Element.BeginPanning();
 
             protected override void OnMouseMove(MouseEventArgs e)
                 => Element.UpdatePanning(Element.MouseLocation);
 
-            protected override void OnEnd(InputEventArgs e)
+            protected override void OnEnd(RoutedEventArgs e)
                 => Element.EndPanning();
 
-            protected override void OnCancel(InputEventArgs e)
+            protected override void OnCancel(RoutedEventArgs e)
                 => Element.CancelPanning();
         }
     }

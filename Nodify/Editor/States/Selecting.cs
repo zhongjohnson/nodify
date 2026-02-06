@@ -1,4 +1,5 @@
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -24,7 +25,7 @@ namespace Nodify.Interactivity
             {
             }
 
-            protected override void OnBegin(InputEventArgs e)
+            protected override void OnBegin(RoutedEventArgs e)
             {
                 var selectionType = EditorGestures.Mappings.Editor.Selection.GetSelectionType(e);
                 Element.BeginSelecting(selectionType);
@@ -33,10 +34,10 @@ namespace Nodify.Interactivity
             protected override void OnMouseMove(MouseEventArgs e)
                 => Element.UpdateSelection(Element.MouseLocation);
 
-            protected override void OnEnd(InputEventArgs e)
+            protected override void OnEnd(RoutedEventArgs e)
                 => Element.EndSelecting();
 
-            protected override void OnCancel(InputEventArgs e)
+            protected override void OnCancel(RoutedEventArgs e)
                 => Element.CancelSelecting();
         }
     }

@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -28,7 +29,7 @@ namespace Nodify.Interactivity
             {
             }
 
-            protected override void OnBegin(InputEventArgs e)
+            protected override void OnBegin(RoutedEventArgs e)
             {
                 _prevPosition = Mouse.GetPosition(Element);
                 Element.BeginPanning();
@@ -41,10 +42,10 @@ namespace Nodify.Interactivity
                 _prevPosition = currentMousePosition;
             }
 
-            protected override void OnEnd(InputEventArgs e)
+            protected override void OnEnd(RoutedEventArgs e)
                 => Element.EndPanning();
 
-            protected override void OnCancel(InputEventArgs e)
+            protected override void OnCancel(RoutedEventArgs e)
                 => Element.CancelPanning();
 
             private bool IsPanningAllowed()

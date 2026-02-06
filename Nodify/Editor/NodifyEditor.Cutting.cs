@@ -9,32 +9,49 @@ using Nodify.Interactivity;
 
 namespace Nodify
 {
-    [StyleTypedProperty(Property = nameof(CuttingLineStyle), StyleTargetType = typeof(CuttingLine))]
     public partial class NodifyEditor
     {
         #region Dependency properties
 
-        protected static readonly StyledPropertyKey CuttingLineStartPropertyKey = StyledProperty.RegisterReadOnly(nameof(CuttingLineStart), typeof(Point), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Point));
-        public static readonly StyledProperty CuttingLineStartProperty = CuttingLineStartPropertyKey.StyledProperty;
+        private Point _cuttingLineStart;
+        public static readonly DirectProperty<NodifyEditor, Point> CuttingLineStartProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, Point>(
+                nameof(CuttingLineStart),
+                o => o._cuttingLineStart,
+                (o, v) => o._cuttingLineStart = v);
 
-        protected static readonly StyledPropertyKey CuttingLineEndPropertyKey = StyledProperty.RegisterReadOnly(nameof(CuttingLineEnd), typeof(Point), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Point));
-        public static readonly StyledProperty CuttingLineEndProperty = CuttingLineEndPropertyKey.StyledProperty;
+        private Point _cuttingLineEnd;
+        public static readonly DirectProperty<NodifyEditor, Point> CuttingLineEndProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, Point>(
+                nameof(CuttingLineEnd),
+                o => o._cuttingLineEnd,
+                (o, v) => o._cuttingLineEnd = v);
 
-        protected static readonly StyledPropertyKey IsCuttingPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsCutting), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False, OnIsCuttingChanged));
-        public static readonly StyledProperty IsCuttingProperty = IsCuttingPropertyKey.StyledProperty;
+        private bool _isCutting;
+        public static readonly DirectProperty<NodifyEditor, bool> IsCuttingProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, bool>(
+                nameof(IsCutting),
+                o => o._isCutting,
+                (o, v) => o._isCutting = v);
 
-        public static readonly StyledProperty CuttingLineStyleProperty = StyledProperty.Register(nameof(CuttingLineStyle), typeof(Style), typeof(NodifyEditor));
+        public static readonly StyledProperty<Style?> CuttingLineStyleProperty =
+            AvaloniaProperty.Register<NodifyEditor, Style?>(nameof(CuttingLineStyle));
 
-        public static readonly StyledProperty CuttingStartedCommandProperty = StyledProperty.Register(nameof(CuttingStartedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly StyledProperty CuttingCompletedCommandProperty = StyledProperty.Register(nameof(CuttingCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty<ICommand?> CuttingStartedCommandProperty =
+            AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(CuttingStartedCommand));
 
-        private static void OnIsCuttingChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        public static readonly StyledProperty<ICommand?> CuttingCompletedCommandProperty =
+            AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(CuttingCompletedCommand));
+
+        static NodifyEditor()
         {
-            var editor = (NodifyEditor)d;
-            if ((bool)e.NewValue == true)
-                editor.OnCuttingStarted();
-            else
-                editor.OnCuttingCompleted();
+            IsCuttingProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+            {
+                if (e.NewValue.GetValueOrDefault())
+                    editor.OnCuttingStarted();
+                else
+                    editor.OnCuttingCompleted();
+            });
         }
 
         private void OnCuttingCompleted()
@@ -52,9 +69,9 @@ namespace Nodify
         /// <summary>
         /// Gets or sets the style to use for the cutting line.
         /// </summary>
-        public Style CuttingLineStyle
+        public Style? CuttingLineStyle
         {
-            get => (Style)GetValue(CuttingLineStyleProperty);
+            get => GetValue(CuttingLineStyleProperty);
             set => SetValue(CuttingLineStyleProperty, value);
         }
 
@@ -63,8 +80,8 @@ namespace Nodify
         /// </summary>
         public Point CuttingLineStart
         {
-            get => (Point)GetValue(CuttingLineStartProperty);
-            private set => SetValue(CuttingLineStartPropertyKey, value);
+            get => _cuttingLineStart;
+            private set => SetAndRaise(CuttingLineStartProperty, ref _cuttingLineStart, value);
         }
 
         /// <summary>
@@ -72,8 +89,8 @@ namespace Nodify
         /// </summary>
         public Point CuttingLineEnd
         {
-            get => (Point)GetValue(CuttingLineEndProperty);
-            private set => SetValue(CuttingLineEndPropertyKey, value);
+            get => _cuttingLineEnd;
+            private set => SetAndRaise(CuttingLineEndProperty, ref _cuttingLineEnd, value);
         }
 
         /// <summary>
@@ -81,8 +98,8 @@ namespace Nodify
         /// </summary>
         public bool IsCutting
         {
-            get => (bool)GetValue(IsCuttingProperty);
-            private set => SetValue(IsCuttingPropertyKey, value);
+            get => _isCutting;
+            private set => SetAndRaise(IsCuttingProperty, ref _isCutting, value);
         }
 
         /// <summary>Invoked when a cutting operation is started.</summary>

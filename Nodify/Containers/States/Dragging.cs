@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Nodify.Interactivity
 {
@@ -21,7 +22,7 @@ namespace Nodify.Interactivity
                 PositionElement = Element.Editor;
             }
 
-            protected override void OnBegin(InputEventArgs e)
+            protected override void OnBegin(RoutedEventArgs e)
             {
                 _previousMousePosition = Element.Editor.MouseLocation;
                 Element.BeginDragging();
@@ -33,10 +34,10 @@ namespace Nodify.Interactivity
                 _previousMousePosition = Element.Editor.MouseLocation;
             }
 
-            protected override void OnEnd(InputEventArgs e)
+            protected override void OnEnd(RoutedEventArgs e)
                 => Element.EndDragging();
 
-            protected override void OnCancel(InputEventArgs e)
+            protected override void OnCancel(RoutedEventArgs e)
                 => Element.CancelDragging();
         }
     }

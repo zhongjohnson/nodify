@@ -30,10 +30,6 @@ namespace Nodify
     /// <summary>
     /// Groups <see cref="ItemContainer"/>s and <see cref="Connection"/>s in an area that you can drag, zoom and select.
     /// </summary>
-    [TemplatePart(Name = ElementItemsHost, Type = typeof(Panel))]
-    [TemplatePart(Name = ElementConnectionsHost, Type = typeof(Control))]
-    [StyleTypedProperty(Property = nameof(ItemContainerStyle), StyleTargetType = typeof(ItemContainer))]
-    [StyleTypedProperty(Property = nameof(DecoratorContainerStyle), StyleTargetType = typeof(DecoratorContainer))]
     [ContentProperty(nameof(Decorators))]
     [DefaultProperty(nameof(Decorators))]
     public partial class NodifyEditor
