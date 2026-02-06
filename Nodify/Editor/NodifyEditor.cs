@@ -11,6 +11,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Metadata;
 using Avalonia.Media;
+using Avalonia.Styling;
+using Avalonia.Controls.Templates;
 
 namespace Nodify
 {
@@ -30,7 +32,6 @@ namespace Nodify
     /// <summary>
     /// Groups <see cref="ItemContainer"/>s and <see cref="Connection"/>s in an area that you can drag, zoom and select.
     /// </summary>
-    [ContentProperty(nameof(Decorators))]
     [DefaultProperty(nameof(Decorators))]
     public partial class NodifyEditor
     {
@@ -39,29 +40,48 @@ namespace Nodify
 
         #region Viewport
 
-        public static readonly StyledProperty ViewportZoomProperty = StyledProperty.Register(nameof(ViewportZoom), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Double1, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnViewportZoomChanged, ConstrainViewportZoomToRange));
-        public static readonly StyledProperty MinViewportZoomProperty = StyledProperty.Register(nameof(MinViewportZoom), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(0.1d, OnMinViewportZoomChanged, CoerceMinViewportZoom));
-        public static readonly StyledProperty MaxViewportZoomProperty = StyledProperty.Register(nameof(MaxViewportZoom), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Double2, OnMaxViewportZoomChanged, CoerceMaxViewportZoom));
-        public static readonly StyledProperty ViewportLocationProperty = StyledProperty.Register(nameof(ViewportLocation), typeof(Point), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnViewportLocationChanged));
-        public static readonly StyledProperty ViewportSizeProperty = StyledProperty.Register(nameof(ViewportSize), typeof(Size), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Size));
-        public static readonly StyledProperty ItemsExtentProperty = StyledProperty.Register(nameof(ItemsExtent), typeof(Rect), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Rect, OnItemsExtentChanged));
-        public static readonly StyledProperty DecoratorsExtentProperty = StyledProperty.Register(nameof(DecoratorsExtent), typeof(Rect), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Rect));
+        public static readonly StyledProperty<double> ViewportZoomProperty =
+            AvaloniaProperty.Register<NodifyEditor, double>(nameof(ViewportZoom), 1.0, defaultBindingMode: Avalonia.Data.BindingMode.TwoWay,
+                coerce: ConstrainViewportZoomToRange);
 
-        protected static readonly StyledPropertyKey ViewportTransformPropertyKey = StyledProperty.RegisterReadOnly(nameof(ViewportTransform), typeof(Transform), typeof(NodifyEditor), new StyledPropertyMetadata(new TransformGroup()));
-        public static readonly StyledProperty ViewportTransformProperty = ViewportTransformPropertyKey.StyledProperty;
+        public static readonly StyledProperty<double> MinViewportZoomProperty =
+            AvaloniaProperty.Register<NodifyEditor, double>(nameof(MinViewportZoom), 0.1,
+                coerce: CoerceMinViewportZoom);
+
+        public static readonly StyledProperty<double> MaxViewportZoomProperty =
+            AvaloniaProperty.Register<NodifyEditor, double>(nameof(MaxViewportZoom), 2.0,
+                coerce: CoerceMaxViewportZoom);
+
+        public static readonly StyledProperty<Point> ViewportLocationProperty =
+            AvaloniaProperty.Register<NodifyEditor, Point>(nameof(ViewportLocation), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+
+        public static readonly StyledProperty<Size> ViewportSizeProperty =
+            AvaloniaProperty.Register<NodifyEditor, Size>(nameof(ViewportSize));
+
+        public static readonly StyledProperty<Rect> ItemsExtentProperty =
+            AvaloniaProperty.Register<NodifyEditor, Rect>(nameof(ItemsExtent));
+
+        public static readonly StyledProperty<Rect> DecoratorsExtentProperty =
+            AvaloniaProperty.Register<NodifyEditor, Rect>(nameof(DecoratorsExtent));
+
+        private readonly TransformGroup _viewportTransform = new TransformGroup();
+        public static readonly DirectProperty<NodifyEditor, Transform> ViewportTransformProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, Transform>(
+                nameof(ViewportTransform),
+                o => o._viewportTransform);
 
         #region Callbacks
 
-        private static void OnItemsExtentChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnItemsExtentChanged(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
             editor.UpdateScrollbars();
         }
 
-        private static void OnViewportLocationChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnViewportLocationChanged(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
-            var translate = (Point)e.NewValue;
+            var translate = (Point)(e.NewValue ?? default(Point));
 
             editor.TranslateTransform.X = -translate.X * editor.ViewportZoom;
             editor.TranslateTransform.Y = -translate.Y * editor.ViewportZoom;
@@ -69,51 +89,50 @@ namespace Nodify
             editor.OnViewportUpdated();
         }
 
-        private static void OnViewportZoomChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnViewportZoomChanged(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
         {
             var editor = (NodifyEditor)d;
-            double zoom = (double)e.NewValue;
+            double zoom = (double)(e.NewValue ?? 1.0);
 
             editor.ScaleTransform.ScaleX = zoom;
             editor.ScaleTransform.ScaleY = zoom;
 
-            editor.ViewportSize = new Size(editor.ActualWidth / zoom, editor.ActualHeight / zoom);
+            editor.ViewportSize = new Size(editor.Bounds.Width / zoom, editor.Bounds.Height / zoom);
 
             editor.ApplyRenderingOptimizations();
             editor.OnViewportUpdated();
         }
 
-        private static void OnMinViewportZoomChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnMinViewportZoomChanged(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
         {
             var zoom = (NodifyEditor)d;
             zoom.CoerceValue(MaxViewportZoomProperty);
             zoom.CoerceValue(ViewportZoomProperty);
         }
 
-        private static object CoerceMinViewportZoom(AvaloniaObject d, object value)
-            => (double)value > 0.1d ? value : 0.1d;
+        private static double CoerceMinViewportZoom(AvaloniaObject d, double value)
+            => value > 0.1 ? value : 0.1;
 
-        private static void OnMaxViewportZoomChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnMaxViewportZoomChanged(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
         {
             var zoom = (NodifyEditor)d;
             zoom.CoerceValue(ViewportZoomProperty);
         }
 
-        private static object CoerceMaxViewportZoom(AvaloniaObject d, object value)
+        private static double CoerceMaxViewportZoom(AvaloniaObject d, double value)
         {
             var editor = (NodifyEditor)d;
             double min = editor.MinViewportZoom;
 
-            return (double)value < min ? min : value;
+            return value < min ? min : value;
         }
 
-        private static object ConstrainViewportZoomToRange(AvaloniaObject d, object value)
+        private static double ConstrainViewportZoomToRange(AvaloniaObject d, double value)
         {
             var editor = (NodifyEditor)d;
 
-            var num = (double)value;
             double minimum = editor.MinViewportZoom;
-            if (num < minimum)
+            if (value < minimum)
             {
                 return minimum;
             }
@@ -125,12 +144,13 @@ namespace Nodify
 
         #region Routed Events
 
-        public static readonly RoutedEvent ViewportUpdatedEvent = EventManager.RegisterRoutedEvent(nameof(ViewportUpdated), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(NodifyEditor));
+        public static readonly RoutedEvent<RoutedEventArgs> ViewportUpdatedEvent =
+            RoutedEvent.Register<NodifyEditor, RoutedEventArgs>(nameof(ViewportUpdated), RoutingStrategy.Bubble);
 
         /// <summary>
         /// Occurs whenever the viewport updates.
         /// </summary>
-        public event RoutedEventHandler ViewportUpdated
+        public event EventHandler<RoutedEventArgs> ViewportUpdated
         {
             add => AddHandler(ViewportUpdatedEvent, value);
             remove => RemoveHandler(ViewportUpdatedEvent, value);
@@ -164,7 +184,7 @@ namespace Nodify
         /// <summary>
         /// Gets the transform that is applied to all child controls.
         /// </summary>
-        public Transform ViewportTransform => (Transform)GetValue(ViewportTransformProperty);
+        public Transform ViewportTransform => _viewportTransform;
 
         /// <summary>
         /// Gets the size of the viewport in graph space (scaled by the <see cref="ViewportZoom"/>).
@@ -253,16 +273,35 @@ namespace Nodify
 
         #region Cosmetic Dependency Properties
 
-        public static readonly StyledProperty BringIntoViewSpeedProperty = StyledProperty.Register(nameof(BringIntoViewSpeed), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Double1000));
-        public static readonly StyledProperty BringIntoViewMaxDurationProperty = StyledProperty.Register(nameof(BringIntoViewMaxDuration), typeof(double), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Double1));
-        public static readonly StyledProperty DisplayConnectionsOnTopProperty = StyledProperty.Register(nameof(DisplayConnectionsOnTop), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
-        public static readonly StyledProperty ConnectionTemplateProperty = StyledProperty.Register(nameof(ConnectionTemplate), typeof(DataTemplate), typeof(NodifyEditor));
-        public static readonly StyledProperty ConnectionTemplateSelectorProperty = StyledProperty.Register(nameof(ConnectionTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
-        public static readonly StyledProperty DecoratorTemplateProperty = StyledProperty.Register(nameof(DecoratorTemplate), typeof(DataTemplate), typeof(NodifyEditor));
-        public static readonly StyledProperty DecoratorTemplateSelectorProperty = StyledProperty.Register(nameof(DecoratorTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
-        public static readonly StyledProperty PendingConnectionTemplateProperty = StyledProperty.Register(nameof(PendingConnectionTemplate), typeof(DataTemplate), typeof(NodifyEditor));
-        public static readonly StyledProperty PendingConnectionTemplateSelectorProperty = StyledProperty.Register(nameof(PendingConnectionTemplateSelector), typeof(DataTemplateSelector), typeof(NodifyEditor));
-        public static readonly StyledProperty DecoratorContainerStyleProperty = StyledProperty.Register(nameof(DecoratorContainerStyle), typeof(Style), typeof(NodifyEditor));
+        public static readonly StyledProperty<double> BringIntoViewSpeedProperty =
+            AvaloniaProperty.Register<NodifyEditor, double>(nameof(BringIntoViewSpeed), 1000.0);
+
+        public static readonly StyledProperty<double> BringIntoViewMaxDurationProperty =
+            AvaloniaProperty.Register<NodifyEditor, double>(nameof(BringIntoViewMaxDuration), 1.0);
+
+        public static readonly StyledProperty<bool> DisplayConnectionsOnTopProperty =
+            AvaloniaProperty.Register<NodifyEditor, bool>(nameof(DisplayConnectionsOnTop), false);
+
+        public static readonly StyledProperty<IDataTemplate?> ConnectionTemplateProperty =
+            AvaloniaProperty.Register<NodifyEditor, IDataTemplate?>(nameof(ConnectionTemplate));
+
+        public static readonly StyledProperty<DataTemplateSelector?> ConnectionTemplateSelectorProperty =
+            AvaloniaProperty.Register<NodifyEditor, DataTemplateSelector?>(nameof(ConnectionTemplateSelector));
+
+        public static readonly StyledProperty<IDataTemplate?> DecoratorTemplateProperty =
+            AvaloniaProperty.Register<NodifyEditor, IDataTemplate?>(nameof(DecoratorTemplate));
+
+        public static readonly StyledProperty<DataTemplateSelector?> DecoratorTemplateSelectorProperty =
+            AvaloniaProperty.Register<NodifyEditor, DataTemplateSelector?>(nameof(DecoratorTemplateSelector));
+
+        public static readonly StyledProperty<IDataTemplate?> PendingConnectionTemplateProperty =
+            AvaloniaProperty.Register<NodifyEditor, IDataTemplate?>(nameof(PendingConnectionTemplate));
+
+        public static readonly StyledProperty<DataTemplateSelector?> PendingConnectionTemplateSelectorProperty =
+            AvaloniaProperty.Register<NodifyEditor, DataTemplateSelector?>(nameof(PendingConnectionTemplateSelector));
+
+        public static readonly StyledProperty<Style?> DecoratorContainerStyleProperty =
+            AvaloniaProperty.Register<NodifyEditor, Style?>(nameof(DecoratorContainerStyle));
 
         /// <summary>
         /// Gets or sets the maximum animation duration in seconds for bringing a location into view.
@@ -293,54 +332,54 @@ namespace Nodify
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="DataTemplate"/> to use when generating a new <see cref="BaseConnection"/>.
+        /// Gets or sets the <see cref="IDataTemplate"/> to use when generating a new <see cref="BaseConnection"/>.
         /// </summary>
-        public DataTemplate ConnectionTemplate
+        public IDataTemplate? ConnectionTemplate
         {
-            get => (DataTemplate)GetValue(ConnectionTemplateProperty);
+            get => GetValue(ConnectionTemplateProperty);
             set => SetValue(ConnectionTemplateProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the custom logic for choosing a template for <see cref="BaseConnection"/>.
         /// </summary>
-        public DataTemplateSelector ConnectionTemplateSelector
+        public DataTemplateSelector? ConnectionTemplateSelector
         {
-            get => (DataTemplateSelector)GetValue(ConnectionTemplateSelectorProperty);
+            get => GetValue(ConnectionTemplateSelectorProperty);
             set => SetValue(ConnectionTemplateSelectorProperty, value);
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="DataTemplate"/> to use when generating a new <see cref="DecoratorContainer"/>.
+        /// Gets or sets the <see cref="IDataTemplate"/> to use when generating a new <see cref="DecoratorContainer"/>.
         /// </summary>
-        public DataTemplate DecoratorTemplate
+        public IDataTemplate? DecoratorTemplate
         {
-            get => (DataTemplate)GetValue(DecoratorTemplateProperty);
+            get => GetValue(DecoratorTemplateProperty);
             set => SetValue(DecoratorTemplateProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the custom logic for choosing a template for <see cref="DecoratorContainer"/>.
         /// </summary>
-        public DataTemplateSelector DecoratorTemplateSelector
+        public DataTemplateSelector? DecoratorTemplateSelector
         {
-            get => (DataTemplateSelector)GetValue(DecoratorTemplateSelectorProperty);
+            get => GetValue(DecoratorTemplateSelectorProperty);
             set => SetValue(DecoratorTemplateSelectorProperty, value);
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="DataTemplate"/> to use for the <see cref="PendingConnection"/>.
+        /// Gets or sets the <see cref="IDataTemplate"/> to use for the <see cref="PendingConnection"/>.
         /// </summary>
-        public DataTemplate PendingConnectionTemplate
+        public IDataTemplate? PendingConnectionTemplate
         {
-            get => (DataTemplate)GetValue(PendingConnectionTemplateProperty);
+            get => GetValue(PendingConnectionTemplateProperty);
             set => SetValue(PendingConnectionTemplateProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the custom logic for choosing a template for <see cref="PendingConnection"/>.
         /// </summary>
-        public DataTemplateSelector PendingConnectionTemplateSelector
+        public DataTemplateSelector? PendingConnectionTemplateSelector
         {
             get => (DataTemplateSelector)GetValue(PendingConnectionTemplateSelectorProperty);
             set => SetValue(PendingConnectionTemplateSelectorProperty, value);
@@ -585,6 +624,50 @@ namespace Nodify
             KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(KeyboardNavigationMode.None));
 
             EditorCommands.RegisterCommandBindings<NodifyEditor>();
+
+            // Property change handlers from partial files
+            IsCuttingProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+            {
+                if (e.NewValue.GetValueOrDefault())
+                    editor.OnCuttingStarted();
+                else
+                    editor.OnCuttingCompleted();
+            });
+
+            IsDraggingProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+            {
+                if (e.NewValue.GetValueOrDefault())
+                    editor.OnItemsDragStarted();
+                else
+                    editor.OnItemsDragCompleted();
+            });
+
+            DisableAutoPanningProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+                editor.OnDisableAutoPanningChanged(e.NewValue.GetValueOrDefault()));
+
+            DisablePanningProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+                editor.OnDisableAutoPanningChanged(editor.DisableAutoPanning || editor.DisablePanning));
+
+            IsSelectingProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+            {
+                if (e.NewValue.GetValueOrDefault())
+                    editor.OnItemsSelectStarted();
+                else
+                    editor.OnItemsSelectCompleted();
+            });
+
+            CanSelectMultipleItemsProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+                editor.CanSelectMultipleItemsBase = e.NewValue.GetValueOrDefault());
+
+            SelectedItemsProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
+                editor.OnSelectedItemsSourceChanged(e.OldValue.Value, e.NewValue.Value));
+
+            // Property change handlers from main file
+            ItemsExtentProperty.Changed.AddClassHandler<NodifyEditor>(OnItemsExtentChanged);
+            ViewportLocationProperty.Changed.AddClassHandler<NodifyEditor>(OnViewportLocationChanged);
+            ViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnViewportZoomChanged);
+            MinViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnMinViewportZoomChanged);
+            MaxViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnMaxViewportZoomChanged);
         }
 
         /// <summary>
@@ -598,11 +681,8 @@ namespace Nodify
 
             AddHandler(BaseConnection.DisconnectEvent, new ConnectionEventHandler(OnRemoveConnection));
 
-            var transform = new TransformGroup();
-            transform.Children.Add(ScaleTransform);
-            transform.Children.Add(TranslateTransform);
-
-            SetValue(ViewportTransformPropertyKey, transform);
+            _viewportTransform.Children.Add(ScaleTransform);
+            _viewportTransform.Children.Add(TranslateTransform);
 
             InputProcessor.AddSharedHandlers(this);
 

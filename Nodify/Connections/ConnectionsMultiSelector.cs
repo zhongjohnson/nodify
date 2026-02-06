@@ -5,26 +5,28 @@ using System.Collections.Specialized;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using System.Windows.Controls.Primitives;
 using Avalonia.Input;
 
 namespace Nodify
 {
-    public class ConnectionsMultiSelector : MultiSelector, IKeyboardNavigationLayer
+    public class ConnectionsMultiSelector : SelectingItemsControl, IKeyboardNavigationLayer
     {
         #region Dependency Properties
 
-        public static readonly StyledProperty SelectedItemsProperty = NodifyEditor.SelectedItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(default(IList), OnSelectedItemsSourceChanged));
-        public static readonly StyledProperty CanSelectMultipleItemsProperty = NodifyEditor.CanSelectMultipleItemsProperty.AddOwner(typeof(ConnectionsMultiSelector), new StyledPropertyMetadata(BoxValue.True, OnCanSelectMultipleItemsChanged, CoerceCanSelectMultipleItems));
+        public static readonly StyledProperty<IList?> SelectedItemsProperty =
+            NodifyEditor.SelectedItemsProperty.AddOwner<ConnectionsMultiSelector>();
 
-        private static void OnCanSelectMultipleItemsChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
-            => ((ConnectionsMultiSelector)d).CanSelectMultipleItemsBase = (bool)e.NewValue;
+        public static readonly StyledProperty<bool> CanSelectMultipleItemsProperty =
+            NodifyEditor.CanSelectMultipleItemsProperty.AddOwner<ConnectionsMultiSelector>();
 
-        private static object CoerceCanSelectMultipleItems(AvaloniaObject d, object baseValue)
-            => ((ConnectionsMultiSelector)d).CanSelectMultipleItemsBase = (bool)baseValue;
+        static ConnectionsMultiSelector()
+        {
+            CanSelectMultipleItemsProperty.Changed.AddClassHandler<ConnectionsMultiSelector>((selector, e) =>
+                selector.CanSelectMultipleItemsBase = e.NewValue.GetValueOrDefault());
 
-        private static void OnSelectedItemsSourceChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
-            => ((ConnectionsMultiSelector)d).OnSelectedItemsSourceChanged((IList)e.OldValue, (IList)e.NewValue);
+            SelectedItemsProperty.Changed.AddClassHandler<ConnectionsMultiSelector>((selector, e) =>
+                selector.OnSelectedItemsSourceChanged(e.OldValue.Value, e.NewValue.Value));
+        }
 
         /// <summary>
         /// Gets or sets the selected connections in the <see cref="NodifyEditor"/>.

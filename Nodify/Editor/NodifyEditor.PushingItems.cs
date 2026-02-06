@@ -4,32 +4,45 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Controls.Shapes;
+using Avalonia.Styling;
 
 namespace Nodify
 {
-    [StyleTypedProperty(Property = nameof(PushedAreaStyle), StyleTargetType = typeof(Rectangle))]
     public partial class NodifyEditor
     {
         #region Dependency properties
 
-        public static readonly StyledProperty PushedAreaStyleProperty = StyledProperty.Register(nameof(PushedAreaStyle), typeof(Style), typeof(NodifyEditor));
+        public static readonly StyledProperty<Style?> PushedAreaStyleProperty =
+            AvaloniaProperty.Register<NodifyEditor, Style?>(nameof(PushedAreaStyle));
 
-        protected static readonly StyledPropertyKey PushedAreaPropertyKey = StyledProperty.RegisterReadOnly(nameof(PushedArea), typeof(Rect), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Rect));
-        public static readonly StyledProperty PushedAreaProperty = PushedAreaPropertyKey.StyledProperty;
+        private Rect _pushedArea;
+        public static readonly DirectProperty<NodifyEditor, Rect> PushedAreaProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, Rect>(
+                nameof(PushedArea),
+                o => o._pushedArea,
+                (o, v) => o._pushedArea = v);
 
-        protected static readonly StyledPropertyKey IsPushingItemsPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsPushingItems), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
-        public static readonly StyledProperty IsPushingItemsProperty = IsPushingItemsPropertyKey.StyledProperty;
+        private bool _isPushingItems;
+        public static readonly DirectProperty<NodifyEditor, bool> IsPushingItemsProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, bool>(
+                nameof(IsPushingItems),
+                o => o._isPushingItems,
+                (o, v) => o._isPushingItems = v);
 
-        protected static readonly StyledPropertyKey PushedAreaOrientationPropertyKey = StyledProperty.RegisterReadOnly(nameof(PushedAreaOrientation), typeof(Orientation), typeof(NodifyEditor), new StyledPropertyMetadata(Orientation.Horizontal));
-        public static readonly StyledProperty PushedAreaOrientationProperty = PushedAreaOrientationPropertyKey.StyledProperty;
+        private Orientation _pushedAreaOrientation = Orientation.Horizontal;
+        public static readonly DirectProperty<NodifyEditor, Orientation> PushedAreaOrientationProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, Orientation>(
+                nameof(PushedAreaOrientation),
+                o => o._pushedAreaOrientation,
+                (o, v) => o._pushedAreaOrientation = v);
 
         /// <summary>
         /// Gets the currently pushed area while <see cref="IsPushingItems"/> is true.
         /// </summary>
         public Rect PushedArea
         {
-            get => (Rect)GetValue(PushedAreaProperty);
-            private set => SetValue(PushedAreaPropertyKey, value);
+            get => _pushedArea;
+            private set => SetAndRaise(PushedAreaProperty, ref _pushedArea, value);
         }
 
         /// <summary>
@@ -37,8 +50,8 @@ namespace Nodify
         /// </summary>
         public bool IsPushingItems
         {
-            get => (bool)GetValue(IsPushingItemsProperty);
-            private set => SetValue(IsPushingItemsPropertyKey, value);
+            get => _isPushingItems;
+            private set => SetAndRaise(IsPushingItemsProperty, ref _isPushingItems, value);
         }
 
         /// <summary>
@@ -46,16 +59,16 @@ namespace Nodify
         /// </summary>
         public Orientation PushedAreaOrientation
         {
-            get => (Orientation)GetValue(PushedAreaOrientationProperty);
-            private set => SetValue(PushedAreaOrientationPropertyKey, value);
+            get => _pushedAreaOrientation;
+            private set => SetAndRaise(PushedAreaOrientationProperty, ref _pushedAreaOrientation, value);
         }
 
         /// <summary>
         /// Gets or sets the style to use for the pushed area.
         /// </summary>
-        public Style PushedAreaStyle
+        public Style? PushedAreaStyle
         {
-            get => (Style)GetValue(PushedAreaStyleProperty);
+            get => GetValue(PushedAreaStyleProperty);
             set => SetValue(PushedAreaStyleProperty, value);
         }
 

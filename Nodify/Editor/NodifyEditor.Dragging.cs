@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Nodify.Events;
 using System.Linq;
+using System;
 
 namespace Nodify
 {
@@ -13,25 +14,18 @@ namespace Nodify
     {
         #region Dependency properties
 
-        public static readonly StyledProperty ItemsDragStartedCommandProperty = StyledProperty.Register(nameof(ItemsDragStartedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly StyledProperty ItemsDragCompletedCommandProperty = StyledProperty.Register(nameof(ItemsDragCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty<ICommand?> ItemsDragStartedCommandProperty =
+            AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(ItemsDragStartedCommand));
 
-        protected static readonly StyledPropertyKey IsDraggingPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsDragging), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False, OnIsDraggingChanged));
-        public static readonly StyledProperty IsDraggingProperty = IsDraggingPropertyKey.StyledProperty;
+        public static readonly StyledProperty<ICommand?> ItemsDragCompletedCommandProperty =
+            AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(ItemsDragCompletedCommand));
 
-        private static void OnIsDraggingChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
-        {
-            var editor = (NodifyEditor)d;
-
-            if ((bool)e.NewValue == true)
-            {
-                editor.OnItemsDragStarted();
-            }
-            else
-            {
-                editor.OnItemsDragCompleted();
-            }
-        }
+        private bool _isDragging;
+        public static readonly DirectProperty<NodifyEditor, bool> IsDraggingProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, bool>(
+                nameof(IsDragging),
+                o => o._isDragging,
+                (o, v) => o._isDragging = v);
 
         private void OnItemsDragCompleted()
         {
@@ -68,20 +62,21 @@ namespace Nodify
         /// </summary>
         public bool IsDragging
         {
-            get => (bool)GetValue(IsDraggingProperty);
-            private set => SetValue(IsDraggingPropertyKey, value);
+            get => _isDragging;
+            private set => SetAndRaise(IsDraggingProperty, ref _isDragging, value);
         }
 
         #endregion
 
         #region Routed events
 
-        public static readonly RoutedEvent ItemsMovedEvent = EventManager.RegisterRoutedEvent(nameof(ItemsMoved), RoutingStrategy.Bubble, typeof(ItemsMovedEventHandler), typeof(NodifyEditor));
+        public static readonly RoutedEvent<ItemsMovedEventArgs> ItemsMovedEvent =
+            RoutedEvent.Register<NodifyEditor, ItemsMovedEventArgs>(nameof(ItemsMoved), RoutingStrategy.Bubble);
 
         /// <summary>
         /// Occurs when items are moved within the editor (see <see cref="BeginDragging()"/>, <see cref="BeginPushingItems(Point, System.Windows.Controls.Orientation)"/>).
         /// </summary>
-        public event ItemsMovedEventHandler ItemsMoved
+        public event EventHandler<ItemsMovedEventArgs> ItemsMoved
         {
             add => AddHandler(ItemsMovedEvent, value);
             remove => RemoveHandler(ItemsMovedEvent, value);

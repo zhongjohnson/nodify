@@ -6,6 +6,8 @@ using Avalonia.Input;
 using Avalonia.Media;
 using System.Diagnostics;
 using Nodify.Interactivity;
+using Avalonia.Controls;
+using Avalonia.Styling;
 
 namespace Nodify
 {
@@ -42,17 +44,6 @@ namespace Nodify
 
         public static readonly StyledProperty<ICommand?> CuttingCompletedCommandProperty =
             AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(CuttingCompletedCommand));
-
-        static NodifyEditor()
-        {
-            IsCuttingProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
-            {
-                if (e.NewValue.GetValueOrDefault())
-                    editor.OnCuttingStarted();
-                else
-                    editor.OnCuttingCompleted();
-            });
-        }
 
         private void OnCuttingCompleted()
         {

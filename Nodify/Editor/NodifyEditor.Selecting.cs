@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Windows.Controls.Primitives;
 using Avalonia.Controls;
 using Avalonia;
 using System.Windows.Input;
@@ -25,46 +24,50 @@ namespace Nodify
         Invert
     }
 
-    [StyleTypedProperty(Property = nameof(SelectionRectangleStyle), StyleTargetType = typeof(Rectangle))]
-    public partial class NodifyEditor : MultiSelector
+    public partial class NodifyEditor : SelectingItemsControl
     {
         #region Dependency properties
 
-        public static readonly StyledProperty ItemsSelectStartedCommandProperty = StyledProperty.Register(nameof(ItemsSelectStartedCommand), typeof(ICommand), typeof(NodifyEditor));
-        public static readonly StyledProperty ItemsSelectCompletedCommandProperty = StyledProperty.Register(nameof(ItemsSelectCompletedCommand), typeof(ICommand), typeof(NodifyEditor));
+        public static readonly StyledProperty<ICommand?> ItemsSelectStartedCommandProperty =
+            AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(ItemsSelectStartedCommand));
 
-        public static readonly StyledProperty SelectionRectangleStyleProperty = StyledProperty.Register(nameof(SelectionRectangleStyle), typeof(Style), typeof(NodifyEditor));
+        public static readonly StyledProperty<ICommand?> ItemsSelectCompletedCommandProperty =
+            AvaloniaProperty.Register<NodifyEditor, ICommand?>(nameof(ItemsSelectCompletedCommand));
 
-        protected static readonly StyledPropertyKey SelectedAreaPropertyKey = StyledProperty.RegisterReadOnly(nameof(SelectedArea), typeof(Rect), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.Rect));
-        public static readonly StyledProperty SelectedAreaProperty = SelectedAreaPropertyKey.StyledProperty;
+        public static readonly StyledProperty<Style?> SelectionRectangleStyleProperty =
+            AvaloniaProperty.Register<NodifyEditor, Style?>(nameof(SelectionRectangleStyle));
 
-        protected static readonly StyledPropertyKey IsSelectingPropertyKey = StyledProperty.RegisterReadOnly(nameof(IsSelecting), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False, OnIsSelectingChanged));
-        public static readonly StyledProperty IsSelectingProperty = IsSelectingPropertyKey.StyledProperty;
+        private Rect _selectedArea;
+        public static readonly DirectProperty<NodifyEditor, Rect> SelectedAreaProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, Rect>(
+                nameof(SelectedArea),
+                o => o._selectedArea,
+                (o, v) => o._selectedArea = v);
 
-        public static readonly StyledProperty EnableRealtimeSelectionProperty = StyledProperty.Register(nameof(EnableRealtimeSelection), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.False));
-        public static readonly StyledProperty CanSelectMultipleConnectionsProperty = StyledProperty.Register(nameof(CanSelectMultipleConnections), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.True));
-        public static readonly StyledProperty CanSelectMultipleItemsProperty = StyledProperty.Register(nameof(CanSelectMultipleItems), typeof(bool), typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.True, OnCanSelectMultipleItemsChanged, CoerceCanSelectMultipleItems));
-        public static readonly StyledProperty SelectedItemsProperty = StyledProperty.Register(nameof(SelectedItems), typeof(IList), typeof(NodifyEditor), new StyledPropertyMetadata(default(IList), OnSelectedItemsSourceChanged));
-        public static readonly StyledProperty SelectedConnectionsProperty = StyledProperty.Register(nameof(SelectedConnections), typeof(IList), typeof(NodifyEditor), new StyledPropertyMetadata(default(IList)));
-        public static readonly StyledProperty SelectedConnectionProperty = StyledProperty.Register(nameof(SelectedConnection), typeof(object), typeof(NodifyEditor), new StyledPropertyMetadata(null, StyledPropertyMetadataOptions.BindsTwoWayByDefault));
+        private bool _isSelecting;
+        public static readonly DirectProperty<NodifyEditor, bool> IsSelectingProperty =
+            AvaloniaProperty.RegisterDirect<NodifyEditor, bool>(
+                nameof(IsSelecting),
+                o => o._isSelecting,
+                (o, v) => o._isSelecting = v);
 
-        private static void OnCanSelectMultipleItemsChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
-            => ((NodifyEditor)d).CanSelectMultipleItemsBase = (bool)e.NewValue;
+        public static readonly StyledProperty<bool> EnableRealtimeSelectionProperty =
+            AvaloniaProperty.Register<NodifyEditor, bool>(nameof(EnableRealtimeSelection), false);
 
-        private static object CoerceCanSelectMultipleItems(AvaloniaObject d, object baseValue)
-            => ((NodifyEditor)d).CanSelectMultipleItemsBase = (bool)baseValue;
+        public static readonly StyledProperty<bool> CanSelectMultipleConnectionsProperty =
+            AvaloniaProperty.Register<NodifyEditor, bool>(nameof(CanSelectMultipleConnections), true);
 
-        private static void OnSelectedItemsSourceChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
-            => ((NodifyEditor)d).OnSelectedItemsSourceChanged((IList)e.OldValue, (IList)e.NewValue);
+        public static readonly StyledProperty<bool> CanSelectMultipleItemsProperty =
+            AvaloniaProperty.Register<NodifyEditor, bool>(nameof(CanSelectMultipleItems), true);
 
-        private static void OnIsSelectingChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
-        {
-            var editor = (NodifyEditor)d;
-            if ((bool)e.NewValue == true)
-                editor.OnItemsSelectStarted();
-            else
-                editor.OnItemsSelectCompleted();
-        }
+        public static readonly StyledProperty<IList?> SelectedItemsProperty =
+            AvaloniaProperty.Register<NodifyEditor, IList?>(nameof(SelectedItems));
+
+        public static readonly StyledProperty<IList?> SelectedConnectionsProperty =
+            AvaloniaProperty.Register<NodifyEditor, IList?>(nameof(SelectedConnections));
+
+        public static readonly StyledProperty<object?> SelectedConnectionProperty =
+            AvaloniaProperty.Register<NodifyEditor, object?>(nameof(SelectedConnection), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
 
         private void OnItemsSelectCompleted()
         {

@@ -255,10 +255,10 @@ namespace Nodify
             }
         }
 
-        private static void OnIsSelectedChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnIsSelectedChanged(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
         {
             var elem = (ItemContainer)d;
-            bool result = elem.IsSelectable && (bool)e.NewValue;
+            bool result = elem.IsSelectable && (bool)(e.NewValue ?? false);
             elem.IsSelected = result;
             elem.OnSelectedChanged(result);
         }

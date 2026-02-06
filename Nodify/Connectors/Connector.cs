@@ -254,11 +254,11 @@ namespace Nodify
         private void OnConnectorUnloaded(object sender, RoutedEventArgs e)
             => TrySetAnchorUpdateEvents(false);
 
-        private static void OnIsConnectedChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnIsConnectedChanged(AvaloniaObject d, AvaloniaPropertyChangedEventArgs e)
         {
             var con = (Connector)d;
 
-            if ((bool)e.NewValue)
+            if ((bool)(e.NewValue ?? false))
             {
                 con.UpdateAnchor();
             }
