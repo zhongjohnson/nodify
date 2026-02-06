@@ -6,30 +6,28 @@ using Avalonia;
 using Avalonia.Metadata;
 using Avalonia.Interactivity;
 using Avalonia.Controls;
-using System.Windows.Controls.Primitives;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Controls.Shapes;
+using Avalonia.Styling;
 
 namespace Nodify
 {
     /// <summary>
     /// A minimap control that can position the viewport, and zoom in and out.
     /// </summary>
-    [StyleTypedProperty(Property = nameof(ViewportStyle), StyleTargetType = typeof(Rectangle))]
-    [StyleTypedProperty(Property = nameof(ItemContainerStyle), StyleTargetType = typeof(MinimapItem))]
-    [TemplatePart(Name = ElementItemsHost, Type = typeof(Panel))]
     public class Minimap : ItemsControl
     {
         private const string ElementItemsHost = "PART_ItemsHost";
 
-        public static readonly StyledProperty ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner(typeof(Minimap), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.BindsTwoWayByDefault));
-        public static readonly StyledProperty ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner(typeof(Minimap));
-        public static readonly StyledProperty ViewportStyleProperty = StyledProperty.Register(nameof(ViewportStyle), typeof(Style), typeof(Minimap));
-        public static readonly StyledProperty ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner(typeof(Minimap));
-        public static readonly StyledProperty ItemsExtentProperty = StyledProperty.Register(nameof(ItemsExtent), typeof(Rect), typeof(Minimap));
-        public static readonly StyledProperty MaxViewportOffsetProperty = StyledProperty.Register(nameof(MaxViewportOffset), typeof(Size), typeof(Minimap), new StyledPropertyMetadata(new Size(2000, 2000)));
-        public static readonly StyledProperty ResizeToViewportProperty = StyledProperty.Register(nameof(ResizeToViewport), typeof(bool), typeof(Minimap));
-        public static readonly StyledProperty IsReadOnlyProperty = TextBoxBase.IsReadOnlyProperty.AddOwner(typeof(Minimap));
+        public static readonly StyledProperty<Point> ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner<Minimap>(new StyledPropertyMetadata<Point>(default, defaultBindingMode: Avalonia.Data.BindingMode.TwoWay));
+        public static readonly StyledProperty<Size> ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner<Minimap>();
+        public static readonly StyledProperty<Style?> ViewportStyleProperty = AvaloniaProperty.Register<Minimap, Style?>(nameof(ViewportStyle));
+        public static readonly StyledProperty<Rect> ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner<Minimap>();
+        public static readonly StyledProperty<Rect> ItemsExtentProperty = AvaloniaProperty.Register<Minimap, Rect>(nameof(ItemsExtent));
+        public static readonly StyledProperty<Size> MaxViewportOffsetProperty = AvaloniaProperty.Register<Minimap, Size>(nameof(MaxViewportOffset), new Size(2000, 2000));
+        public static readonly StyledProperty<bool> ResizeToViewportProperty = AvaloniaProperty.Register<Minimap, bool>(nameof(ResizeToViewport));
+        public static readonly StyledProperty<bool> IsReadOnlyProperty = TextBox.IsReadOnlyProperty.AddOwner<Minimap>();
 
         public static readonly RoutedEvent ZoomEvent = EventManager.RegisterRoutedEvent(nameof(Zoom), RoutingStrategy.Bubble, typeof(ZoomEventHandler), typeof(Minimap));
 

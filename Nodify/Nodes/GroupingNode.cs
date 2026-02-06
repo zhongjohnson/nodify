@@ -7,7 +7,7 @@ using Avalonia.Metadata;
 using System.Windows.Input;
 using Avalonia.Interactivity;
 using Avalonia.Controls;
-using System.Windows.Controls.Primitives;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Media;
 
@@ -32,10 +32,7 @@ namespace Nodify
     /// <summary>
     /// Defines a panel with a header that groups <see cref="ItemContainer"/>s inside it and can be resized.
     /// </summary>
-    [TemplatePart(Name = ElementResizeThumb, Type = typeof(Control))]
-    [TemplatePart(Name = ElementHeader, Type = typeof(Control))]
-    [TemplatePart(Name = ElementContent, Type = typeof(Control))]
-    public class GroupingNode : HeaderedContentControl
+    public class GroupingNode : ContentControl
     {
         protected static readonly object GroupMovementBoxed = GroupingMovementMode.Group;
 
@@ -70,17 +67,16 @@ namespace Nodify
 
         #region Dependency Properties
 
-        public static readonly StyledProperty HeaderBrushProperty = Node.HeaderBrushProperty.AddOwner(typeof(GroupingNode));
-        public static readonly StyledProperty CanResizeProperty = StyledProperty.Register(nameof(CanResize), typeof(bool), typeof(GroupingNode), new StyledPropertyMetadata(BoxValue.True));
-        public static readonly StyledProperty ActualSizeProperty = StyledProperty.Register(nameof(ActualSize), typeof(Size), typeof(GroupingNode), new StyledPropertyMetadata(BoxValue.Size, StyledPropertyMetadataOptions.BindsTwoWayByDefault, OnActualSizeChanged));
-        public static readonly StyledProperty MovementModeProperty = StyledProperty.Register(nameof(MovementMode), typeof(GroupingMovementMode), typeof(GroupingNode), new StyledPropertyMetadata(GroupMovementBoxed));
-        public static readonly StyledProperty ResizeCompletedCommandProperty = StyledProperty.Register(nameof(ResizeCompletedCommand), typeof(ICommand), typeof(GroupingNode));
-        public static readonly StyledProperty ResizeStartedCommandProperty = StyledProperty.Register(nameof(ResizeStartedCommand), typeof(ICommand), typeof(GroupingNode));
+        public static readonly StyledProperty<IBrush?> HeaderBrushProperty = Node.HeaderBrushProperty.AddOwner<GroupingNode>();
+        public static readonly StyledProperty<bool> CanResizeProperty = AvaloniaProperty.Register<GroupingNode, bool>(nameof(CanResize), true);
+        public static readonly StyledProperty<Size> ActualSizeProperty = AvaloniaProperty.Register<GroupingNode, Size>(nameof(ActualSize), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay, notifying: OnActualSizeChanged);
+        public static readonly StyledProperty<GroupingMovementMode> MovementModeProperty = AvaloniaProperty.Register<GroupingNode, GroupingMovementMode>(nameof(MovementMode), GroupingMovementMode.Group);
+        public static readonly StyledProperty<ICommand?> ResizeCompletedCommandProperty = AvaloniaProperty.Register<GroupingNode, ICommand?>(nameof(ResizeCompletedCommand));
+        public static readonly StyledProperty<ICommand?> ResizeStartedCommandProperty = AvaloniaProperty.Register<GroupingNode, ICommand?>(nameof(ResizeStartedCommand));
 
-        private static void OnActualSizeChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnActualSizeChanged(GroupingNode node, AvaloniaPropertyChangedEventArgs<Size> e)
         {
-            var node = (GroupingNode)d;
-            var newSize = (Size)e.NewValue;
+            var newSize = e.NewValue.Value;
             node.Width = newSize.Width;
             node.Height = newSize.Height;
         }
@@ -182,12 +178,11 @@ namespace Nodify
             Panel.ZIndexProperty.OverrideMetadata(typeof(GroupingNode), new StyledPropertyMetadata(-1, OnZIndexPropertyChanged));
         }
 
-        private static void OnZIndexPropertyChanged(AvaloniaObject d, StyledPropertyChangedEventArgs e)
+        private static void OnZIndexPropertyChanged(GroupingNode node, AvaloniaPropertyChangedEventArgs<int> e)
         {
-            var node = (GroupingNode)d;
             if (node.Container != null)
             {
-                Panel.SetZIndex(node.Container, (int)e.NewValue);
+                Panel.SetZIndex(node.Container, e.NewValue.Value);
             }
         }
 

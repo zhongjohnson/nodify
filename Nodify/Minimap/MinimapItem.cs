@@ -7,10 +7,10 @@ namespace Nodify
     {
         static MinimapItem()
         {
-            FocusableProperty.OverrideMetadata(typeof(MinimapItem), new StyledPropertyMetadata(BoxValue.False));
+            FocusableProperty.OverrideMetadata(typeof(MinimapItem), new StyledPropertyMetadata<bool>(false));
         }
 
-        public static readonly StyledProperty LocationProperty = ItemContainer.LocationProperty.AddOwner(typeof(MinimapItem), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.BindsTwoWayByDefault | StyledPropertyMetadataOptions.AffectsParentMeasure));
+        public static readonly StyledProperty<Point> LocationProperty = ItemContainer.LocationProperty.AddOwner<MinimapItem>(new StyledPropertyMetadata<Point>(default, defaultBindingMode: Avalonia.Data.BindingMode.TwoWay, affects: AffectsFlags.ParentMeasure));
 
         /// <summary>
         /// Gets or sets the location of this <see cref="MinimapItem"/> inside the <see cref="Minimap"/>.

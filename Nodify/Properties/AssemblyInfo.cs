@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Metadata;
 
-[assembly: ThemeInfo(ResourceDictionaryLocation.ExternalAssembly, ResourceDictionaryLocation.SourceAssembly)]
+// ThemeInfo is WPF-specific and not needed in Avalonia
 [assembly: XmlnsDefinition("https://miroiu.github.io/nodify", "Nodify")]
 [assembly: XmlnsPrefix("https://miroiu.github.io/nodify", "nodify")]
 

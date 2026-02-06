@@ -6,11 +6,13 @@ namespace Nodify
 {
     internal sealed class MinimapPanel : Panel
     {
-        public static readonly StyledProperty ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner(typeof(MinimapPanel), new StyledPropertyMetadata(BoxValue.Point, StyledPropertyMetadataOptions.AffectsMeasure));
-        public static readonly StyledProperty ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner(typeof(MinimapPanel), new StyledPropertyMetadata(BoxValue.Size, StyledPropertyMetadataOptions.AffectsMeasure));
-        public static readonly StyledProperty ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner(typeof(MinimapPanel));
-        public static readonly StyledProperty ItemsExtentProperty = Minimap.ItemsExtentProperty.AddOwner(typeof(MinimapPanel));
-        public static readonly StyledProperty ResizeToViewportProperty = Minimap.ResizeToViewportProperty.AddOwner(typeof(MinimapPanel));
+        public static readonly StyledProperty<Point> ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner<MinimapPanel>(new StyledPropertyMetadata<Point>(default, affects: AffectsMeasureFlags));
+        public static readonly StyledProperty<Size> ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner<MinimapPanel>(new StyledPropertyMetadata<Size>(default, affects: AffectsMeasureFlags));
+        public static readonly StyledProperty<Rect> ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner<MinimapPanel>();
+        public static readonly StyledProperty<Rect> ItemsExtentProperty = Minimap.ItemsExtentProperty.AddOwner<MinimapPanel>();
+        public static readonly StyledProperty<bool> ResizeToViewportProperty = Minimap.ResizeToViewportProperty.AddOwner<MinimapPanel>();
+
+        private const AffectsFlags AffectsMeasureFlags = AffectsFlags.Measure;
 
         /// <inheritdoc cref="Minimap.ViewportLocation" />
         public Point ViewportLocation
