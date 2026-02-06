@@ -20,7 +20,7 @@ namespace Nodify.Interactivity
             Value = gesture;
         }
 
-        public override bool Matches(object targetElement, InputEventArgs inputEventArgs)
+        public override bool Matches(object targetElement, RoutedEventArgs inputEventArgs)
         {
             return Value.Matches(targetElement, inputEventArgs);
         }

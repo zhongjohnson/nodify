@@ -24,7 +24,7 @@ namespace Nodify
         public static readonly StyledProperty<IBrush?> ContentBrushProperty = AvaloniaProperty.Register<Node, IBrush?>(nameof(ContentBrush));
         public static readonly StyledProperty<IBrush?> HeaderBrushProperty = AvaloniaProperty.Register<Node, IBrush?>(nameof(HeaderBrush));
         public static readonly StyledProperty<IBrush?> FooterBrushProperty = AvaloniaProperty.Register<Node, IBrush?>(nameof(FooterBrush));
-        public static readonly StyledProperty<object?> FooterProperty = AvaloniaProperty.Register<Node, object?>(nameof(Footer), notifying: OnFooterChanged);
+        public static readonly StyledProperty<object?> FooterProperty = AvaloniaProperty.Register<Node, object?>(nameof(Footer), coerce: (o, v) => { OnFooterChanged(o, v); return v; });
         public static readonly StyledProperty<IDataTemplate?> FooterTemplateProperty = AvaloniaProperty.Register<Node, IDataTemplate?>(nameof(FooterTemplate));
         public static readonly StyledProperty<IDataTemplate?> InputConnectorTemplateProperty = AvaloniaProperty.Register<Node, IDataTemplate?>(nameof(InputConnectorTemplate));
 
@@ -33,6 +33,11 @@ namespace Nodify
             AvaloniaProperty.RegisterDirect<Node, bool>(nameof(HasFooter), o => o._hasFooter, (o, v) => o._hasFooter = v);
 
         public static readonly StyledProperty<IDataTemplate?> OutputConnectorTemplateProperty = AvaloniaProperty.Register<Node, IDataTemplate?>(nameof(OutputConnectorTemplate));
+
+        private static void OnFooterChanged(Node node, object? footer)
+        {
+            node._hasFooter = footer != null;
+        }
         public static readonly StyledProperty<IEnumerable?> InputProperty = AvaloniaProperty.Register<Node, IEnumerable?>(nameof(Input));
         public static readonly StyledProperty<IEnumerable?> OutputProperty = AvaloniaProperty.Register<Node, IEnumerable?>(nameof(Output));
         public static readonly StyledProperty<Style?> ContentContainerStyleProperty = AvaloniaProperty.Register<Node, Style?>(nameof(ContentContainerStyle));
@@ -167,10 +172,11 @@ namespace Nodify
         protected ItemsControl? InputItemsControl { get; private set; }
         protected ItemsControl? OutputItemsControl { get; private set; }
 
+        // TODO: Avalonia doesn't have DefaultStyleKeyProperty - handled by theme system differently
+        // FocusableProperty override not needed in same way
         static Node()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(Node), new StyledPropertyMetadata<Type>(typeof(Node)));
-            FocusableProperty.OverrideMetadata(typeof(Node), new StyledPropertyMetadata<bool>(false));
+            FocusableProperty.OverrideDefaultValue<Node>(false);
         }
 
         public Node()
@@ -180,12 +186,12 @@ namespace Nodify
             // OutputGroupStyle.CollectionChanged += OnOutputGroupStyleCollectionChanged;
         }
 
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
-            InputItemsControl = GetTemplateChild(ElementInputItemsControl) as ItemsControl;
-            OutputItemsControl = GetTemplateChild(ElementOutputItemsControl) as ItemsControl;
+            InputItemsControl = e.NameScope.Find<ItemsControl>(ElementInputItemsControl);
+            OutputItemsControl = e.NameScope.Find<ItemsControl>(ElementOutputItemsControl);
 
             // TODO: GroupStyle is WPF-specific - commented out for Avalonia
             /*

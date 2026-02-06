@@ -145,11 +145,9 @@ namespace Nodify
             ItemsHost = e.NameScope.Find<Panel>(ElementItemsHost) ?? throw new InvalidOperationException($"{ElementItemsHost} is missing or is not of type {nameof(Panel)}.");
         }
 
-        protected override AvaloniaObject GetContainerForItemOverride()
-            => new MinimapItem();
-
-        protected override bool IsItemItsOwnContainerOverride(object item)
-            => item is MinimapItem;
+        // NOTE: Avalonia ItemsControl doesn't have IsItemItsOwnContainerOverride/GetContainerForItemOverride
+        // Container creation is handled differently in Avalonia using ItemTemplate
+        // TODO: Implement container generation using Avalonia patterns
 
         #region Gesture Handling
 

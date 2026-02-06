@@ -77,11 +77,11 @@ namespace Nodify.Interactivity
             }
         }
 
-        public void HandleEvent(InputEventArgs e)
+        public void HandleEvent(RoutedEventArgs e)
         {
             State.HandleEvent(e);
 
-            if (e.RoutedEvent == Control.LostMouseCaptureEvent)
+            if (e.RoutedEvent == Control.PointerCaptureLostEvent)
             {
                 PopAllStates();
             }

@@ -18,10 +18,8 @@ namespace Nodify.Interactivity
             /// </summary>
             public InputElementStateStack<TElement> Stack { get; }
 
-            private readonly InputEventArgs _mouseEventArgs = new MouseEventArgs(Mouse.PrimaryDevice, 0, Stylus.CurrentStylusDevice)
-            {
-                RoutedEvent = NodifyEditor.ViewportUpdatedEvent  // dummy event
-            };
+            // Dummy event args for BeginDrag call - Avalonia doesn't need Mouse.PrimaryDevice
+            private readonly RoutedEventArgs _mouseEventArgs = new RoutedEventArgs(NodifyEditor.ViewportUpdatedEvent);
 
             /// <summary>
             /// Initializes a new instance of the <see cref="DragState"/> class.
@@ -68,10 +66,10 @@ namespace Nodify.Interactivity
             public void PopState()
                 => Stack.PopState();
 
-            protected override void OnCancel(InputEventArgs e)
+            protected override void OnCancel(RoutedEventArgs e)
                 => PopState();
 
-            protected override void OnEnd(InputEventArgs e)
+            protected override void OnEnd(RoutedEventArgs e)
                 => PopState();
         }
     }

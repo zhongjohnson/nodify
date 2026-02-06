@@ -51,17 +51,13 @@ namespace Nodify
             _focusNavigator = new StatefulFocusNavigator<DecoratorContainer>(OnElementFocused);
         }
 
-        /// <inheritdoc />
-        protected override bool IsItemItsOwnContainerOverride(object item)
-            => item is DecoratorContainer;
+        // NOTE: Avalonia ItemsControl doesn't have IsItemItsOwnContainerOverride/GetContainerForItemOverride
+        // Container creation is handled differently in Avalonia using ItemTemplate
+        // TODO: Implement container generation using Avalonia patterns
 
-        /// <inheritdoc />
-        protected override AvaloniaObject GetContainerForItemOverride()
-            => new DecoratorContainer(this);
-
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
             Editor = this.GetParentOfType<NodifyEditor>();
 

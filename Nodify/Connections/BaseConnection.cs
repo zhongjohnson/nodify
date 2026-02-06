@@ -569,10 +569,10 @@ namespace Nodify
         #region Routed Events
 
         public static readonly RoutedEvent<ConnectionEventArgs> DisconnectEvent =
-            RoutedEvent.Register<BaseConnection, ConnectionEventArgs>(nameof(Disconnect), RoutingStrategy.Bubble);
+            RoutedEvent.Register<BaseConnection, ConnectionEventArgs>(nameof(Disconnect), RoutingStrategies.Bubble);
 
         public static readonly RoutedEvent<ConnectionEventArgs> SplitEvent =
-            RoutedEvent.Register<BaseConnection, ConnectionEventArgs>(nameof(Split), RoutingStrategy.Bubble);
+            RoutedEvent.Register<BaseConnection, ConnectionEventArgs>(nameof(Split), RoutingStrategies.Bubble);
 
         /// <summary>Triggered by the <see cref="EditorGestures.ConnectionGestures.Disconnect"/> gesture.</summary>
         public event EventHandler<ConnectionEventArgs> Disconnect

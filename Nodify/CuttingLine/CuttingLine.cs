@@ -64,16 +64,10 @@ namespace Nodify
             IsHitTestVisibleProperty.OverrideDefaultValue<CuttingLine>(false);
         }
 
-        public override void Render(DrawingContext drawingContext)
-        {
-            base.Render(drawingContext);
-
-            if (Fill != null && StrokeThickness > 0)
-            {
-                var radius = StrokeThickness * 1.2;
-                drawingContext.DrawEllipse(Fill, null, StartPoint, radius, radius);
-                drawingContext.DrawEllipse(Fill, null, EndPoint, radius, radius);
-            }
-        }
+        // NOTE: In Avalonia, Shape.Render is sealed. Additional ellipse rendering can be done via:
+        // 1. Custom adorner layer
+        // 2. Separate visual children
+        // 3. Custom effect
+        // TODO: Implement start/end point ellipse rendering using Avalonia patterns
     }
 }

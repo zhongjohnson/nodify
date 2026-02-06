@@ -42,8 +42,10 @@ namespace Nodify
 
         #region Routed Events
 
-        public static readonly RoutedEvent ResizeStartedEvent = EventManager.RegisterRoutedEvent(nameof(ResizeStarted), RoutingStrategy.Bubble, typeof(ResizeEventHandler), typeof(GroupingNode));
-        public static readonly RoutedEvent ResizeCompletedEvent = EventManager.RegisterRoutedEvent(nameof(ResizeCompleted), RoutingStrategy.Bubble, typeof(ResizeEventHandler), typeof(GroupingNode));
+        public static readonly RoutedEvent<RoutedEventArgs> ResizeStartedEvent =
+            RoutedEvent.Register<GroupingNode, RoutedEventArgs>(nameof(ResizeStarted), RoutingStrategies.Bubble);
+        public static readonly RoutedEvent<RoutedEventArgs> ResizeCompletedEvent =
+            RoutedEvent.Register<GroupingNode, RoutedEventArgs>(nameof(ResizeCompleted), RoutingStrategies.Bubble);
 
         /// <summary>
         /// Occurs when the node finished resizing.
@@ -69,14 +71,13 @@ namespace Nodify
 
         public static readonly StyledProperty<IBrush?> HeaderBrushProperty = Node.HeaderBrushProperty.AddOwner<GroupingNode>();
         public static readonly StyledProperty<bool> CanResizeProperty = AvaloniaProperty.Register<GroupingNode, bool>(nameof(CanResize), true);
-        public static readonly StyledProperty<Size> ActualSizeProperty = AvaloniaProperty.Register<GroupingNode, Size>(nameof(ActualSize), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay, notifying: OnActualSizeChanged);
+        public static readonly StyledProperty<Size> ActualSizeProperty = AvaloniaProperty.Register<GroupingNode, Size>(nameof(ActualSize), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay, coerce: (o, v) => { OnActualSizeChanged(o, v); return v; });
         public static readonly StyledProperty<GroupingMovementMode> MovementModeProperty = AvaloniaProperty.Register<GroupingNode, GroupingMovementMode>(nameof(MovementMode), GroupingMovementMode.Group);
         public static readonly StyledProperty<ICommand?> ResizeCompletedCommandProperty = AvaloniaProperty.Register<GroupingNode, ICommand?>(nameof(ResizeCompletedCommand));
         public static readonly StyledProperty<ICommand?> ResizeStartedCommandProperty = AvaloniaProperty.Register<GroupingNode, ICommand?>(nameof(ResizeStartedCommand));
 
-        private static void OnActualSizeChanged(GroupingNode node, AvaloniaPropertyChangedEventArgs<Size> e)
+        private static void OnActualSizeChanged(GroupingNode node, Size newSize)
         {
-            var newSize = e.NewValue.Value;
             node.Width = newSize.Width;
             node.Height = newSize.Height;
         }
@@ -173,16 +174,17 @@ namespace Nodify
 
         static GroupingNode()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(GroupingNode), new StyledPropertyMetadata(typeof(GroupingNode)));
-            FocusableProperty.OverrideMetadata(typeof(GroupingNode), new StyledPropertyMetadata(BoxValue.False));
-            Panel.ZIndexProperty.OverrideMetadata(typeof(GroupingNode), new StyledPropertyMetadata(-1, OnZIndexPropertyChanged));
+            // Avalonia uses different metadata override patterns
+            // DefaultStyleKeyProperty doesn't exist in Avalonia - handled by theme system
+            // FocusableProperty override not needed in same way
+            ZIndexProperty.Changed.AddClassHandler<GroupingNode>(OnZIndexPropertyChanged);
         }
 
-        private static void OnZIndexPropertyChanged(GroupingNode node, AvaloniaPropertyChangedEventArgs<int> e)
+        private static void OnZIndexPropertyChanged(GroupingNode node, AvaloniaPropertyChangedEventArgs e)
         {
             if (node.Container != null)
             {
-                Panel.SetZIndex(node.Container, e.NewValue.Value);
+                node.Container.ZIndex = (int)e.NewValue!;
             }
         }
 
@@ -191,9 +193,11 @@ namespace Nodify
         /// </summary>
         public GroupingNode()
         {
-            AddHandler(Thumb.DragDeltaEvent, new DragDeltaEventHandler(OnResize));
-            AddHandler(Thumb.DragCompletedEvent, new DragCompletedEventHandler(OnResizeCompleted));
-            AddHandler(Thumb.DragStartedEvent, new DragStartedEventHandler(OnResizeStarted));
+            // TODO: Avalonia Thumb control has different event handler patterns
+            // Need to implement resize functionality using Avalonia Thumb events
+            // AddHandler(Thumb.DragDeltaEvent, new DragDeltaEventHandler(OnResize));
+            // AddHandler(Thumb.DragCompletedEvent, new DragCompletedEventHandler(OnResizeCompleted));
+            // AddHandler(Thumb.DragStartedEvent, new DragStartedEventHandler(OnResizeStarted));
 
             Loaded += OnNodeLoaded;
             Unloaded += OnNodeUnloaded;
@@ -203,7 +207,8 @@ namespace Nodify
         {
             if (HeaderControl != null)
             {
-                HeaderControl.MouseDown += OnHeaderMouseDown;
+                // TODO: Replace MouseDown with PointerPressed in Avalonia
+                // HeaderControl.MouseDown += OnHeaderMouseDown;
                 HeaderControl.SizeChanged += OnHeaderSizeChanged;
                 CalculateDesiredHeaderSize();
             }
@@ -213,11 +218,15 @@ namespace Nodify
         {
             if (HeaderControl != null)
             {
-                HeaderControl.MouseDown -= OnHeaderMouseDown;
+                // TODO: Replace MouseDown with PointerPressed
+                // HeaderControl.MouseDown -= OnHeaderMouseDown;
                 HeaderControl.SizeChanged -= OnHeaderSizeChanged;
             }
         }
 
+        // TODO: Implement mouse handling using Avalonia pointer events
+        // MouseButtonEventArgs and Keyboard static class don't exist in Avalonia
+        /*
         private void OnHeaderMouseDown(object sender, MouseButtonEventArgs e)
         {
             EditorGestures.ItemContainerGestures gestures = EditorGestures.Mappings.ItemContainer;
@@ -225,12 +234,12 @@ namespace Nodify
             {
                 // Switch the default movement mode if necessary
                 var prevMovementMode = MovementMode;
-                if (Keyboard.Modifiers == EditorGestures.Mappings.GroupingNode.SwitchMovementMode)
+                if (KeyModifiersMatch()) // TODO: Replace Keyboard.Modifiers check
                 {
                     MovementMode = MovementMode == GroupingMovementMode.Group ? GroupingMovementMode.Self : GroupingMovementMode.Group;
                 }
 
-                var groupBounds = new Rect(Container.Location, RenderSize);
+                var groupBounds = new Rect(Container.Location, Bounds.Size);
 
                 // Select the content and move with it
                 if (gestures.Selection.Append.Matches(e.Source, e))
@@ -294,29 +303,32 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
-            ResizeThumb = Template.FindName(ElementResizeThumb, this) as Control;
-            HeaderControl = Template.FindName(ElementHeader, this) as Control;
-            ContentControl = Template.FindName(ElementContent, this) as Control;
+            ResizeThumb = e.NameScope.Find<Control>(ElementResizeThumb);
+            HeaderControl = e.NameScope.Find<Control>(ElementHeader);
+            ContentControl = e.NameScope.Find<Control>(ElementContent);
 
             Container = this.GetParentOfType<ItemContainer>();
             Editor = Container?.Editor ?? this.GetParentOfType<NodifyEditor>();
 
             if (Container != null)
             {
-                Panel.SetZIndex(Container, Panel.GetZIndex(this));
+                Container.ZIndex = this.ZIndex;
             }
         }
 
+        // TODO: Implement resize using Avalonia Thumb DragDelta event pattern
+        // WPF DragDeltaEventArgs, DragStartedEventArgs, DragCompletedEventArgs don't exist in Avalonia
+        /*
         private void OnResize(object sender, DragDeltaEventArgs e)
         {
             if (CanResize && ReferenceEquals(e.OriginalSource, ResizeThumb))
             {
-                double resultWidth = ActualWidth + e.HorizontalChange;
-                double resultHeight = ActualHeight + e.VerticalChange;
+                double resultWidth = Bounds.Width + e.HorizontalChange;
+                double resultHeight = Bounds.Height + e.VerticalChange;
 
                 // Snap to grid
                 if (Editor != null)
@@ -335,7 +347,7 @@ namespace Nodify
 
         private void OnResizeStarted(object sender, DragStartedEventArgs e)
         {
-            ActualSize = new Size(ActualWidth, ActualHeight);
+            ActualSize = new Size(Bounds.Width, Bounds.Height);
             var args = new ResizeEventArgs(ActualSize, ActualSize)
             {
                 RoutedEvent = ResizeStartedEvent,
@@ -354,7 +366,7 @@ namespace Nodify
         private void OnResizeCompleted(object sender, DragCompletedEventArgs e)
         {
             Size previousSize = ActualSize;
-            var newSize = new Size(ActualWidth, ActualHeight);
+            var newSize = new Size(Bounds.Width, Bounds.Height);
             ActualSize = newSize;
 
             var args = new ResizeEventArgs(previousSize, newSize)
@@ -371,6 +383,7 @@ namespace Nodify
                 ResizeCompletedCommand.Execute(newSize);
             }
         }
+        */
 
         private void OnHeaderSizeChanged(object sender, SizeChangedEventArgs e)
             => CalculateDesiredHeaderSize();

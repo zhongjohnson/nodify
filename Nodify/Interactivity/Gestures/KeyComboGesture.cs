@@ -32,11 +32,15 @@ namespace Nodify.Interactivity
         /// </summary>
         public bool AllowRepeatingComboKey { get; set; }
 
+        // TODO: Avalonia doesn't have EventManager.RegisterClassHandler
+        // Event handling needs to be done differently in Avalonia
+        /*
         static KeyComboGesture()
         {
             EventManager.RegisterClassHandler(typeof(Control), Control.PreviewKeyUpEvent, new KeyEventHandler(HandleKeyUp), true);
             EventManager.RegisterClassHandler(typeof(Control), Control.LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(HandleFocusLost), true);
         }
+        */
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyComboGesture"/> class with the specified trigger and combo keys.
@@ -65,7 +69,7 @@ namespace Nodify.Interactivity
         /// <param name="comboKey">The combo key pressed while the trigger key is held.</param>
         /// <param name="modifiers">Any modifier keys required for the combo key.</param>
         /// <param name="displayString">The display string representing the gesture.</param>
-        public KeyComboGesture(Key triggerKey, Key comboKey, ModifierKeys modifiers, string displayString) : base(comboKey, modifiers, displayString)
+        public KeyComboGesture(Key triggerKey, Key comboKey, ModifierKeys modifiers, string displayString) : base(comboKey, (Avalonia.Input.KeyModifiers)modifiers)
         {
             TriggerKey = triggerKey;
             _allCombos.Add(this);
@@ -101,9 +105,9 @@ namespace Nodify.Interactivity
             _comboCounter = 0;
         }
 
-        public override bool Matches(object targetElement, InputEventArgs inputEventArgs)
+        public override bool Matches(object targetElement, RoutedEventArgs inputEventArgs)
         {
-            if (inputEventArgs is KeyEventArgs { IsDown: true } keyArgs)
+            if (inputEventArgs is KeyEventArgs keyArgs)
             {
                 if (keyArgs.Key == TriggerKey)
                 {

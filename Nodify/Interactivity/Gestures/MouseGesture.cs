@@ -70,7 +70,7 @@ namespace Nodify.Interactivity
         }
 
         /// <inheritdoc />
-        public override bool Matches(object targetElement, InputEventArgs inputEventArgs)
+        public override bool Matches(object targetElement, RoutedEventArgs inputEventArgs)
         {
             if (inputEventArgs is MouseButtonEventArgs || inputEventArgs is MouseWheelEventArgs)
             {

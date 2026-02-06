@@ -30,7 +30,7 @@ namespace Nodify.Interactivity
             {
             }
 
-            protected override void OnBegin(InputEventArgs e)
+            protected override void OnBegin(RoutedEventArgs e)
                 => _prevPosition = Element.MouseLocation;
 
             protected override void OnMouseMove(MouseEventArgs e)
@@ -53,10 +53,10 @@ namespace Nodify.Interactivity
                 }
             }
 
-            protected override void OnEnd(InputEventArgs e)
+            protected override void OnEnd(RoutedEventArgs e)
                 => Element.EndPushingItems();
 
-            protected override void OnCancel(InputEventArgs e)
+            protected override void OnCancel(RoutedEventArgs e)
                 => Element.CancelPushingItems();
         }
     }
