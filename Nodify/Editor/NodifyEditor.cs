@@ -8,6 +8,7 @@ using Avalonia;
 using System.Windows.Input;
 using Avalonia.Interactivity;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Metadata;
 using Avalonia.Media;

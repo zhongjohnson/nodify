@@ -52,7 +52,7 @@ namespace Nodify
         #region Routed Events
 
         public static readonly RoutedEvent<RoutedEventArgs> LocationChangedEvent =
-            RoutedEvent.Register<DecoratorContainer, RoutedEventArgs>(nameof(LocationChanged), RoutingStrategy.Bubble);
+            RoutedEvent.Register<DecoratorContainer, RoutedEventArgs>(nameof(LocationChanged), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         /// <summary>
         /// Occurs when the <see cref="Location"/> of this <see cref="DecoratorContainer"/> is changed.
@@ -106,17 +106,13 @@ namespace Nodify
             }
         }
 
-        protected override void OnVisualParentChanged(AvaloniaObject oldParent)
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
         {
-            if (VisualTreeHelper.GetParent(this) == null && IsKeyboardFocusWithin)
-            {
-                base.OnVisualParentChanged(oldParent);
+            base.OnDetachedFromVisualTree(e);
 
-                Owner?.Editor?.Focus();
-            }
-            else
+            if (IsKeyboardFocusWithin)
             {
-                base.OnVisualParentChanged(oldParent);
+                Owner?.Editor?.Focus();
             }
         }
     }

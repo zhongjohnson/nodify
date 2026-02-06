@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Metadata;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 
 namespace Nodify
@@ -9,31 +11,30 @@ namespace Nodify
     /// <summary>
     /// Represents a control that acts as a <see cref="Connector"/>.
     /// </summary>
-    [TemplatePart(Name = ElementContent, Type = typeof(Control))]
     public class StateNode : Connector
     {
         protected const string ElementContent = "PART_Content";
 
         #region Dependency Properties
 
-        public static readonly StyledProperty HighlightBrushProperty = ItemContainer.HighlightBrushProperty.AddOwner(typeof(StateNode));
-        public static readonly StyledProperty ContentProperty = ContentPresenter.ContentProperty.AddOwner(typeof(StateNode));
-        public static readonly StyledProperty ContentTemplateProperty = ContentPresenter.ContentTemplateProperty.AddOwner(typeof(StateNode));
-        public static readonly StyledProperty CornerRadiusProperty = Border.CornerRadiusProperty.AddOwner(typeof(StateNode));
+        public static readonly StyledProperty<IBrush?> HighlightBrushProperty = ItemContainer.HighlightBrushProperty.AddOwner<StateNode>();
+        public static readonly StyledProperty<object?> ContentProperty = ContentPresenter.ContentProperty.AddOwner<StateNode>();
+        public static readonly StyledProperty<IDataTemplate?> ContentTemplateProperty = ContentPresenter.ContentTemplateProperty.AddOwner<StateNode>();
+        public static readonly StyledProperty<CornerRadius> CornerRadiusProperty = Border.CornerRadiusProperty.AddOwner<StateNode>();
 
         /// <summary>
         /// Gets or sets the brush used when the <see cref="PendingConnection.IsOverElementProperty"/> attached property is true for this <see cref="StateNode"/>.
         /// </summary>
-        public Brush HighlightBrush
+        public IBrush? HighlightBrush
         {
-            get => (Brush)GetValue(HighlightBrushProperty);
+            get => GetValue(HighlightBrushProperty);
             set => SetValue(HighlightBrushProperty, value);
         }
 
         /// <summary>
         /// Gets or sets the data for the control's content.
         /// </summary>
-        public object Content
+        public object? Content
         {
             get => GetValue(ContentProperty);
             set => SetValue(ContentProperty, value);
@@ -42,9 +43,9 @@ namespace Nodify
         /// <summary>
         /// Gets or sets the template used to display the content of the control's header.
         /// </summary>
-        public DataTemplate ContentTemplate
+        public IDataTemplate? ContentTemplate
         {
-            get => (DataTemplate)GetValue(ContentTemplateProperty);
+            get => GetValue(ContentTemplateProperty);
             set => SetValue(ContentTemplateProperty, value);
         }
         
@@ -71,30 +72,30 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
-            ContentControl = Template.FindName(ElementContent, this) as Control;
+            ContentControl = e.NameScope.Find<Control>(ElementContent);
         }
 
         /// <inheritdoc />
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
-            if (e.OriginalSource is Visual visual && (!ContentControl?.IsAncestorOf(visual) ?? true))
+            if (e.Source is Visual visual && (!ContentControl?.IsVisualAncestorOf(visual) ?? true))
             {
-                base.OnMouseDown(e);
+                base.OnPointerPressed(e);
             }
         }
 
         /// <inheritdoc />
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
-            if (e.OriginalSource is Visual visual && (!ContentControl?.IsAncestorOf(visual) ?? true))
+            if (e.Source is Visual visual && (!ContentControl?.IsVisualAncestorOf(visual) ?? true))
             {
-                base.OnMouseUp(e);
+                base.OnPointerReleased(e);
             }
         }
     }

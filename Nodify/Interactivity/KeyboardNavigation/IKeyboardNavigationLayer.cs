@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Input;
 
 namespace Nodify.Interactivity

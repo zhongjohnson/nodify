@@ -11,7 +11,7 @@ namespace Nodify.Interactivity
 
         private readonly WeakReference<TElement?> _previousFocusedElement = new WeakReference<TElement?>(null);
         private readonly WeakReference<TElement?> _lastFocusedElement = new WeakReference<TElement?>(null);
-        private FocusNavigationDirection? _previousFocusNavigationDirection;
+        private NavigationDirection? _previousFocusNavigationDirection;
 
         private readonly Action<IKeyboardFocusTarget<TElement>> _onFocus;
 
