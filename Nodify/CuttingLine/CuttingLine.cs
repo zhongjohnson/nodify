@@ -64,9 +64,9 @@ namespace Nodify
             IsHitTestVisibleProperty.OverrideDefaultValue<CuttingLine>(false);
         }
 
-        protected override void OnRender(DrawingContext drawingContext)
+        public override void Render(DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);
+            base.Render(drawingContext);
 
             if (Fill != null && StrokeThickness > 0)
             {

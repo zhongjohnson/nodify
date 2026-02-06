@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Input;
 using Avalonia;
+using Avalonia.Controls;
 using System.Collections;
 using System.Diagnostics;
+using System.Windows.Input;
 
 namespace Nodify
 {
@@ -114,7 +116,7 @@ namespace Nodify
             }
         }
 
-        public bool MoveFocus(FocusNavigationDirection direction)
+        public bool MoveFocus(NavigationDirection direction)
             => MoveFocus(new TraversalRequest(direction));
 
         public new bool MoveFocus(TraversalRequest request)
@@ -129,13 +131,13 @@ namespace Nodify
         {
         }
 
-        protected override void OnLostKeyboardFocus(KeyboardFocusChangedEventArgs e)
+        protected override void OnLostFocus(RoutedEventArgs e)
         {
-            bool isKeyboardInitiated = InputManager.Current.MostRecentInputDevice is KeyboardDevice;
+            // In Avalonia, we don't have direct access to InputManager, so we simplify the logic
 
             // When any focusable elements inside the editor - that are most likely inside containers (textbox, checkbox etc) - lose focus,
             // and the focus goes outside the editor, we must focus its container first, otherwise focus the editor (don't allow focus to escape)
-            if (isKeyboardInitiated && e.OldFocus is AvaloniaObject oldFocus && !IsNavigationTrigger(oldFocus) && IsAncestorOf(oldFocus) && (e.NewFocus is AvaloniaObject newFocus && !IsAncestorOf(newFocus)))
+            if (e.Source is AvaloniaObject oldFocus && !IsNavigationTrigger(oldFocus) && this.IsVisualAncestorOf(oldFocus))
             {
                 var container = oldFocus.GetParent(IsNavigationTrigger);
                 if (container is Control elem && elem.Focus())
@@ -149,13 +151,13 @@ namespace Nodify
             }
         }
 
-        protected override void OnGotKeyboardFocus(KeyboardFocusChangedEventArgs e)
+        protected override void OnGotFocus(GotFocusEventArgs e)
         {
-            bool isKeyboardInitiated = InputManager.Current.MostRecentInputDevice is KeyboardDevice;
+            // In Avalonia, we simplify the keyboard initiated check
 
-            if (isKeyboardInitiated && ActiveNavigationLayer != null)
+            if (ActiveNavigationLayer != null)
             {
-                bool isFocusComingFromOutside = e.OldFocus is null || e.OldFocus is AvaloniaObject dpo && !IsAncestorOf(dpo);
+                bool isFocusComingFromOutside = e.Source is null || e.Source is AvaloniaObject dpo && !this.IsVisualAncestorOf(dpo);
 
                 if (isFocusComingFromOutside && ActiveNavigationLayer.TryRestoreFocus())
                 {

@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Input;
+using System.Windows.Input;
 
 namespace Nodify.Interactivity
 {

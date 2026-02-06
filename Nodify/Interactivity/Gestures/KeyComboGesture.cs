@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using System.Windows.Input;
 
 namespace Nodify.Interactivity
 {
@@ -7,7 +9,7 @@ namespace Nodify.Interactivity
     /// Represents a keyboard gesture that requires a trigger key to be held down
     /// before pressing a combo key. For example, press and hold Space, then press Left arrow.
     /// </summary>
-    public class KeyComboGesture : KeyGesture
+    public class KeyComboGesture : System.Windows.Input.KeyGesture
     {
         private static readonly WeakReferenceCollection<KeyComboGesture> _allCombos = new WeakReferenceCollection<KeyComboGesture>(16);
 

@@ -1,4 +1,6 @@
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using System.Windows.Input;
 
 namespace Nodify.Interactivity
 {
@@ -29,7 +31,7 @@ namespace Nodify.Interactivity
         public static implicit operator InputGestureRef(System.Windows.Input.MouseGesture gesture)
             => new InputGestureRef { Value = gesture };
 
-        public static implicit operator InputGestureRef(KeyGesture gesture)
+        public static implicit operator InputGestureRef(System.Windows.Input.KeyGesture gesture)
             => new InputGestureRef { Value = gesture };
 
         public static implicit operator InputGestureRef(MultiGesture gesture)

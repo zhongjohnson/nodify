@@ -1,3 +1,5 @@
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using System;
 
@@ -5,7 +7,7 @@ namespace System.Windows.Input
 {
     // Temporary compatibility types for WPF input system
     // TODO: Replace with proper Avalonia gesture system
-    
+
     /// <summary>
     /// Temporary compatibility enum for WPF MouseAction.
     /// </summary>
@@ -126,5 +128,41 @@ namespace System.Windows.Input
     /// </summary>
     public class InputEventArgs : RoutedEventArgs
     {
+    }
+}
+
+namespace System.Windows.Controls.Primitives
+{
+    /// <summary>
+    /// Temporary compatibility interface for WPF IScrollInfo.
+    /// TODO: Replace with proper Avalonia scrolling implementation
+    /// </summary>
+    public interface IScrollInfo
+    {
+        bool CanHorizontallyScroll { get; set; }
+        bool CanVerticallyScroll { get; set; }
+        double ExtentWidth { get; }
+        double ExtentHeight { get; }
+        double HorizontalOffset { get; }
+        double VerticalOffset { get; }
+        double ViewportWidth { get; }
+        double ViewportHeight { get; }
+        ScrollViewer? ScrollOwner { get; set; }
+
+        void LineUp();
+        void LineDown();
+        void LineLeft();
+        void LineRight();
+        void MouseWheelUp();
+        void MouseWheelDown();
+        void MouseWheelLeft();
+        void MouseWheelRight();
+        void PageUp();
+        void PageDown();
+        void PageLeft();
+        void PageRight();
+        Rect MakeVisible(Visual visual, Rect rectangle);
+        void SetHorizontalOffset(double offset);
+        void SetVerticalOffset(double offset);
     }
 }

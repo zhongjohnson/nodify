@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Collections;
 using System.Windows.Input;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Controls.Shapes;
@@ -324,9 +325,9 @@ namespace Nodify
         #endregion
 
         /// <inheritdoc />
-        protected override void OnApplyTemplateCore()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplateCore();
+            base.OnApplyTemplate(e);
 
             if (Editor != null)
             {

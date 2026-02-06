@@ -100,17 +100,13 @@ namespace Nodify
             Selector = selector;
         }
 
-        protected override void OnVisualParentChanged(AvaloniaObject oldParent)
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
         {
-            if (VisualTreeHelper.GetParent(this) == null && IsKeyboardFocusWithin)
-            {
-                base.OnVisualParentChanged(oldParent);
+            base.OnDetachedFromVisualTree(e);
 
-                Selector.Editor?.Focus();
-            }
-            else
+            if (IsKeyboardFocusWithin)
             {
-                base.OnVisualParentChanged(oldParent);
+                Selector.Editor?.Focus();
             }
         }
 
@@ -138,7 +134,7 @@ namespace Nodify
             RaiseEvent(new RoutedEventArgs(newValue ? SelectedEvent : UnselectedEvent, this));
         }
 
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             EditorGestures.ConnectionGestures gestures = EditorGestures.Mappings.Connection;
             if (IsSelectable && gestures.Selection.Select.Matches(e.Source, e))
@@ -147,7 +143,7 @@ namespace Nodify
             }
             // Replaces the current selection when right-clicking on an element that has a context menu and is not selected.
             // Applies only when the select gesture is not right click.
-            else if (e.ChangedButton == MouseButton.Right && Connection?.ContextMenu != null)
+            else if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed && Connection?.ContextMenu != null)
             {
                 _selectionType = IsSelected ? SelectionType.Append : SelectionType.Replace;
             }
@@ -159,7 +155,7 @@ namespace Nodify
             }
         }
 
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             if (_selectionType.HasValue)
             {
@@ -167,7 +163,8 @@ namespace Nodify
                 // If the right mouse button is pressed on an already selected item, and the item either has an 
                 // explicit context menu, the selection remains unchanged.
                 // This ensures that the context menu applies to the entire selection rather than only the clicked item.
-                bool allowContextMenu = e.ChangedButton == MouseButton.Right && IsSelected && Connection?.ContextMenu != null;
+                var pointerPoint = e.GetCurrentPoint(this);
+                bool allowContextMenu = pointerPoint.Properties.PointerUpdateKind == PointerUpdateKind.RightButtonReleased && IsSelected && Connection?.ContextMenu != null;
                 if (!allowContextMenu)
                 {
                     Select(_selectionType.Value);

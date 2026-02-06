@@ -1,4 +1,6 @@
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using System.Windows.Input;
 
 namespace Nodify.Interactivity
 {
@@ -29,7 +31,7 @@ namespace Nodify.Interactivity
         }
 
         /// <inheritdoc />
-        public override bool Matches(object targetElement, InputEventArgs inputEventArgs)
+        public override bool Matches(object targetElement, RoutedEventArgs inputEventArgs)
         {
             if (_match == Match.Any)
             {
@@ -39,7 +41,7 @@ namespace Nodify.Interactivity
             return MatchesAll(targetElement, inputEventArgs);
         }
 
-        private bool MatchesAll(object targetElement, InputEventArgs inputEventArgs)
+        private bool MatchesAll(object targetElement, RoutedEventArgs inputEventArgs)
         {
             for (int i = 0; i < _gestures.Length; i++)
             {
@@ -52,7 +54,7 @@ namespace Nodify.Interactivity
             return true;
         }
 
-        private bool MatchesAny(object targetElement, InputEventArgs inputEventArgs)
+        private bool MatchesAny(object targetElement, RoutedEventArgs inputEventArgs)
         {
             for (int i = 0; i < _gestures.Length; i++)
             {

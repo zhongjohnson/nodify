@@ -197,13 +197,13 @@ namespace Nodify
         #region Routed Events
 
         public static readonly RoutedEvent<RoutedEventArgs> SelectedEvent =
-            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(Selected), RoutingStrategy.Bubble);
+            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(Selected), RoutingStrategies.Bubble);
 
         public static readonly RoutedEvent<RoutedEventArgs> UnselectedEvent =
-            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(Unselected), RoutingStrategy.Bubble);
+            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(Unselected), RoutingStrategies.Bubble);
 
         public static readonly RoutedEvent<RoutedEventArgs> LocationChangedEvent =
-            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(LocationChanged), RoutingStrategy.Bubble);
+            RoutedEvent.Register<ItemContainer, RoutedEventArgs>(nameof(LocationChanged), RoutingStrategies.Bubble);
 
         /// <summary>
         /// Occurs when the <see cref="Location"/> of this <see cref="ItemContainer"/> is changed.
@@ -329,17 +329,13 @@ namespace Nodify
             InputProcessor.AddSharedHandlers(this);
         }
 
-        protected override void OnVisualParentChanged(AvaloniaObject oldParent)
+        protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
         {
-            if (VisualTreeHelper.GetParent(this) == null && IsKeyboardFocusWithin)
-            {
-                base.OnVisualParentChanged(oldParent);
+            base.OnDetachedFromVisualTree(e);
 
-                Editor.Focus();
-            }
-            else
+            if (IsKeyboardFocusWithin)
             {
-                base.OnVisualParentChanged(oldParent);
+                Editor.Focus();
             }
         }
 

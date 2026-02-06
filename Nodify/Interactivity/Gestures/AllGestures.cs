@@ -1,4 +1,6 @@
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using System.Windows.Input;
 
 namespace Nodify.Interactivity
 {

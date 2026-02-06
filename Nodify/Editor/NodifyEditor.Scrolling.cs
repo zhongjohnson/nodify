@@ -12,7 +12,7 @@ namespace Nodify
         /// <summary>
         /// The number of units the mouse wheel is rotated to scroll one line.
         /// </summary>
-        public static double ScrollIncrement { get; set; } = Mouse.MouseWheelDeltaForOneLine / 2;
+        public static double ScrollIncrement { get; set; } = 120.0 / 2; // Default mouse wheel delta is 120
 
         bool IScrollInfo.CanHorizontallyScroll { get; set; }
         bool IScrollInfo.CanVerticallyScroll { get; set; }
