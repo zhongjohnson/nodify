@@ -33,7 +33,7 @@ namespace Nodify
         {
             var (p0, p1) = GetLinePoints(source, target);
 
-            context.BeginFigure(source, false, false);
+            context.BeginFigure(source, false);
             if (CornerRadius > 0 && Spacing > 0)
             {
                 AddSmoothCorner(context, source, p0, p1, CornerRadius);
@@ -41,10 +41,10 @@ namespace Nodify
             }
             else
             {
-                context.LineTo(p0, true, true);
-                context.LineTo(p1, true, true);
+                context.LineTo(p0);
+                context.LineTo(p1);
             }
-            context.LineTo(target, true, true);
+            context.LineTo(target);
 
             return ((target, source), (source, target));
         }
@@ -64,9 +64,9 @@ namespace Nodify
                 var from = new Point(target.X + (headWidth * cosT - headHeight * sinT), target.Y + (headWidth * sinT + headHeight * cosT));
                 var to = new Point(target.X + (headWidth * cosT + headHeight * sinT), target.Y - (headHeight * cosT - headWidth * sinT));
 
-                context.BeginFigure(target, true, true);
-                context.LineTo(from, true, true);
-                context.LineTo(to, true, true);
+                context.BeginFigure(target, true);
+                context.LineTo(from);
+                context.LineTo(to);
             }
             else
             {
@@ -108,9 +108,9 @@ namespace Nodify
 
         protected static ((Point SegmentStart, Point SegmentEnd), Point InterpolatedPoint) InterpolateLine(Point p0, Point p1, Point p2, Point p3, double t)
         {
-            double length1 = (p1 - p0).Length;
-            double length2 = (p2 - p1).Length;
-            double length3 = (p3 - p2).Length;
+            double length1 = ((Vector)(p1 - p0)).Length;
+            double length2 = ((Vector)(p2 - p1)).Length;
+            double length3 = ((Vector)(p3 - p2)).Length;
             double totalLength = length1 + length2 + length3;
 
             double ratio1 = length1 / totalLength;
@@ -132,8 +132,8 @@ namespace Nodify
 
         protected static ((Point SegmentStart, Point SegmentEnd), Point InterpolatedPoint) InterpolateLine(Point p0, Point p1, Point p2, double t)
         {
-            double length1 = (p1 - p0).Length;
-            double length2 = (p2 - p1).Length;
+            double length1 = ((Vector)(p1 - p0)).Length;
+            double length2 = ((Vector)(p2 - p1)).Length;
             double totalLength = length1 + length2;
 
             double ratio1 = length1 / totalLength;
@@ -150,8 +150,10 @@ namespace Nodify
 
         protected static void AddSmoothCorner(StreamGeometryContext context, Point start, Point corner, Point end, double radius)
         {
-            double distAB = (corner - start).LengthSquared;
-            double distBC = (end - corner).LengthSquared;
+            Vector vecAB = corner - start;
+            Vector vecBC = end - corner;
+            double distAB = vecAB.Length * vecAB.Length;
+            double distBC = vecBC.Length * vecBC.Length;
 
             double bendSize = Math.Sqrt(Math.Min(distAB, distBC)) / 2;
             radius = Math.Min(bendSize, radius);
@@ -159,17 +161,17 @@ namespace Nodify
             Vector directionToCorner = corner - start;
             Vector directionFromCorner = end - corner;
 
-            if (directionToCorner.LengthSquared != 0)
-                directionToCorner.Normalize();
+            if (directionToCorner.Length * directionToCorner.Length != 0)
+                directionToCorner = directionToCorner.Normalize();
 
-            if (directionFromCorner.LengthSquared != 0)
-                directionFromCorner.Normalize();
+            if (directionFromCorner.Length * directionFromCorner.Length != 0)
+                directionFromCorner = directionFromCorner.Normalize();
 
             Point curveStart = corner - directionToCorner * radius;
             Point curveEnd = corner + directionFromCorner * radius;
 
-            context.LineTo(curveStart, true, true);
-            context.QuadraticBezierTo(corner, curveEnd, true, true);
+            context.LineTo(curveStart);
+            context.QuadraticBezierTo(corner, curveEnd);
         }
     }
 }

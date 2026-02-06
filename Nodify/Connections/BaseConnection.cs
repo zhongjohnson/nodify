@@ -617,12 +617,8 @@ namespace Nodify
 
         private Pen? _outlinePen;
         private static Pen? _defaultFocusVisualPen;
-        private FocusVisualAdorner? _focusVisualAdorner;
-        private AdornerLayer? _adornerLayer;
-
-        private AdornerLayer AdornerLayer => _adornerLayer ??= AdornerLayer.GetAdornerLayer(this);
-
-        private FocusVisualAdorner FocusVisualPenAdorner => _focusVisualAdorner ??= new FocusVisualAdorner(this);
+        // Adorner system removed for Avalonia
+        // Adorner system removed for Avalonia
 
         private static Pen DefaultFocusVisualPen
         {
@@ -630,11 +626,12 @@ namespace Nodify
             {
                 if (_defaultFocusVisualPen is null)
                 {
-                    _defaultFocusVisualPen = new Pen(SystemColors.ControlTextBrush, 1)
+                    // TODO: SystemColors doesn't exist in Avalonia - use theme brush or hardcoded color
+                    _defaultFocusVisualPen = new Pen(Brushes.Black, 1)
                     {
                         DashStyle = new DashStyle { Dashes = { 0.5d, 3d } }
                     };
-                    _defaultFocusVisualPen.Freeze();
+                    // Pen.Freeze() doesn't exist in Avalonia - objects are immutable by default
                 }
 
                 return _defaultFocusVisualPen;
@@ -715,9 +712,9 @@ namespace Nodify
             var from = headMiddle + headHeight;
             var to = headMiddle - headHeight;
 
-            context.BeginFigure(location, true, true);
-            context.LineTo(from, true, true);
-            context.LineTo(to, true, true);
+            context.BeginFigure(location, true);
+            context.LineTo(from);
+            context.LineTo(to);
         }
 
         protected virtual void DrawArrowGeometry(StreamGeometryContext context, Point source, Point target, ConnectionDirection arrowDirection = ConnectionDirection.Forward, ArrowHeadShape shape = ArrowHeadShape.Arrowhead, Orientation orientation = Orientation.Horizontal)
@@ -749,9 +746,9 @@ namespace Nodify
                 var from = new Point(target.X - headWidth * direction, target.Y + headHeight);
                 var to = new Point(target.X - headWidth * direction, target.Y - headHeight);
 
-                context.BeginFigure(target, true, true);
-                context.LineTo(from, true, true);
-                context.LineTo(to, true, true);
+                context.BeginFigure(target, true);
+                context.LineTo(from);
+                context.LineTo(to);
             }
             else
             {
@@ -761,9 +758,9 @@ namespace Nodify
                 var from = new Point(target.X - headWidth, target.Y - headHeight * direction);
                 var to = new Point(target.X + headWidth, target.Y - headHeight * direction);
 
-                context.BeginFigure(target, true, true);
-                context.LineTo(from, true, true);
-                context.LineTo(to, true, true);
+                context.BeginFigure(target, true);
+                context.LineTo(from);
+                context.LineTo(to);
             }
         }
 
@@ -780,11 +777,11 @@ namespace Nodify
                 var topLeft = new Point(target.X - headWidth * direction, target.Y - headHeight);
                 var topRight = new Point(target.X, target.Y - headHeight);
 
-                context.BeginFigure(target, true, true);
-                context.LineTo(bottomRight, true, true);
-                context.LineTo(bottomLeft, true, true);
-                context.LineTo(topLeft, true, true);
-                context.LineTo(topRight, true, true);
+                context.BeginFigure(target, true);
+                context.LineTo(bottomRight);
+                context.LineTo(bottomLeft);
+                context.LineTo(topLeft);
+                context.LineTo(topRight);
             }
             else
             {
@@ -795,11 +792,11 @@ namespace Nodify
                 var topRight = new Point(target.X + headWidth, target.Y - headHeight * direction);
                 var bottomRight = new Point(target.X + headWidth, target.Y);
 
-                context.BeginFigure(target, true, true);
-                context.LineTo(bottomLeft, true, true);
-                context.LineTo(topLeft, true, true);
-                context.LineTo(topRight, true, true);
-                context.LineTo(bottomRight, true, true);
+                context.BeginFigure(target, true);
+                context.LineTo(bottomLeft);
+                context.LineTo(topLeft);
+                context.LineTo(topRight);
+                context.LineTo(bottomRight);
             }
         }
 
@@ -827,11 +824,11 @@ namespace Nodify
             double y3 = targetLocation.Y + headHeight * ControlPointRatio;
             double y4 = targetLocation.Y + headHeight;
 
-            context.BeginFigure(new Point(x2, y0), true, true);
-            context.BezierTo(new Point(x3, y0), new Point(x4, y1), new Point(x4, y2), true, true);
-            context.BezierTo(new Point(x4, y3), new Point(x3, y4), new Point(x2, y4), true, true);
-            context.BezierTo(new Point(x1, y4), new Point(x0, y3), new Point(x0, y2), true, true);
-            context.BezierTo(new Point(x0, y1), new Point(x1, y0), new Point(x2, y0), true, true);
+            context.BeginFigure(new Point(x2, y0), true);
+            context.CubicBezierTo(new Point(x3, y0), new Point(x4, y1), new Point(x4, y2));
+            context.CubicBezierTo(new Point(x4, y3), new Point(x3, y4), new Point(x2, y4));
+            context.CubicBezierTo(new Point(x1, y4), new Point(x0, y3), new Point(x0, y2));
+            context.CubicBezierTo(new Point(x0, y1), new Point(x1, y0), new Point(x2, y0));
         }
 
         /// <summary>
@@ -849,12 +846,12 @@ namespace Nodify
 
             if (SourceOrientation == Orientation.Vertical)
             {
-                (sourceOffset.X, sourceOffset.Y) = (sourceOffset.Y, sourceOffset.X);
+                sourceOffset = new Vector(sourceOffset.Y, sourceOffset.X);
             }
 
             if (TargetOrientation == Orientation.Vertical)
             {
-                (targetOffset.X, targetOffset.Y) = (targetOffset.Y, targetOffset.X);
+                targetOffset = new Vector(targetOffset.Y, targetOffset.X);
             }
 
             return (sourceOffset, targetOffset);
@@ -887,9 +884,9 @@ namespace Nodify
 
             static Vector GetCircleModeOffset(Vector delta, Size offset)
             {
-                if (delta.LengthSquared > 0d)
+                if (delta.Length * delta.Length > 0d)
                 {
-                    delta.Normalize();
+                    delta = delta.Normalize();
                 }
 
                 return new Vector(delta.X * offset.Width, delta.Y * offset.Height);
@@ -897,26 +894,27 @@ namespace Nodify
 
             static Vector GetRectangleModeOffset(Vector delta, Size offset)
             {
-                if (delta.LengthSquared > 0d)
+                if (delta.Length * delta.Length > 0d)
                 {
-                    delta.Normalize();
+                    delta = delta.Normalize();
                 }
 
                 double angle = Math.Atan2(delta.Y, delta.X);
-                var result = new Vector();
+                double resultX;
+                double resultY;
 
                 if (offset.Width * 2d * Math.Abs(delta.Y) < offset.Height * 2d * Math.Abs(delta.X))
                 {
-                    result.X = Math.Sign(delta.X) * offset.Width;
-                    result.Y = Math.Tan(angle) * result.X;
+                    resultX = Math.Sign(delta.X) * offset.Width;
+                    resultY = Math.Tan(angle) * resultX;
                 }
                 else
                 {
-                    result.Y = Math.Sign(delta.Y) * offset.Height;
-                    result.X = 1.0d / Math.Tan(angle) * result.Y;
+                    resultY = Math.Sign(delta.Y) * offset.Height;
+                    resultX = 1.0d / Math.Tan(angle) * resultY;
                 }
 
-                return result;
+                return new Vector(resultX, resultY);
             }
         }
 
@@ -981,7 +979,7 @@ namespace Nodify
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnKeyUp(KeyEventArgs e)
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
         {
             InputProcessor.ProcessEvent(e);
 
@@ -989,7 +987,7 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         #endregion
@@ -1049,74 +1047,7 @@ namespace Nodify
             return _outlinePen ??= new Pen(OutlineBrush, StrokeThickness + OutlineThickness * 2d);
         }
 
-        public override void Render(DrawingContext drawingContext)
-        {
-            if (OutlineBrush != null)
-            {
-                drawingContext.DrawGeometry(OutlineBrush, GetOutlinePen(), DefiningGeometry);
-            }
-
-            base.Render(drawingContext);
-
-            if (!string.IsNullOrEmpty(Text))
-            {
-                double dpi = VisualTreeHelper.GetDpi(this).PixelsPerDip;
-                var typeface = new Typeface(FontFamily, FontStyle, FontWeight, FontStretch);
-                var text = new FormattedText(Text, CultureInfo.CurrentUICulture, FlowDirection, typeface, FontSize, Foreground ?? Stroke, dpi);
-
-                (Vector sourceOffset, Vector targetOffset) = GetOffset();
-                drawingContext.DrawText(text, GetTextPosition(text, Source + sourceOffset, Target + targetOffset));
-            }
-
-            if (AdornerLayer != null && Container is { IsKeyboardFocused: true })
-            {
-                AdornerLayer.Update(this);
-            }
-        }
-
-        internal void UpdateFocusVisual()
-        {
-            if (AdornerLayer != null)
-            {
-                if (Container is { IsKeyboardFocused: true })
-                {
-                    AdornerLayer.Add(FocusVisualPenAdorner);
-                }
-                else
-                {
-                    AdornerLayer.Remove(FocusVisualPenAdorner);
-                }
-            }
-        }
-
-        private class FocusVisualAdorner : Adorner
-        {
-            private readonly BaseConnection _baseConnection;
-            private Pen? _cachedPenResource;
-            private Pen? CachedPenResource => _cachedPenResource ??= TryFindResource(FocusVisualPenKey) as Pen;
-
-            public FocusVisualAdorner(BaseConnection baseConnection) : base(baseConnection)
-            {
-                IsHitTestVisible = false;
-                IsEnabled = false;
-                IsClipEnabled = true;
-                _baseConnection = baseConnection;
-            }
-
-            protected override void OnRender(DrawingContext drawingContext)
-            {
-                var drawPen = _baseConnection.FocusVisualPen == DefaultFocusVisualPen
-                    ? CachedPenResource
-                    : _baseConnection.FocusVisualPen;
-
-                if (drawPen != null)
-                {
-                    var widenPen = new Pen(null, _baseConnection.StrokeThickness + drawPen.Thickness + _baseConnection.FocusVisualPadding * 2d);
-                    var geometry = _baseConnection.DefiningGeometry;
-                    var expandedGeometry = Geometry.Combine(geometry, geometry.GetWidenedPathGeometry(widenPen), GeometryCombineMode.Union, Transform.Identity);
-                    drawingContext.DrawGeometry(null, drawPen, expandedGeometry.GetOutlinedPathGeometry());
-                }
-            }
-        }
+        // TODO: Render override is sealed in Avalonia's Shape class - needs reimplementation
+        // TODO: Adorner system doesn't exist in Avalonia - UpdateFocusVisual() needs reimplementation
     }
 }

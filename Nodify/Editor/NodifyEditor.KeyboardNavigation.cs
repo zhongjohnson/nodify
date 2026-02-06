@@ -5,8 +5,10 @@ using System.Linq;
 using Avalonia.Input;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using System.Collections;
 using System.Diagnostics;
+using Avalonia.VisualTree;
 using System.Windows.Input;
 
 namespace Nodify
@@ -116,7 +118,7 @@ namespace Nodify
             }
         }
 
-        public bool MoveFocus(NavigationDirection direction)
+        public bool MoveFocus(Nodify.Interactivity.NavigationDirection direction)
             => MoveFocus(new TraversalRequest(direction));
 
         public new bool MoveFocus(TraversalRequest request)
@@ -137,9 +139,9 @@ namespace Nodify
 
             // When any focusable elements inside the editor - that are most likely inside containers (textbox, checkbox etc) - lose focus,
             // and the focus goes outside the editor, we must focus its container first, otherwise focus the editor (don't allow focus to escape)
-            if (e.Source is AvaloniaObject oldFocus && !IsNavigationTrigger(oldFocus) && this.IsVisualAncestorOf(oldFocus))
+            if (e.Source is Avalonia.Visual oldFocus && !IsNavigationTrigger(oldFocus) && this.GetVisualAncestors().Contains(oldFocus))
             {
-                var container = oldFocus.GetParent(IsNavigationTrigger);
+                var container = oldFocus.GetVisualAncestors().FirstOrDefault(IsNavigationTrigger);
                 if (container is Control elem && elem.Focus())
                 {
                     e.Handled = true;
@@ -157,15 +159,16 @@ namespace Nodify
 
             if (ActiveNavigationLayer != null)
             {
-                bool isFocusComingFromOutside = e.Source is null || e.Source is AvaloniaObject dpo && !this.IsVisualAncestorOf(dpo);
+                bool isFocusComingFromOutside = e.Source is null || e.Source is Avalonia.Visual dpo && !this.GetVisualAncestors().Contains(dpo);
 
                 if (isFocusComingFromOutside && ActiveNavigationLayer.TryRestoreFocus())
                 {
                     e.Handled = true;
                 }
-                else if (ActiveNavigationLayer.LastFocusedElement is null && e.NewFocus == this && AutoFocusFirstElement)
+                // Avalonia's GotFocusEventArgs does not have NewFocus, so skip this check or use e.Source == this
+                else if (ActiveNavigationLayer.LastFocusedElement is null && e.Source == this && AutoFocusFirstElement)
                 {
-                    e.Handled = ActiveNavigationLayer.TryMoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                    e.Handled = ActiveNavigationLayer.TryMoveFocus(new TraversalRequest(NavigationDirection.Next));
                 }
             }
         }
@@ -183,7 +186,7 @@ namespace Nodify
         {
             if (AutoFocusFirstElement && !activeLayer!.TryRestoreFocus() && HandleNestedEditor())
             {
-                activeLayer.TryMoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                activeLayer.TryMoveFocus(new TraversalRequest(NavigationDirection.Next));
             }
 
             bool HandleNestedEditor()

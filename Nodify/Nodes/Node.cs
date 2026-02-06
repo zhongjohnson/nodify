@@ -24,7 +24,7 @@ namespace Nodify
         public static readonly StyledProperty<IBrush?> ContentBrushProperty = AvaloniaProperty.Register<Node, IBrush?>(nameof(ContentBrush));
         public static readonly StyledProperty<IBrush?> HeaderBrushProperty = AvaloniaProperty.Register<Node, IBrush?>(nameof(HeaderBrush));
         public static readonly StyledProperty<IBrush?> FooterBrushProperty = AvaloniaProperty.Register<Node, IBrush?>(nameof(FooterBrush));
-        public static readonly StyledProperty<object?> FooterProperty = AvaloniaProperty.Register<Node, object?>(nameof(Footer), coerce: (o, v) => { OnFooterChanged(o, v); return v; });
+        public static readonly StyledProperty<object?> FooterProperty = AvaloniaProperty.Register<Node, object?>(nameof(Footer), coerce: (o, v) => { OnFooterChanged((Node)o, v); return v; });
         public static readonly StyledProperty<IDataTemplate?> FooterTemplateProperty = AvaloniaProperty.Register<Node, IDataTemplate?>(nameof(FooterTemplate));
         public static readonly StyledProperty<IDataTemplate?> InputConnectorTemplateProperty = AvaloniaProperty.Register<Node, IDataTemplate?>(nameof(InputConnectorTemplate));
 
@@ -184,12 +184,11 @@ namespace Nodify
             // TODO: GroupStyle is WPF-specific - commented out for Avalonia
             // InputGroupStyle.CollectionChanged += OnInputGroupStyleCollectionChanged;
             // OutputGroupStyle.CollectionChanged += OnOutputGroupStyleCollectionChanged;
+            TemplateApplied += OnNodeTemplateApplied;
         }
 
-        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        private void OnNodeTemplateApplied(object? sender, TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate(e);
-
             InputItemsControl = e.NameScope.Find<ItemsControl>(ElementInputItemsControl);
             OutputItemsControl = e.NameScope.Find<ItemsControl>(ElementOutputItemsControl);
 

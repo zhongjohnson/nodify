@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Input;
 
@@ -7,9 +8,9 @@ namespace Nodify.Interactivity
     /// <summary>
     /// Represents a base class for handling input events in a specific state for a framework element.
     /// </summary>
-    /// <typeparam name="TElement">The type of the visual element that owns this state.</typeparam>
+    /// <typeparam name="TElement">The type of the control element that owns this state.</typeparam>
     public abstract class InputElementState<TElement> : IInputHandler
-        where TElement : Visual
+        where TElement : Control
     {
         /// <summary>
         /// Gets the owner of the state.
@@ -81,13 +82,13 @@ namespace Nodify.Interactivity
             {
                 OnLostMouseCapture(CreateMouseEventArgs(captureLostArgs));
             }
-            else if (e.RoutedEvent == InputElement.KeyDownEvent && e is KeyEventArgs keyDownArgs)
+            else if (e.RoutedEvent == InputElement.KeyDownEvent && e is Avalonia.Input.KeyEventArgs keyDownArgs)
             {
-                OnKeyDown(keyDownArgs);
+                OnKeyDown(new KeyEventArgs(keyDownArgs, true));
             }
-            else if (e.RoutedEvent == InputElement.KeyUpEvent && e is KeyEventArgs keyUpArgs)
+            else if (e.RoutedEvent == InputElement.KeyUpEvent && e is Avalonia.Input.KeyEventArgs keyUpArgs)
             {
-                OnKeyUp(keyUpArgs);
+                OnKeyUp(new KeyEventArgs(keyUpArgs, false));
             }
 
             OnEvent(e);

@@ -52,7 +52,7 @@ namespace Nodify.Interactivity
                     _ => null
                 };
 
-                request.Wrapped = candidate != null;
+                // request.Wrapped = candidate != null; // Not available in Avalonia
             }
 
             return candidate;

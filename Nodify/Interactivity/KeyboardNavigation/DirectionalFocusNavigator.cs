@@ -23,14 +23,14 @@ namespace Nodify.Interactivity
 
             IEnumerable<IKeyboardFocusTarget<TElement>> candidates = request.FocusNavigationDirection switch
             {
-                FocusNavigationDirection.Left => _availableTargets.Where(c => c.Bounds.Left < currentContainerBounds.Left),
-                FocusNavigationDirection.Right => _availableTargets.Where(c => c.Bounds.Left > currentContainerBounds.Left),
-                FocusNavigationDirection.Up => _availableTargets.Where(c => c.Bounds.Top < currentContainerBounds.Top),
-                FocusNavigationDirection.Down => _availableTargets.Where(c => c.Bounds.Top > currentContainerBounds.Top),
-                FocusNavigationDirection.Previous => FindCandidatesLinearly(currentContainer, request),
-                FocusNavigationDirection.Next => FindCandidatesLinearly(currentContainer, request),
-                FocusNavigationDirection.First => FindCandidatesLinearly(currentContainer, request),
-                FocusNavigationDirection.Last => FindCandidatesLinearly(currentContainer, request),
+                NavigationDirection.Left => _availableTargets.Where(c => c.Bounds.Left < currentContainerBounds.Left),
+                NavigationDirection.Right => _availableTargets.Where(c => c.Bounds.Left > currentContainerBounds.Left),
+                NavigationDirection.Up => _availableTargets.Where(c => c.Bounds.Top < currentContainerBounds.Top),
+                NavigationDirection.Down => _availableTargets.Where(c => c.Bounds.Top > currentContainerBounds.Top),
+                NavigationDirection.Previous => FindCandidatesLinearly(currentContainer, request),
+                NavigationDirection.Next => FindCandidatesLinearly(currentContainer, request),
+                NavigationDirection.First => FindCandidatesLinearly(currentContainer, request),
+                NavigationDirection.Last => FindCandidatesLinearly(currentContainer, request),
                 _ => Array.Empty<IKeyboardFocusTarget<TElement>>()
             };
 
@@ -39,14 +39,14 @@ namespace Nodify.Interactivity
             {
                 candidates = request.FocusNavigationDirection switch
                 {
-                    FocusNavigationDirection.Left => _availableTargets.OrderByDescending(c => c.Bounds.Left).Take(1),
-                    FocusNavigationDirection.Right => _availableTargets.OrderBy(c => c.Bounds.Left).Take(1),
-                    FocusNavigationDirection.Up => _availableTargets.OrderByDescending(c => c.Bounds.Top).Take(1),
-                    FocusNavigationDirection.Down => _availableTargets.OrderBy(c => c.Bounds.Top).Take(1),
+                    NavigationDirection.Left => _availableTargets.OrderByDescending(c => c.Bounds.Left).Take(1),
+                    NavigationDirection.Right => _availableTargets.OrderBy(c => c.Bounds.Left).Take(1),
+                    NavigationDirection.Up => _availableTargets.OrderByDescending(c => c.Bounds.Top).Take(1),
+                    NavigationDirection.Down => _availableTargets.OrderBy(c => c.Bounds.Top).Take(1),
                     _ => Array.Empty<IKeyboardFocusTarget<TElement>>()
                 };
 
-                request.Wrapped = true;
+                // request.Wrapped = true; // Not available in Avalonia
             }
 
             IKeyboardFocusTarget<TElement>? best = null;
@@ -54,7 +54,8 @@ namespace Nodify.Interactivity
 
             foreach (var candidate in candidates)
             {
-                double distanceSquared = (candidate.Bounds.TopLeft - currentContainerBounds.TopLeft).LengthSquared;
+                var delta = candidate.Bounds.TopLeft - currentContainerBounds.TopLeft;
+                double distanceSquared = delta.X * delta.X + delta.Y * delta.Y;
                 if (distanceSquared < minDistanceSquared)
                 {
                     minDistanceSquared = distanceSquared;

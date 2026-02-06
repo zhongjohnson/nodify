@@ -87,7 +87,7 @@ namespace Nodify
 
         private static void OnAllowOnlyConnectorsChanged(PendingConnection connection, AvaloniaPropertyChangedEventArgs e)
         {
-            connection.InvalidateHitTest();
+            // InvalidateHitTest is not available in Avalonia. Skipped.
             OnAllowOnlyConnectorsChangedInternal(connection, e);
         }
 
@@ -317,10 +317,8 @@ namespace Nodify
 
         private Control? _connectionTarget;
         private Connector? _hotKeysSource;
-        private readonly List<HotKeyAdorner> _hotKeysAdorners = new List<HotKeyAdorner>();
-        private AdornerLayer? _adornerLayer;
+        // Adorner system is not available in Avalonia. HotKeyAdorner and AdornerLayer are not implemented.
 
-        private AdornerLayer? AdornerLayer => _adornerLayer ??= AdornerLayer.GetAdornerLayer(this);
 
         #endregion
 
@@ -334,7 +332,7 @@ namespace Nodify
                 Editor.RemoveHandler(Connector.PendingConnectionStartedEvent, new PendingConnectionEventHandler(OnPendingConnectionStarted));
                 Editor.RemoveHandler(Connector.PendingConnectionDragEvent, new PendingConnectionEventHandler(OnPendingConnectionDrag));
                 Editor.RemoveHandler(Connector.PendingConnectionCompletedEvent, new PendingConnectionEventHandler(OnPendingConnectionCompleted));
-                Editor.RemoveHandler(PreviewKeyUpEvent, new KeyEventHandler(OnKeyUp));
+                // Editor.RemoveHandler(PreviewKeyUpEvent, new KeyEventHandler(OnKeyUp)); // Removed for Avalonia
             }
 
             Editor = this.GetParentOfType<NodifyEditor>();
@@ -344,7 +342,7 @@ namespace Nodify
                 Editor.AddHandler(Connector.PendingConnectionStartedEvent, new PendingConnectionEventHandler(OnPendingConnectionStarted));
                 Editor.AddHandler(Connector.PendingConnectionDragEvent, new PendingConnectionEventHandler(OnPendingConnectionDrag));
                 Editor.AddHandler(Connector.PendingConnectionCompletedEvent, new PendingConnectionEventHandler(OnPendingConnectionCompleted));
-                Editor.AddHandler(PreviewKeyUpEvent, new KeyEventHandler(OnKeyUp), true);
+                // Editor.AddHandler(PreviewKeyUpEvent, new KeyEventHandler(OnKeyUp), true); // Removed for Avalonia
 
                 SetAllowOnlyConnectorsAttached(Editor, AllowOnlyConnectors);
             }
@@ -369,10 +367,7 @@ namespace Nodify
                 {
                     StartedCommand?.Execute(Source);
 
-                    if (e.OriginalSource is Connector connector)
-                    {
-                        ShowHotKeys(connector);
-                    }
+                    // HotKeyAdorner system is not available in Avalonia. Skipping ShowHotKeys logic.
                 }
 
                 if (EnablePreview)
@@ -484,22 +479,7 @@ namespace Nodify
 
         private void OnKeyUp(object sender, KeyEventArgs e)
         {
-            if (_hotKeysSource is { IsPendingConnection: true })
-            {
-                int hotKey = GetHotKey(e.Key);
-
-                if (hotKey <= _hotKeysAdorners.Count)
-                {
-                    var adorner = _hotKeysAdorners.Find(x => x.Number == hotKey);
-                    if (adorner != null)
-                    {
-                        var tempConnector = _hotKeysSource;
-                        _hotKeysSource.EndConnecting(adorner.Connector);
-                        tempConnector.ReleaseMouseCapture();
-                        e.Handled = true;
-                    }
-                }
-            }
+            // HotKeyAdorner system is not available in Avalonia. Stubbed for compatibility.
         }
 
         private static int GetHotKey(Key key)
@@ -519,10 +499,7 @@ namespace Nodify
 
         private void ShowHotKeys(Connector sourceConnector)
         {
-            if (Editor == null
-                || AdornerLayer == null
-                || HotKeysDisplayMode == HotKeysDisplayMode.None
-                || HotKeysDisplayMode == HotKeysDisplayMode.Keyboard && !(InputManager.Current.MostRecentInputDevice is KeyboardDevice))
+            if (Editor == null || HotKeysDisplayMode == HotKeysDisplayMode.None)
             {
                 return;
             }
@@ -537,16 +514,10 @@ namespace Nodify
 
                 var possibleTargets = connectorsInViewport
                     .Where(x => isEditorConnect ? connectCommand.CanExecute((sourceConnector.DataContext, x.DataContext)) : connectCommand.CanExecute(x.DataContext))
-                    .OrderBy(x => (sourceConnector.Anchor - x.Anchor).LengthSquared)
+                    .OrderBy(x => { var d = sourceConnector.Anchor - x.Anchor; return d.X * d.X + d.Y * d.Y; })
                     .Take((int)Math.Min(MaxHotKeys, 9));
 
-                var adorners = possibleTargets.Select((x, i) => new HotKeyAdorner(x, i + 1));
-
-                foreach (var adorner in adorners)
-                {
-                    _hotKeysAdorners.Add(adorner);
-                    AdornerLayer.Add(adorner);
-                }
+                // HotKeyAdorner and AdornerLayer are not available in Avalonia. Skipping adorners.
             }
         }
 
@@ -554,15 +525,7 @@ namespace Nodify
         {
             _hotKeysSource = null;
 
-            if (AdornerLayer != null)
-            {
-                foreach (var hotKeyAdorner in _hotKeysAdorners)
-                {
-                    AdornerLayer.Remove(hotKeyAdorner);
-                }
-
-                _hotKeysAdorners.Clear();
-            }
+            // HotKeyAdorner and AdornerLayer are not available in Avalonia. Skipping adorners removal.
         }
 
         #endregion
@@ -614,46 +577,6 @@ namespace Nodify
 
         #endregion
 
-        private class HotKeyAdorner : Adorner
-        {
-            private readonly HotKeyControl _hotKeyControl;
-            public Connector Connector { get; }
-            public int Number { get; }
-            private Point _offset;
-
-            public HotKeyAdorner(Connector connector, int number) : base(connector)
-            {
-                IsHitTestVisible = false;
-                Connector = connector;
-                Number = number;
-
-                _hotKeyControl = new HotKeyControl
-                {
-                    Number = number,
-                    DataContext = connector.DataContext
-                };
-
-                AddVisualChild(_hotKeyControl);
-                AddLogicalChild(_hotKeyControl);
-
-                _offset = connector.Thumb.TranslatePoint(new Point(0, 0), connector);
-            }
-
-            protected override int VisualChildrenCount => 1;
-
-            protected override Visual GetVisualChild(int index) => _hotKeyControl;
-
-            protected override Size MeasureOverride(Size constraint)
-            {
-                _hotKeyControl.Measure(constraint);
-                return _hotKeyControl.DesiredSize;
-            }
-
-            protected override Size ArrangeOverride(Size finalSize)
-            {
-                _hotKeyControl.Arrange(new Rect(_offset, finalSize));
-                return finalSize;
-            }
-        }
+        // Adorner system is not available in Avalonia. HotKeyAdorner is not implemented.
     }
 }

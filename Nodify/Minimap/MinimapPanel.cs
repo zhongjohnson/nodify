@@ -6,13 +6,12 @@ namespace Nodify
 {
     internal sealed class MinimapPanel : Panel
     {
-        public static readonly StyledProperty<Point> ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner<MinimapPanel>(new StyledPropertyMetadata<Point>(default, affects: AffectsMeasureFlags));
-        public static readonly StyledProperty<Size> ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner<MinimapPanel>(new StyledPropertyMetadata<Size>(default, affects: AffectsMeasureFlags));
+        // In Avalonia, property metadata doesn't use AffectsFlags - it uses AffectsMeasure/AffectsArrange/AffectsRender enums
+        public static readonly StyledProperty<Point> ViewportLocationProperty = NodifyEditor.ViewportLocationProperty.AddOwner<MinimapPanel>();
+        public static readonly StyledProperty<Size> ViewportSizeProperty = NodifyEditor.ViewportSizeProperty.AddOwner<MinimapPanel>();
         public static readonly StyledProperty<Rect> ExtentProperty = NodifyCanvas.ExtentProperty.AddOwner<MinimapPanel>();
         public static readonly StyledProperty<Rect> ItemsExtentProperty = Minimap.ItemsExtentProperty.AddOwner<MinimapPanel>();
         public static readonly StyledProperty<bool> ResizeToViewportProperty = Minimap.ResizeToViewportProperty.AddOwner<MinimapPanel>();
-
-        private const AffectsFlags AffectsMeasureFlags = AffectsFlags.Measure;
 
         /// <inheritdoc cref="Minimap.ViewportLocation" />
         public Point ViewportLocation
@@ -57,7 +56,7 @@ namespace Nodify
             double maxX = double.MinValue;
             double maxY = double.MinValue;
 
-            ControlCollection children = InternalChildren;
+            var children = InternalChildren;
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (MinimapItem)children[i];
@@ -108,7 +107,7 @@ namespace Nodify
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            ControlCollection children = InternalChildren;
+            var children = InternalChildren;
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (MinimapItem)children[i];

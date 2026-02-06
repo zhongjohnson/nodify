@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Input;
 using System.Windows.Input;
@@ -9,9 +10,9 @@ namespace Nodify.Interactivity
     /// Represents an abstract base class for managing drag interactions within a UI element.
     /// Provides a framework for handling input gestures such as starting, canceling, and completing drag interactions.
     /// </summary>
-    /// <typeparam name="TElement">The type of <see cref="Visual"/> that owns the state.</typeparam>
+    /// <typeparam name="TElement">The type of <see cref="Control"/> that owns the state.</typeparam>
     public abstract class DragState<TElement> : InputElementState<TElement>, IInputHandler
-        where TElement : Visual
+        where TElement : Control
     {
         private enum InteractionState
         {
@@ -78,7 +79,7 @@ namespace Nodify.Interactivity
         public DragState(TElement element, InputGesture beginGesture) : base(element)
         {
             BeginGesture = beginGesture;
-            PositionElement = element;
+            PositionElement = element as IInputElement ?? element;
         }
 
         /// <summary>
@@ -233,7 +234,8 @@ namespace Nodify.Interactivity
             if (HasContextMenu && e is MouseButtonEventArgs mbe && mbe.ChangedButton == MouseButton.Right)
             {
                 double dragThreshold = NodifyEditor.MouseActionSuppressionThreshold * NodifyEditor.MouseActionSuppressionThreshold;
-                double dragDistance = (mbe.GetPosition(PositionElement) - _initialPosition).LengthSquared;
+                Vector dragVector = mbe.GetPosition(PositionElement) - _initialPosition;
+                double dragDistance = dragVector.Length * dragVector.Length;
 
                 if (dragDistance > dragThreshold)
                 {
@@ -291,21 +293,29 @@ namespace Nodify.Interactivity
         /// <param name="e">The <see cref="RoutedEventArgs"/> representing the input event.</param>
         /// <remarks>Must return true if the input is already captured by the current element.</remarks>
         protected virtual bool CanCaptureInput(RoutedEventArgs e)
-            => Mouse.Captured == null || Element.IsMouseCaptured;
+        {
+            // In Avalonia, we can capture pointer directly, no need for complex checks
+            return true;
+        }
 
         /// <summary>
         /// Captures input for the element.
         /// </summary>
         /// <param name="e">The <see cref="RoutedEventArgs"/> representing the input event.</param>
         protected virtual void CaptureInput(RoutedEventArgs e)
-            => Element.CaptureMouse();
+        {
+            if (e is MouseButtonEventArgs mbe && mbe.PointerEventArgs is PointerEventArgs pe)
+            {
+                pe.Pointer.Capture(Element);
+            }
+        }
 
         /// <summary>
         /// Determines whether input capture has been lost.
         /// </summary>
         /// <param name="e">The <see cref="RoutedEventArgs"/> representing the input event.</param>
         protected virtual bool IsInputCaptureLost(RoutedEventArgs e)
-            => e.RoutedEvent == Control.LostMouseCaptureEvent;
+            => e.RoutedEvent == InputElement.PointerCaptureLostEvent;
 
         /// <summary>
         /// Determines if the given input event represents the release of an input gesture.

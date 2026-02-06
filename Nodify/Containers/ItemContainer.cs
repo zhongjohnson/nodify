@@ -290,7 +290,7 @@ namespace Nodify
         /// <summary>
         /// Gets the bounds of the selection area for this <see cref="ItemContainer"/> based on its <see cref="Location"/> and <see cref="DesiredSizeForSelection"/>.
         /// </summary>
-        public Rect Bounds => new Rect(Location, DesiredSizeForSelection ?? RenderSize);
+        public Rect Bounds => new Rect(Location, DesiredSizeForSelection ?? Bounds.Size);
 
         ItemContainer IKeyboardFocusTarget<ItemContainer>.Element => this;
 
@@ -365,7 +365,7 @@ namespace Nodify
         /// <returns>True if <paramref name="area"/> contains or intersects this <see cref="ItemContainer"/>.</returns>
         public virtual bool IsSelectableInArea(Rect area, bool isContained)
         {
-            return isContained ? area.Contains(Bounds) : area.IntersectsWith(Bounds);
+            return isContained ? area.Contains(Bounds) : area.Intersects(Bounds);
         }
 
         /// <inheritdoc cref="NodifyEditor.BeginDragging()" />
@@ -448,7 +448,7 @@ namespace Nodify
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnKeyUp(KeyEventArgs e)
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
         {
             InputProcessor.ProcessEvent(e);
 
@@ -456,7 +456,7 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         #endregion

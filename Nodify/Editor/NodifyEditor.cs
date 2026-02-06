@@ -1073,7 +1073,7 @@ namespace Nodify
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnKeyUp(KeyEventArgs e)
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
         {
             InputProcessor.ProcessEvent(e);
 
@@ -1082,7 +1082,7 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         #endregion

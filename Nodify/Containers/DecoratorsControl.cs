@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 
 namespace Nodify
@@ -39,11 +40,9 @@ namespace Nodify
 
         static DecoratorsControl()
         {
-            FocusableProperty.OverrideMetadata(typeof(DecoratorsControl), new StyledPropertyMetadata(BoxValue.False));
-
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new StyledPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new StyledPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(DecoratorsControl), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            FocusableProperty.OverrideDefaultValue<DecoratorsControl>(false);
+            // Avalonia doesn't have KeyboardNavigation.ControlTabNavigationProperty and DirectionalNavigationProperty
+            // Tab navigation is handled differently in Avalonia
         }
 
         public DecoratorsControl()
@@ -100,7 +99,7 @@ namespace Nodify
             {
                 var viewport = new Rect(Editor.ViewportLocation, Editor.ViewportSize);
                 var containers = DecoratorContainers;
-                containerToFocus = containers.FirstOrDefault(container => viewport.IntersectsWith(((IKeyboardFocusTarget<DecoratorContainer>)container).Bounds))
+                containerToFocus = containers.FirstOrDefault(container => viewport.Intersects(((IKeyboardFocusTarget<DecoratorContainer>)container).Bounds))
                     ?? containers.First();
             }
 

@@ -29,7 +29,9 @@ namespace Nodify
         public static readonly StyledProperty<bool> ResizeToViewportProperty = AvaloniaProperty.Register<Minimap, bool>(nameof(ResizeToViewport));
         public static readonly StyledProperty<bool> IsReadOnlyProperty = TextBox.IsReadOnlyProperty.AddOwner<Minimap>();
 
-        public static readonly RoutedEvent ZoomEvent = EventManager.RegisterRoutedEvent(nameof(Zoom), RoutingStrategy.Bubble, typeof(ZoomEventHandler), typeof(Minimap));
+        // TODO: Avalonia doesn't use EventManager for routed events - need to use RoutedEvent.Register
+        public static readonly RoutedEvent<ZoomEventArgs> ZoomEvent = 
+            RoutedEvent.Register<Minimap, ZoomEventArgs>(nameof(Zoom), RoutingStrategies.Bubble);
 
         /// <inheritdoc cref="NodifyEditor.ViewportLocation" />
         public Point ViewportLocation
@@ -125,12 +127,8 @@ namespace Nodify
 
         static Minimap()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(typeof(Minimap)));
-            FocusableProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(BoxValue.True));
-
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(Minimap), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            // TODO: DefaultStyleKey and KeyboardNavigation property overrides don't work the same in Avalonia
+            FocusableProperty.OverrideDefaultValue<Minimap>(true);
         }
 
         public Minimap()
@@ -192,7 +190,7 @@ namespace Nodify
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnKeyUp(KeyEventArgs e)
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
         {
             InputProcessor.ProcessEvent(e);
 
@@ -200,7 +198,7 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         #endregion
@@ -295,15 +293,16 @@ namespace Nodify
 
         protected void SetViewportLocation(Point location)
         {
-            var position = location - new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2) + (Vector)Extent.Location;
+            var position = location - new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2) + new Vector(Extent.X, Extent.Y);
 
             if (MaxViewportOffset.Width != 0 || MaxViewportOffset.Height != 0)
             {
                 double maxRight = ResizeToViewport ? ItemsExtent.Right : Math.Max(ItemsExtent.Right, ItemsExtent.Left + ViewportSize.Width);
                 double maxBottom = ResizeToViewport ? ItemsExtent.Bottom : Math.Max(ItemsExtent.Bottom, ItemsExtent.Top + ViewportSize.Height);
 
-                position.X = position.X.Clamp(ItemsExtent.Left - ViewportSize.Width / 2 - MaxViewportOffset.Width, maxRight - ViewportSize.Width / 2 + MaxViewportOffset.Width);
-                position.Y = position.Y.Clamp(ItemsExtent.Top - ViewportSize.Height / 2 - MaxViewportOffset.Height, maxBottom - ViewportSize.Height / 2 + MaxViewportOffset.Height);
+                double clampedX = position.X.Clamp(ItemsExtent.Left - ViewportSize.Width / 2 - MaxViewportOffset.Width, maxRight - ViewportSize.Width / 2 + MaxViewportOffset.Width);
+                double clampedY = position.Y.Clamp(ItemsExtent.Top - ViewportSize.Height / 2 - MaxViewportOffset.Height, maxBottom - ViewportSize.Height / 2 + MaxViewportOffset.Height);
+                position = new Point(clampedX, clampedY);
             }
 
             ViewportLocation = position;
@@ -330,7 +329,7 @@ namespace Nodify
                 SetViewportLocation(location);
             }
 
-            var viewportLocation = ViewportLocation + (Vector)ViewportSize / 2;
+            var viewportLocation = ViewportLocation + new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2);
             var args = new ZoomEventArgs(zoom, viewportLocation)
             {
                 RoutedEvent = ZoomEvent,
@@ -342,12 +341,12 @@ namespace Nodify
         /// <summary>
         /// Zoom in at the viewport's center.
         /// </summary>
-        public void ZoomIn() => SetZoom(Math.Pow(2.0, 120.0 / 3.0 / Mouse.MouseWheelDeltaForOneLine));
+        public void ZoomIn() => SetZoom(Math.Pow(2.0, 120.0 / 3.0 / 120));
 
         /// <summary>
         /// Zoom out at the viewport's center.
         /// </summary>
-        public void ZoomOut() => SetZoom(Math.Pow(2.0, -120.0 / 3.0 / Mouse.MouseWheelDeltaForOneLine));
+        public void ZoomOut() => SetZoom(Math.Pow(2.0, -120.0 / 3.0 / 120));
 
         public void ResetViewport()
         {
@@ -362,7 +361,7 @@ namespace Nodify
 
         private void SetZoom(double zoom)
         {
-            var viewportLocation = ViewportLocation + (Vector)ViewportSize / 2;
+            var viewportLocation = ViewportLocation + new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2);
             var args = new ZoomEventArgs(zoom, viewportLocation)
             {
                 RoutedEvent = ZoomEvent,

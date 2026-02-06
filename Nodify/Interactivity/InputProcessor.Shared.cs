@@ -17,6 +17,10 @@ namespace Nodify.Interactivity
         public sealed class Shared<TElement> : InputProcessor, IInputHandler
             where TElement : Visual
         {
+            public void HandleEvent(RoutedEventArgs e)
+            {
+                ProcessEvent(e);
+            }
             private static readonly List<KeyValuePair<Type, Func<TElement, IInputHandler>>> _handlerFactories = new List<KeyValuePair<Type, Func<TElement, IInputHandler>>>();
 
             bool IInputHandler.ProcessHandledEvents { get; }

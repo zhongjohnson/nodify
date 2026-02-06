@@ -16,7 +16,7 @@ namespace Nodify
     /// Represents a connector control that can start and complete a <see cref="PendingConnection"/>.
     /// Has a <see cref="ElementConnector"/> that the <see cref="Anchor"/> is calculated from for the <see cref="PendingConnection"/>. Center of this control is used if missing.
     /// </summary>
-    public class Connector : Control
+    public class Connector : TemplatedControl
     {
         protected const string ElementConnector = "PART_Connector";
 
@@ -203,10 +203,10 @@ namespace Nodify
 
             Loaded += OnConnectorLoaded;
             Unloaded += OnConnectorUnloaded;
+            TemplateApplied += OnConnectorTemplateApplied;
         }
 
-        /// <inheritdoc />
-        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        private void OnConnectorTemplateApplied(object? sender, TemplateAppliedEventArgs e)
         {
             // Find the PART_Connector from template
             _thumb = e.NameScope.Find<Control>(ElementConnector);
@@ -404,7 +404,7 @@ namespace Nodify
             => InputProcessor.ProcessEvent(e);
 
         /// <inheritdoc />
-        protected override void OnKeyUp(KeyEventArgs e)
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
         {
             InputProcessor.ProcessEvent(e);
 
@@ -412,7 +412,7 @@ namespace Nodify
         }
 
         /// <inheritdoc />
-        protected override void OnKeyDown(KeyEventArgs e)
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
             => InputProcessor.ProcessEvent(e);
 
         #endregion
@@ -592,7 +592,7 @@ namespace Nodify
         /// </remarks>
         internal Point GetLocationInsideEditor(MouseEventArgs e)
         {
-            Vector thumbOffset = e.GetPosition(Thumb) - new Point(Thumb.ActualWidth / 2, Thumb.ActualHeight / 2);
+            Vector thumbOffset = e.GetPosition(Thumb) - new Point(Thumb.Bounds.Width / 2, Thumb.Bounds.Height / 2);
             return Anchor + thumbOffset;
         }
 
