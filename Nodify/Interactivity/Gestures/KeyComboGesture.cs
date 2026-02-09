@@ -69,7 +69,7 @@ namespace Nodify.Interactivity
         /// <param name="comboKey">The combo key pressed while the trigger key is held.</param>
         /// <param name="modifiers">Any modifier keys required for the combo key.</param>
         /// <param name="displayString">The display string representing the gesture.</param>
-        public KeyComboGesture(Key triggerKey, Key comboKey, ModifierKeys modifiers, string displayString) : base(comboKey, (Avalonia.Input.KeyModifiers)modifiers)
+        public KeyComboGesture(Key triggerKey, Key comboKey, ModifierKeys modifiers, string displayString) : base(comboKey, modifiers)
         {
             TriggerKey = triggerKey;
             _allCombos.Add(this);

@@ -19,8 +19,11 @@ namespace Nodify
         #region Dependency Properties
 
         public static readonly StyledProperty<IBrush?> HighlightBrushProperty = ItemContainer.HighlightBrushProperty.AddOwner<StateNode>();
-        public static readonly StyledProperty<object?> ContentProperty = Avalonia.Controls.Primitives.ContentPresenter.ContentProperty.AddOwner<StateNode>();
-        public static readonly StyledProperty<IDataTemplate?> ContentTemplateProperty = Avalonia.Controls.Primitives.ContentPresenter.ContentTemplateProperty.AddOwner<StateNode>();
+        // ContentPresenter properties - define our own since Avalonia's ContentPresenter might not expose these as styled properties
+        public static readonly StyledProperty<object?> ContentProperty =
+            AvaloniaProperty.Register<StateNode, object?>(nameof(Content));
+        public static readonly StyledProperty<IDataTemplate?> ContentTemplateProperty =
+            AvaloniaProperty.Register<StateNode, IDataTemplate?>(nameof(ContentTemplate));
         public static readonly StyledProperty<CornerRadius> CornerRadiusProperty = Border.CornerRadiusProperty.AddOwner<StateNode>();
 
         /// <summary>
@@ -85,7 +88,7 @@ namespace Nodify
         protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
-            if (e.Source is Visual visual && (ContentControl == null || !((Visual)ContentControl).IsVisualAncestorOf(visual)))
+            if (e.Source is Visual visual && (ContentControl == null || !visual.IsDescendantOf(ContentControl)))
             {
                 base.OnPointerPressed(e);
             }
@@ -95,7 +98,7 @@ namespace Nodify
         protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
-            if (e.Source is Visual visual && (ContentControl == null || !((Visual)ContentControl).IsVisualAncestorOf(visual)))
+            if (e.Source is Visual visual && (ContentControl == null || !visual.IsDescendantOf(ContentControl)))
             {
                 base.OnPointerReleased(e);
             }

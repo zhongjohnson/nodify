@@ -71,7 +71,7 @@ namespace Nodify
 
         public static readonly StyledProperty<IBrush?> HeaderBrushProperty = Node.HeaderBrushProperty.AddOwner<GroupingNode>();
         public static readonly StyledProperty<bool> CanResizeProperty = AvaloniaProperty.Register<GroupingNode, bool>(nameof(CanResize), true);
-        public static readonly StyledProperty<Size> ActualSizeProperty = AvaloniaProperty.Register<GroupingNode, Size>(nameof(ActualSize), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay, coerce: (o, v) => { OnActualSizeChanged(o, v); return v; });
+        public static readonly StyledProperty<Size> ActualSizeProperty = AvaloniaProperty.Register<GroupingNode, Size>(nameof(ActualSize), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay, coerce: (instance, v) => { OnActualSizeChanged((GroupingNode)instance, v); return v; });
         public static readonly StyledProperty<GroupingMovementMode> MovementModeProperty = AvaloniaProperty.Register<GroupingNode, GroupingMovementMode>(nameof(MovementMode), GroupingMovementMode.Group);
         public static readonly StyledProperty<ICommand?> ResizeCompletedCommandProperty = AvaloniaProperty.Register<GroupingNode, ICommand?>(nameof(ResizeCompletedCommand));
         public static readonly StyledProperty<ICommand?> ResizeStartedCommandProperty = AvaloniaProperty.Register<GroupingNode, ICommand?>(nameof(ResizeStartedCommand));
@@ -392,8 +392,8 @@ namespace Nodify
         {
             if (HeaderControl != null && ResizeThumb != null)
             {
-                _minHeight = Math.Max(HeaderControl.ActualHeight + ResizeThumb.ActualHeight, MinHeight);
-                _minWidth = Math.Max(ResizeThumb.ActualWidth, MinWidth);
+                _minHeight = Math.Max(HeaderControl.Bounds.Height + ResizeThumb.Bounds.Height, MinHeight);
+                _minWidth = Math.Max(ResizeThumb.Bounds.Width, MinWidth);
 
                 // If there's content don't resize it
                 if (ContentControl != null)
@@ -406,7 +406,7 @@ namespace Nodify
             // Allow selecting only by the header
             if (Container != null)
             {
-                Container.DesiredSizeForSelection = new Size(ActualWidth, Math.Max(HeaderControl?.ActualHeight ?? _minHeight, MinHeight));
+                Container.DesiredSizeForSelection = new Size(Bounds.Width, Math.Max(HeaderControl?.Bounds.Height ?? _minHeight, MinHeight));
             }
         }
     }

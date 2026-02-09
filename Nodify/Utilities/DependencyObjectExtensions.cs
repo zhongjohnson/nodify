@@ -26,6 +26,37 @@ namespace Nodify
             return null;
         }
 
+        public static T? FindAncestorOfType<T>(this Visual current, bool includeThis = true)
+            where T : Visual
+        {
+            if (includeThis && current is T match)
+            {
+                return match;
+            }
+
+            return GetParentOfType<T>(current);
+        }
+
+        public static T? FindDescendantOfType<T>(this Visual current)
+            where T : Visual
+        {
+            return GetChildOfType<T>(current);
+        }
+
+        public static bool IsDescendantOf(this Visual element, Visual ancestor)
+        {
+            var current = element;
+            while (current != null)
+            {
+                if (current == ancestor)
+                {
+                    return true;
+                }
+                current = current.GetVisualParent<Visual>();
+            }
+            return false;
+        }
+
         public static Visual? GetParent(this Visual current, Func<Visual, bool> condition)
         {
             while ((current = current.GetVisualParent<Visual>()) != null)

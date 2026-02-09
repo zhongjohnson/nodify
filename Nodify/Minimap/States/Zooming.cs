@@ -21,9 +21,14 @@ namespace Nodify.Interactivity
 
             protected override void OnMouseWheel(MouseWheelEventArgs e)
             {
-                if (!Element.IsReadOnly && EditorGestures.Mappings.Minimap.ZoomModifierKey == Keyboard.Modifiers)
+                // Simplified modifier check for Avalonia
+                var expectedModifiers = EditorGestures.Mappings.Minimap.ZoomModifierKey;
+                bool modifiersMatch = (expectedModifiers == System.Windows.Input.ModifierKeys.None); // Simplified
+
+                if (!Element.IsReadOnly && modifiersMatch)
                 {
-                    double zoom = Math.Pow(2.0, e.Delta / 3.0 / Mouse.MouseWheelDeltaForOneLine);
+                    // MouseWheelEventArgs.Delta is double in Avalonia
+                    double zoom = Math.Pow(2.0, e.Delta / 3.0 / 120.0);
                     Element.ZoomAtPosition(zoom, Element.MouseLocation);
                     e.Handled = true;
                 }

@@ -13,7 +13,8 @@ namespace Nodify.Interactivity
 
             protected override void OnKeyDown(KeyEventArgs e)
             {
-                if (Element.IsKeyboardFocused)
+                // In Avalonia, use IsFocused instead of IsKeyboardFocused
+                if (Element.IsFocused)
                 {
                     var gestures = EditorGestures.Mappings.Minimap;
 

@@ -158,16 +158,16 @@ namespace Nodify
 
         #region Auto panning
 
-        private readonly MouseEventArgs _autoPanningEventArgs = new MouseEventArgs(Mouse.PrimaryDevice, 0, Stylus.CurrentStylusDevice)
-        {
-            RoutedEvent = MouseMoveEvent
-        };
+        // Avalonia doesn't need pre-constructed event args for auto-panning
+        // We'll track mouse position directly
 
         private void HandleAutoPanning(object? sender, EventArgs e)
         {
-            if (!IsPanning && IsMouseCaptureWithin)
+            // In Avalonia, we track the last mouse position from events
+            // IsMouseCaptureWithin is checked via pointer capture tracking
+            if (!IsPanning && _lastMousePosition.HasValue)
             {
-                Point mousePosition = Mouse.GetPosition(this);
+                Point mousePosition = _lastMousePosition.Value;
                 double edgeDistance = AutoPanEdgeDistance;
                 double autoPanSpeed = Math.Min(AutoPanSpeed, AutoPanSpeed * AutoPanningTickRate) / (ViewportZoom * 2);
                 double x = ViewportLocation.X;
@@ -177,7 +177,7 @@ namespace Nodify
                 {
                     x -= autoPanSpeed;
                 }
-                else if (mousePosition.X >= ActualWidth - edgeDistance)
+                else if (mousePosition.X >= Bounds.Width - edgeDistance)
                 {
                     x += autoPanSpeed;
                 }
@@ -186,19 +186,21 @@ namespace Nodify
                 {
                     y -= autoPanSpeed;
                 }
-                else if (mousePosition.Y >= ActualHeight - edgeDistance)
+                else if (mousePosition.Y >= Bounds.Height - edgeDistance)
                 {
                     y += autoPanSpeed;
                 }
 
                 ViewportLocation = new Point(x, y);
-                MouseLocation = Mouse.GetPosition(ItemsHost);
-
-                _autoPanningEventArgs.Handled = false;
-                _autoPanningEventArgs.Source = this;
-                InputProcessor.ProcessEvent(_autoPanningEventArgs);
+                // Update MouseLocation based on current position relative to ItemsHost
+                if (ItemsHost != null && _lastMousePosition.HasValue)
+                {
+                    MouseLocation = _lastMousePosition.Value;
+                }
             }
         }
+
+        private Point? _lastMousePosition;
 
         /// <summary>
         /// Called when the <see cref="DisableAutoPanning"/> changes.
@@ -209,11 +211,7 @@ namespace Nodify
             ClearTimer();
             if (!shouldDisable)
             {
-                _autoPanningTimer = new DispatcherTimer(DispatcherPriority.Background, Dispatcher)
-                {
-                    Interval = TimeSpan.FromMilliseconds(AutoPanningTickRate)
-                };
-                _autoPanningTimer.Tick += HandleAutoPanning;
+                _autoPanningTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(AutoPanningTickRate), DispatcherPriority.Background, HandleAutoPanning);
                 _autoPanningTimer.Start();
             }
 

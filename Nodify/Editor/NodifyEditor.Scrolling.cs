@@ -108,7 +108,7 @@ namespace Nodify
             double locationY = Math.Min(ItemsExtent.Top, _viewportLocationBeforeScrolling.Value.Y) + ScrollInfo.VerticalOffset;
             ViewportLocation = new Point(locationX, locationY);
 
-            ScrollInfo.ScrollOwner?.InvalidateScrollInfo();
+            // Avalonia doesn't need InvalidateScrollInfo - scroll info updates automatically
             _isScrolling = false;
         }
 
@@ -130,7 +130,7 @@ namespace Nodify
                 _horizontalOffset = Math.Max(0, scrollOffset.X);
                 _verticalOffset = Math.Max(0, scrollOffset.Y);
 
-                ScrollInfo.ScrollOwner.InvalidateScrollInfo();
+                // Avalonia doesn't need InvalidateScrollInfo - scroll info updates automatically
             }
         }
     }

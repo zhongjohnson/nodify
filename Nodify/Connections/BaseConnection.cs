@@ -1047,6 +1047,17 @@ namespace Nodify
             return _outlinePen ??= new Pen(OutlineBrush, StrokeThickness + OutlineThickness * 2d);
         }
 
+        /// <summary>
+        /// Updates the visual state when focus changes.
+        /// </summary>
+        /// <remarks>
+        /// Avalonia doesn't have Adorner system - using InvalidateVisual instead
+        /// </remarks>
+        internal void UpdateFocusVisual()
+        {
+            InvalidateVisual();
+        }
+
         // TODO: Render override is sealed in Avalonia's Shape class - needs reimplementation
         // TODO: Adorner system doesn't exist in Avalonia - UpdateFocusVisual() needs reimplementation
     }

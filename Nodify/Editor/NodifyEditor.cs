@@ -14,6 +14,9 @@ using Avalonia.Metadata;
 using Avalonia.Media;
 using Avalonia.Styling;
 using Avalonia.Controls.Templates;
+using Avalonia.VisualTree;
+using System.Linq;
+using System.Collections.Specialized;
 
 namespace Nodify
 {
@@ -672,7 +675,17 @@ namespace Nodify
             ViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnViewportZoomChanged);
             MinViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnMinViewportZoomChanged);
             MaxViewportZoomProperty.Changed.AddClassHandler<NodifyEditor>(OnMaxViewportZoomChanged);
-            GridCellSizeProperty.Changed.AddClassHandler<NodifyEditor>((x, e) => x.OnGridCellSizeChanged(x, e));
+            GridCellSizeProperty.Changed.AddClassHandler<NodifyEditor>(OnGridCellSizeChangedHandler);
+        }
+
+        private static void OnGridCellSizeChangedHandler(NodifyEditor editor, AvaloniaPropertyChangedEventArgs e)
+        {
+            NodifyEditor.OnGridCellSizeChanged(editor, new AvaloniaPropertyChangedEventArgs<uint>(
+                editor,
+                GridCellSizeProperty,
+                (uint)(e.OldValue ?? default(uint)),
+                Avalonia.Data.BindingValue<uint>.FromUntyped(e.NewValue ?? default(uint)),
+                e.Priority));
         }
 
         /// <summary>
@@ -787,7 +800,7 @@ namespace Nodify
         /// <remarks>Temporarily disables editor controls when animated.</remarks>
         public void BringIntoView(Point point, bool animated = true, Action? onFinish = null)
         {
-            Point newLocation = (Point)((Vector)point - (Vector)ViewportSize / 2);
+            Point newLocation = (Point)((Vector)point - new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2));
 
             if (animated && newLocation != ViewportLocation)
             {
@@ -795,7 +808,8 @@ namespace Nodify
                 SetCurrentValue(DisablePanningProperty, true);
                 SetCurrentValue(DisableZoomingProperty, true);
 
-                double distance = (newLocation - ViewportLocation).Length;
+                Vector delta = newLocation - ViewportLocation;
+                double distance = Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y);
                 double duration = distance / (BringIntoViewSpeed + (distance / 10)) * ViewportZoom;
                 duration = Math.Max(0.1, Math.Min(duration, BringIntoViewMaxDuration));
 
@@ -831,11 +845,11 @@ namespace Nodify
         {
             var viewport = new Rect(ViewportLocation, ViewportSize);
 
-            area.Inflate(offsetFromEdge, offsetFromEdge);
+            area = area.Inflate(offsetFromEdge);
 
             if (!viewport.Contains(area))
             {
-                if (viewport.IntersectsWith(area))
+                if (viewport.Intersects(area))
                 {
                     double newX = viewport.X;
                     double newY = viewport.Y;
@@ -898,7 +912,7 @@ namespace Nodify
         public void FitToScreen(Rect? area = null)
         {
             Rect extent = area ?? ItemsExtent;
-            extent.Inflate(FitToScreenExtentMargin, FitToScreenExtentMargin);
+            extent = extent.Inflate(FitToScreenExtentMargin);
 
             if (extent.Width > 0 && extent.Height > 0)
             {
@@ -1099,7 +1113,7 @@ namespace Nodify
         /// <param name="relativeTo">The element where the <paramref name="location"/> was calculated from.</param>
         /// <returns>A location inside the graph.</returns>
         public Point GetLocationInsideEditor(Point location, Control relativeTo)
-            => relativeTo.TranslatePoint(location, ItemsHost);
+            => relativeTo.TranslatePoint(location, ItemsHost) ?? location;
 
         /// <summary>
         /// Translates the event location to graph space coordinates (relative to the <see cref="ItemsHost" />).
@@ -1139,18 +1153,15 @@ namespace Nodify
         {
             var viewport = new Rect(ViewportLocation, ViewportSize);
 
-            var stack = new Stack<AvaloniaObject>();
+            var stack = new Stack<Visual>();
             stack.Push(this);
 
             while (stack.Count > 0)
             {
-                AvaloniaObject current = stack.Pop();
-                int childrenCount = VisualTreeHelper.GetChildrenCount(current);
+                Visual current = stack.Pop();
 
-                for (int i = 0; i < childrenCount; i++)
+                foreach (var child in current.GetVisualChildren())
                 {
-                    AvaloniaObject child = VisualTreeHelper.GetChild(current, i);
-
                     if (child is Connector connector && connector.Container != null && connector.Container.IsSelectableInArea(viewport, isContained: false))
                     {
                         connector.UpdateAnchor();
@@ -1161,7 +1172,10 @@ namespace Nodify
                         }
                     }
 
-                    stack.Push(child);
+                    if (child is Visual visualChild)
+                    {
+                        stack.Push(visualChild);
+                    }
                 }
             }
         }

@@ -56,7 +56,7 @@ namespace Nodify
             double maxX = double.MinValue;
             double maxY = double.MinValue;
 
-            var children = InternalChildren;
+            var children = Children;
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (MinimapItem)children[i];
@@ -107,11 +107,11 @@ namespace Nodify
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            var children = InternalChildren;
+            var children = Children;
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (MinimapItem)children[i];
-                item.Arrange(new Rect(item.Location - (Vector)Extent.Location, item.DesiredSize));
+                item.Arrange(new Rect(item.Location - (Vector)Extent.Position, item.DesiredSize));
             }
 
             return finalSize;

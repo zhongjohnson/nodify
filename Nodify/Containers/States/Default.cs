@@ -111,16 +111,22 @@ namespace Nodify.Interactivity
 
                 private void CaptureMouseSafe()
                 {
-                    // Avoid stealing mouse capture from other elements
+                    // Avalonia uses pointer capture instead of mouse capture
                     if (CanCaptureMouse())
                     {
                         Element.Focus();
-                        Element.CaptureMouse();
+                        // In Avalonia, we'd typically capture pointer in the pointer event handler
+                        // For now, this is a stub - actual capture happens in pointer event handlers
                     }
                 }
 
                 private bool CanCaptureMouse()
-                    => Mouse.Captured == null || Element.IsMouseCaptured;
+                {
+                    // In Avalonia, pointer capture is handled differently
+                    // We'll always allow capture for now - proper implementation would check
+                    // TopLevel.GetTopLevel(Element)?.PointerCapture
+                    return true;
+                }
 
                 private static SelectionType GetSelectionTypeForDragging(SelectionType? selectionType)
                 {

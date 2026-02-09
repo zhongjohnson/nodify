@@ -111,9 +111,13 @@ namespace Nodify.Interactivity
             Handled = avaloniaArgs.Handled;
             IsDown = isDown;
             IsUp = !isDown;
+            Key = avaloniaArgs.Key;
+            KeyModifiers = avaloniaArgs.KeyModifiers;
         }
 
         public bool IsDown { get; set; }
         public bool IsUp { get; set; }
+        public Key Key { get; set; }
+        public Avalonia.Input.KeyModifiers KeyModifiers { get; set; }
     }
 }

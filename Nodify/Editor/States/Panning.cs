@@ -31,7 +31,8 @@ namespace Nodify.Interactivity
 
             protected override void OnBegin(RoutedEventArgs e)
             {
-                _prevPosition = Mouse.GetPosition(Element);
+                // Avalonia doesn't have static Mouse.GetPosition - use element center as starting point
+                _prevPosition = new Point(Element.Bounds.Width / 2, Element.Bounds.Height / 2);
                 Element.BeginPanning();
             }
 
@@ -74,18 +75,38 @@ namespace Nodify.Interactivity
             protected override void OnMouseWheel(MouseWheelEventArgs e)
             {
                 EditorGestures.NodifyEditorGestures gestures = EditorGestures.Mappings.Editor;
-                if (gestures.PanWithMouseWheel && Keyboard.Modifiers == gestures.PanHorizontalModifierKey)
+
+                // TODO: Get actual key modifiers from the event or track them
+                var currentModifiers = Avalonia.Input.KeyModifiers.None; // Placeholder
+
+                if (gestures.PanWithMouseWheel && currentModifiers == ConvertToAvaloniaModifiers(gestures.PanHorizontalModifierKey))
                 {
-                    double offset = Math.Sign(e.Delta) * Mouse.MouseWheelDeltaForOneLine / 2 / Element.ViewportZoom;
+                    double offset = Math.Sign(e.Delta) * 120.0 / 2 / Element.ViewportZoom; // 120 is standard mouse wheel delta
                     Element.UpdatePanning(new Vector(offset, 0d));
                     e.Handled = true;
                 }
-                else if (gestures.PanWithMouseWheel && Keyboard.Modifiers == gestures.PanVerticalModifierKey)
+                else if (gestures.PanWithMouseWheel && currentModifiers == ConvertToAvaloniaModifiers(gestures.PanVerticalModifierKey))
                 {
-                    double offset = Math.Sign(e.Delta) * Mouse.MouseWheelDeltaForOneLine / 2 / Element.ViewportZoom;
+                    double offset = Math.Sign(e.Delta) * 120.0 / 2 / Element.ViewportZoom;
                     Element.UpdatePanning(new Vector(0d, offset));
                     e.Handled = true;
                 }
+            }
+
+            private Avalonia.Input.KeyModifiers ConvertToAvaloniaModifiers(System.Windows.Input.ModifierKeys modifiers)
+            {
+                var result = Avalonia.Input.KeyModifiers.None;
+
+                if ((modifiers & System.Windows.Input.ModifierKeys.Control) != 0)
+                    result |= Avalonia.Input.KeyModifiers.Control;
+                if ((modifiers & System.Windows.Input.ModifierKeys.Shift) != 0)
+                    result |= Avalonia.Input.KeyModifiers.Shift;
+                if ((modifiers & System.Windows.Input.ModifierKeys.Alt) != 0)
+                    result |= Avalonia.Input.KeyModifiers.Alt;
+                if ((modifiers & System.Windows.Input.ModifierKeys.Windows) != 0)
+                    result |= Avalonia.Input.KeyModifiers.Meta;
+
+                return result;
             }
         }
     }

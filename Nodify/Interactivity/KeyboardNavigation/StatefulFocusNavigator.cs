@@ -24,13 +24,15 @@ namespace Nodify.Interactivity
 
         public bool TryMoveFocus(TraversalRequest request, FindNextFocusTargetDelegate findNext)
         {
-            var currentTarget = Keyboard.FocusedElement as TElement;
+            // Avalonia doesn't have static Keyboard.FocusedElement - would need TopLevel context
+            // For now, pass null as current target
+            var currentTarget = default(TElement);
 
             // If the request is in the opposite direction of the last focus navigation, try to restore the previous focused container
             if (_previousFocusedElement.TryGetTarget(out var prevTarget)
                 && _previousFocusNavigationDirection.HasValue
                 && request.FocusNavigationDirection.IsOppositeOf(_previousFocusNavigationDirection.Value)
-                && prevTarget!.Focus())
+                && prevTarget!.Element is IInputElement prevInput && prevInput.Focus())
             {
                 _previousFocusNavigationDirection = request.FocusNavigationDirection;
                 _previousFocusedElement.SetTarget(currentTarget);
@@ -39,7 +41,7 @@ namespace Nodify.Interactivity
                 _onFocus(prevTarget);
                 return true;
             }
-            else if (findNext(currentTarget, request, out var nextTarget) && nextTarget!.Element.Focus())
+            else if (findNext(currentTarget, request, out var nextTarget) && nextTarget!.Element is IInputElement nextInput && nextInput.Focus())
             {
                 _previousFocusNavigationDirection = request.FocusNavigationDirection;
                 _previousFocusedElement.SetTarget(currentTarget);
@@ -56,12 +58,12 @@ namespace Nodify.Interactivity
         {
             if (_lastFocusedElement.TryGetTarget(out var lastTarget))
             {
-                if (lastTarget!.IsKeyboardFocused)
+                if (lastTarget!.Element is IInputElement elementInput && elementInput.IsFocused)
                 {
                     return true;
                 }
 
-                if (lastTarget.Focus())
+                if (lastTarget.Element is IInputElement input && input.Focus())
                 {
                     _onFocus.Invoke(lastTarget);
                     return true;

@@ -55,10 +55,10 @@ namespace Nodify
         #region Routed events
 
         public static readonly RoutedEvent<RoutedEventArgs> SelectedEvent =
-            RoutedEvent.Register<ConnectionContainer, RoutedEventArgs>(nameof(Selected), RoutingStrategy.Bubble);
+            RoutedEvent.Register<ConnectionContainer, RoutedEventArgs>(nameof(Selected), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         public static readonly RoutedEvent<RoutedEventArgs> UnselectedEvent =
-            RoutedEvent.Register<ConnectionContainer, RoutedEventArgs>(nameof(Unselected), RoutingStrategy.Bubble);
+            RoutedEvent.Register<ConnectionContainer, RoutedEventArgs>(nameof(Unselected), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         /// <summary>
         /// Occurs when this <see cref="ConnectionContainer"/> is selected.
