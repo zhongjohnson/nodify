@@ -52,7 +52,8 @@ namespace Nodify
                         editor.BringIntoView(location);
                         break;
                     case string str:
-                        if (Point.TryParse(str, out var parsed))
+                        // Point.TryParse doesn't exist in Avalonia, parse manually
+                        if (TryParsePoint(str, out var parsed))
                             editor.BringIntoView(parsed);
                         break;
                     default:
@@ -105,6 +106,33 @@ namespace Nodify
 
         private static ICommand CreateCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
             => new RelayCommand(execute, canExecute);
+
+        /// <summary>
+        /// Avalonia doesn't require command binding registration like WPF.
+        /// This method is kept for compatibility but does nothing.
+        /// </summary>
+        public static void RegisterCommandBindings<T>() where T : class
+        {
+            // Avalonia uses a different command binding mechanism
+            // Commands are typically bound in XAML or code-behind directly
+        }
+
+        private static bool TryParsePoint(string str, out Point point)
+        {
+            point = default;
+            if (string.IsNullOrWhiteSpace(str)) return false;
+
+            var parts = str.Split(',');
+            if (parts.Length != 2) return false;
+
+            if (double.TryParse(parts[0].Trim(), out double x) &&
+                double.TryParse(parts[1].Trim(), out double y))
+            {
+                point = new Point(x, y);
+                return true;
+            }
+            return false;
+        }
 
         private class RelayCommand : ICommand
         {

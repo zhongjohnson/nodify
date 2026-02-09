@@ -161,7 +161,7 @@ namespace Nodify
                         Cue = new Avalonia.Animation.Cue(1.0),
                         Setters =
                         {
-                            new Avalonia.Animation.Setter(property, toValue)
+                            new Avalonia.Styling.Setter(property, toValue)
                         }
                     }
                 }
@@ -185,7 +185,7 @@ namespace Nodify
                         Cue = new Avalonia.Animation.Cue(1.0),
                         Setters =
                         {
-                            new Avalonia.Animation.Setter(property, toValue)
+                            new Avalonia.Styling.Setter(property, toValue)
                         }
                     }
                 }
@@ -210,7 +210,7 @@ namespace Nodify
                         Cue = new Avalonia.Animation.Cue(1.0),
                         Setters =
                         {
-                            new Avalonia.Animation.Setter(property, toValue)
+                            new Avalonia.Styling.Setter(property, toValue)
                         }
                     }
                 }

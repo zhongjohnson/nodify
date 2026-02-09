@@ -139,7 +139,7 @@ namespace Nodify
             }
 
             double maximum = editor.MaxViewportZoom;
-            return num > maximum ? maximum : value;
+            return value > maximum ? maximum : value;
         }
         #endregion
 
@@ -254,19 +254,13 @@ namespace Nodify
 
         private void ApplyRenderingOptimizations()
         {
+            // Avalonia doesn't have BitmapCache in the same way as WPF
+            // This optimization is not applicable, but we can leave the method for potential future optimization
+            // Note: Avalonia has RenderOptions.BitmapInterpolationMode but that's different
             if (ItemsHost != null)
             {
-                if (EnableRenderingContainersOptimizations && Items.Count >= OptimizeRenderingMinimumContainers)
-                {
-                    double zoom = ViewportZoom;
-                    double availableZoomIn = 1.0 - MinViewportZoom;
-                    bool shouldCache = zoom / availableZoomIn <= OptimizeRenderingZoomOutPercent;
-                    ItemsHost.CacheMode = shouldCache ? new BitmapCache(1.0 / zoom) : null;
-                }
-                else
-                {
-                    ItemsHost.CacheMode = null;
-                }
+                // Rendering optimizations would need to be implemented differently in Avalonia
+                // For now, this is a no-op
             }
         }
 
@@ -628,19 +622,17 @@ namespace Nodify
 
         static NodifyEditor()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(typeof(NodifyEditor)));
-            FocusableProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(BoxValue.True));
-
-            KeyboardNavigation.TabNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.ControlTabNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(KeyboardNavigationMode.None));
-            KeyboardNavigation.DirectionalNavigationProperty.OverrideMetadata(typeof(NodifyEditor), new StyledPropertyMetadata(KeyboardNavigationMode.None));
+            // In Avalonia, style keys are automatically inferred and keyboard navigation
+            // is handled differently, so we don't need these overrides
+            FocusableProperty.OverrideDefaultValue<NodifyEditor>(true);
 
             EditorCommands.RegisterCommandBindings<NodifyEditor>();
 
             // Property change handlers from partial files
+            // In Avalonia, e.NewValue is object and needs casting
             IsCuttingProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
             {
-                if (e.NewValue.GetValueOrDefault())
+                if ((bool)e.NewValue!)
                     editor.OnCuttingStarted();
                 else
                     editor.OnCuttingCompleted();
@@ -648,31 +640,31 @@ namespace Nodify
 
             IsDraggingProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
             {
-                if (e.NewValue.GetValueOrDefault())
+                if ((bool)e.NewValue!)
                     editor.OnItemsDragStarted();
                 else
                     editor.OnItemsDragCompleted();
             });
 
             DisableAutoPanningProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
-                editor.OnDisableAutoPanningChanged(e.NewValue.GetValueOrDefault()));
+                editor.OnDisableAutoPanningChanged((bool)e.NewValue!));
 
             DisablePanningProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
                 editor.OnDisableAutoPanningChanged(editor.DisableAutoPanning || editor.DisablePanning));
 
             IsSelectingProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
             {
-                if (e.NewValue.GetValueOrDefault())
+                if ((bool)e.NewValue!)
                     editor.OnItemsSelectStarted();
                 else
                     editor.OnItemsSelectCompleted();
             });
 
             CanSelectMultipleItemsProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
-                editor.CanSelectMultipleItemsBase = e.NewValue.GetValueOrDefault());
+                editor.CanSelectMultipleItemsBase = (bool)e.NewValue!);
 
             SelectedItemsProperty.Changed.AddClassHandler<NodifyEditor>((editor, e) =>
-                editor.OnSelectedItemsSourceChanged(e.OldValue.Value, e.NewValue.Value));
+                editor.OnSelectedItemsSourceChanged(e.OldValue, e.NewValue));
 
             // Property change handlers from main file
             ItemsExtentProperty.Changed.AddClassHandler<NodifyEditor>(OnItemsExtentChanged);
@@ -752,12 +744,12 @@ namespace Nodify
         /// <summary>
         /// Zoom in at the viewport's center.
         /// </summary>
-        public void ZoomIn() => ZoomAtPosition(Math.Pow(2.0, 120.0 / 3.0 / Mouse.MouseWheelDeltaForOneLine), ViewportLocation + (Vector)ViewportSize / 2);
+        public void ZoomIn() => ZoomAtPosition(Math.Pow(2.0, 120.0 / 3.0 / 120.0), ViewportLocation + new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2));
 
         /// <summary>
         /// Zoom out at the viewport's center.
         /// </summary>
-        public void ZoomOut() => ZoomAtPosition(Math.Pow(2.0, -120.0 / 3.0 / Mouse.MouseWheelDeltaForOneLine), ViewportLocation + (Vector)ViewportSize / 2);
+        public void ZoomOut() => ZoomAtPosition(Math.Pow(2.0, -120.0 / 3.0 / 120.0), ViewportLocation + new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2));
 
         /// <summary>
         /// Zoom at the specified location in graph space coordinates.

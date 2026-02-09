@@ -19,8 +19,8 @@ namespace Nodify
         #region Dependency Properties
 
         public static readonly StyledProperty<IBrush?> HighlightBrushProperty = ItemContainer.HighlightBrushProperty.AddOwner<StateNode>();
-        public static readonly StyledProperty<object?> ContentProperty = ContentPresenter.ContentProperty.AddOwner<StateNode>();
-        public static readonly StyledProperty<IDataTemplate?> ContentTemplateProperty = ContentPresenter.ContentTemplateProperty.AddOwner<StateNode>();
+        public static readonly StyledProperty<object?> ContentProperty = Avalonia.Controls.Primitives.ContentPresenter.ContentProperty.AddOwner<StateNode>();
+        public static readonly StyledProperty<IDataTemplate?> ContentTemplateProperty = Avalonia.Controls.Primitives.ContentPresenter.ContentTemplateProperty.AddOwner<StateNode>();
         public static readonly StyledProperty<CornerRadius> CornerRadiusProperty = Border.CornerRadiusProperty.AddOwner<StateNode>();
 
         /// <summary>
@@ -68,8 +68,9 @@ namespace Nodify
 
         static StateNode()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(StateNode), new StyledPropertyMetadata(typeof(StateNode)));
-            FocusableProperty.OverrideMetadata(typeof(StateNode), new StyledPropertyMetadata(BoxValue.False));
+            // In Avalonia, style keys are automatically inferred from type
+            // No need to override DefaultStyleKeyProperty explicitly
+            FocusableProperty.OverrideDefaultValue<StateNode>(false);
         }
 
         /// <inheritdoc />
@@ -84,7 +85,7 @@ namespace Nodify
         protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
-            if (e.Source is Visual visual && (!ContentControl?.IsVisualAncestorOf(visual) ?? true))
+            if (e.Source is Visual visual && (ContentControl == null || !((Visual)ContentControl).IsVisualAncestorOf(visual)))
             {
                 base.OnPointerPressed(e);
             }
@@ -94,7 +95,7 @@ namespace Nodify
         protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
-            if (e.Source is Visual visual && (!ContentControl?.IsVisualAncestorOf(visual) ?? true))
+            if (e.Source is Visual visual && (ContentControl == null || !((Visual)ContentControl).IsVisualAncestorOf(visual)))
             {
                 base.OnPointerReleased(e);
             }

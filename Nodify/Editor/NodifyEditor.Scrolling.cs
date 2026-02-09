@@ -125,7 +125,7 @@ namespace Nodify
                 _extentHeight = extent.Height;
                 _extentWidth = extent.Width;
 
-                var scrollOffset = ViewportLocation - ItemsExtent.Location;
+                var scrollOffset = ViewportLocation - ItemsExtent.Position;
 
                 _horizontalOffset = Math.Max(0, scrollOffset.X);
                 _verticalOffset = Math.Max(0, scrollOffset.Y);

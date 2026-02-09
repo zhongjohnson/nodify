@@ -359,6 +359,36 @@ namespace Nodify
         }
 
         /// <summary>
+        /// Selects all items in the editor.
+        /// </summary>
+        public void SelectAll()
+        {
+            if (CanSelectMultipleItems)
+            {
+                foreach (var item in Items)
+                {
+                    if (!SelectedItems.Contains(item))
+                    {
+                        SelectedItems.Add(item);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Unselects all items in the editor.
+        /// </summary>
+        public void UnselectAll()
+        {
+            SelectedItems.Clear();
+        }
+
+        /// <summary>
+        /// Gets whether the editor has any items.
+        /// </summary>
+        public bool HasItems => Items.Count > 0;
+
+        /// <summary>
         /// Initiates a selection operation from the current <see cref="MouseLocation"/>.
         /// </summary>
         /// <remarks>This method has no effect if a selection operation is already in progress.</remarks>

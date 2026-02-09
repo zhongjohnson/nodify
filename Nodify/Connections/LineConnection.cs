@@ -152,8 +152,8 @@ namespace Nodify
         {
             Vector vecAB = corner - start;
             Vector vecBC = end - corner;
-            double distAB = vecAB.Length * vecAB.Length;
-            double distBC = vecBC.Length * vecBC.Length;
+            double distAB = vecAB.X * vecAB.X + vecAB.Y * vecAB.Y;
+            double distBC = vecBC.X * vecBC.X + vecBC.Y * vecBC.Y;
 
             double bendSize = Math.Sqrt(Math.Min(distAB, distBC)) / 2;
             radius = Math.Min(bendSize, radius);
@@ -161,10 +161,12 @@ namespace Nodify
             Vector directionToCorner = corner - start;
             Vector directionFromCorner = end - corner;
 
-            if (directionToCorner.Length * directionToCorner.Length != 0)
+            double lengthSqToCorner = directionToCorner.X * directionToCorner.X + directionToCorner.Y * directionToCorner.Y;
+            if (lengthSqToCorner != 0)
                 directionToCorner = directionToCorner.Normalize();
 
-            if (directionFromCorner.Length * directionFromCorner.Length != 0)
+            double lengthSqFromCorner = directionFromCorner.X * directionFromCorner.X + directionFromCorner.Y * directionFromCorner.Y;
+            if (lengthSqFromCorner != 0)
                 directionFromCorner = directionFromCorner.Normalize();
 
             Point curveStart = corner - directionToCorner * radius;

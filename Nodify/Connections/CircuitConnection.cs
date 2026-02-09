@@ -35,7 +35,7 @@ namespace Nodify
         {
             var (p0, p1, p2) = GetLinePoints(source, target);
 
-            context.BeginFigure(source, false, false);
+            context.BeginFigure(source, false);
             if (CornerRadius > 0)
             {
                 AddSmoothCorner(context, source, p0, p1, CornerRadius);
@@ -44,11 +44,11 @@ namespace Nodify
             }
             else
             {
-                context.LineTo(p0, true, true);
-                context.LineTo(p1, true, true);
-                context.LineTo(p2, true, true);
+                context.LineTo(p0);
+                context.LineTo(p1);
+                context.LineTo(p2);
             }
-            context.LineTo(target, true, true);
+            context.LineTo(target);
 
             if (Spacing < 1d)
             {
@@ -65,7 +65,10 @@ namespace Nodify
             Vector deltaSource = p1 - p0;
             Vector deltaTarget = p2 - p1;
 
-            if (deltaSource.LengthSquared > deltaTarget.LengthSquared)
+            double sourceLengthSq = deltaSource.X * deltaSource.X + deltaSource.Y * deltaSource.Y;
+            double targetLengthSq = deltaTarget.X * deltaTarget.X + deltaTarget.Y * deltaTarget.Y;
+
+            if (sourceLengthSq > targetLengthSq)
             {
                 return new Point((p0.X + p1.X - text.Width) / 2, (p0.Y + p1.Y - text.Height) / 2);
             }
@@ -97,7 +100,7 @@ namespace Nodify
 
             if (TargetOrientation == Orientation.Vertical)
             {
-                (arrowOffset.X, arrowOffset.Y) = (arrowOffset.Y, arrowOffset.X);
+                arrowOffset = new Vector(arrowOffset.Y, arrowOffset.X);
             }
 
             Point endPoint = Spacing > 0 ? target - arrowOffset : target;

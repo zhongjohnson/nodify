@@ -23,10 +23,10 @@ namespace Nodify
         {
             var (p0, p1, p2, p3) = GetBezierControlPoints(source, target);
 
-            context.BeginFigure(source, false, false);
-            context.LineTo(p0, true, true);
-            context.BezierTo(p1, p2, p3, true, true);
-            context.LineTo(target, true, true);
+            context.BeginFigure(source, false);
+            context.LineTo(p0);
+            context.CubicBezierTo(p1, p2, p3);
+            context.LineTo(target);
 
             return ((target, source), (source, target));
         }

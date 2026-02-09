@@ -71,7 +71,7 @@ namespace Nodify
         #region Routed events
 
         public static readonly RoutedEvent<ItemsMovedEventArgs> ItemsMovedEvent =
-            RoutedEvent.Register<NodifyEditor, ItemsMovedEventArgs>(nameof(ItemsMoved), RoutingStrategy.Bubble);
+            RoutedEvent.Register<NodifyEditor, ItemsMovedEventArgs>(nameof(ItemsMoved), Avalonia.Interactivity.RoutingStrategies.Bubble);
 
         /// <summary>
         /// Occurs when items are moved within the editor (see <see cref="BeginDragging()"/>, <see cref="BeginPushingItems(Point, System.Windows.Controls.Orientation)"/>).

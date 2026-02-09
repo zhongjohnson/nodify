@@ -90,17 +90,17 @@ namespace Nodify
 
             void DrawDefaultLine(StreamGeometryContext context)
             {
-                context.BeginFigure(source, false, false);
-                context.LineTo(p0, true, true);
-                context.LineTo(p1, true, true);
-                context.LineTo(p2, true, true);
-                context.LineTo(p3, true, true);
-                context.LineTo(target, true, true);
+                context.BeginFigure(source, false);
+                context.LineTo(p0);
+                context.LineTo(p1);
+                context.LineTo(p2);
+                context.LineTo(p3);
+                context.LineTo(target);
             }
 
             void DrawSmoothLine(StreamGeometryContext context)
             {
-                context.BeginFigure(source, false, false);
+                context.BeginFigure(source, false);
                 AddSmoothCorner(context, source, p0, p1, CornerRadius);
 
                 if (p1 == p2)
@@ -115,7 +115,7 @@ namespace Nodify
                 }
 
                 AddSmoothCorner(context, p2, p3, target, CornerRadius);
-                context.LineTo(target, true, true);
+                context.LineTo(target);
             }
         }
 
@@ -141,7 +141,11 @@ namespace Nodify
             return new Point((p3.X + p2.X - text.Width) / 2, (p3.Y + p2.Y - text.Height) / 2);
 
             static Vector GetMax(in Vector a, in Vector b)
-                => a.LengthSquared > b.LengthSquared ? a : b;
+            {
+                double aSq = a.X * a.X + a.Y * a.Y;
+                double bSq = b.X * b.X + b.Y * b.Y;
+                return aSq > bSq ? a : b;
+            }
         }
 
         protected override void DrawDirectionalArrowsGeometry(StreamGeometryContext context, Point source, Point target)

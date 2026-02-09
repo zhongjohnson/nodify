@@ -61,37 +61,37 @@ namespace Nodify
 
         private static void AlignBottom(IReadOnlyCollection<ItemContainer> containers, ItemContainer? instigator)
         {
-            double bottom = instigator != null ? instigator.Location.Y + instigator.ActualHeight : containers.Max(x => x.Location.Y + x.ActualHeight);
+            double bottom = instigator != null ? instigator.Location.Y + instigator.Bounds.Height : containers.Max(x => x.Location.Y + x.Bounds.Height);
             foreach (var c in containers)
             {
-                c.Location = new Point(c.Location.X, bottom - c.ActualHeight);
+                c.Location = new Point(c.Location.X, bottom - c.Bounds.Height);
             }
         }
 
         private static void AlignRight(IReadOnlyCollection<ItemContainer> containers, ItemContainer? instigator)
         {
-            double right = instigator != null ? instigator.Location.X + instigator.ActualWidth : containers.Max(x => x.Location.X + x.ActualWidth);
+            double right = instigator != null ? instigator.Location.X + instigator.Bounds.Width : containers.Max(x => x.Location.X + x.Bounds.Width);
             foreach (var c in containers)
             {
-                c.Location = new Point(right - c.ActualWidth, c.Location.Y);
+                c.Location = new Point(right - c.Bounds.Width, c.Location.Y);
             }
         }
 
         private static void AlignMiddle(IReadOnlyCollection<ItemContainer> containers, ItemContainer? instigator)
         {
-            double mid = instigator != null ? instigator.Location.Y + instigator.ActualHeight / 2 : containers.Average(c => c.Location.Y + c.ActualHeight / 2);
+            double mid = instigator != null ? instigator.Location.Y + instigator.Bounds.Height / 2 : containers.Average(c => c.Location.Y + c.Bounds.Height / 2);
             foreach (var c in containers)
             {
-                c.Location = new Point(c.Location.X, mid - c.ActualHeight / 2);
+                c.Location = new Point(c.Location.X, mid - c.Bounds.Height / 2);
             }
         }
 
         private static void AlignCenter(IReadOnlyCollection<ItemContainer> containers, ItemContainer? instigator)
         {
-            double center = instigator != null ? instigator.Location.X + instigator.ActualWidth / 2 : containers.Average(c => c.Location.X + c.ActualWidth / 2);
+            double center = instigator != null ? instigator.Location.X + instigator.Bounds.Width / 2 : containers.Average(c => c.Location.X + c.Bounds.Width / 2);
             foreach (var c in containers)
             {
-                c.Location = new Point(center - c.ActualWidth / 2, c.Location.Y);
+                c.Location = new Point(center - c.Bounds.Width / 2, c.Location.Y);
             }
         }
     }

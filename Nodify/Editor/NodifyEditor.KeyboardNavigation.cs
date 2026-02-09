@@ -168,7 +168,7 @@ namespace Nodify
                 // Avalonia's GotFocusEventArgs does not have NewFocus, so skip this check or use e.Source == this
                 else if (ActiveNavigationLayer.LastFocusedElement is null && e.Source == this && AutoFocusFirstElement)
                 {
-                    e.Handled = ActiveNavigationLayer.TryMoveFocus(new TraversalRequest(NavigationDirection.Next));
+                    e.Handled = ActiveNavigationLayer.TryMoveFocus(new TraversalRequest(Nodify.Interactivity.NavigationDirection.Next));
                 }
             }
         }
@@ -186,7 +186,7 @@ namespace Nodify
         {
             if (AutoFocusFirstElement && !activeLayer!.TryRestoreFocus() && HandleNestedEditor())
             {
-                activeLayer.TryMoveFocus(new TraversalRequest(NavigationDirection.Next));
+                activeLayer.TryMoveFocus(new TraversalRequest(Nodify.Interactivity.NavigationDirection.Next));
             }
 
             bool HandleNestedEditor()

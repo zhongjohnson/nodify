@@ -1,4 +1,5 @@
 using Avalonia.Input;
+using WpfKeyGesture = System.Windows.Input.KeyGesture;
 using System.Windows.Input;
 
 namespace Nodify.Interactivity
@@ -29,7 +30,7 @@ namespace Nodify.Interactivity
                 Append = new MouseGesture(mouseAction, ModifierKeys.Shift, ignoreModifierKeysOnRelease);
                 Invert = new MouseGesture(mouseAction, ModifierKeys.Control, ignoreModifierKeysOnRelease);
                 Select = new AnyGesture(Replace, Remove, Append, Invert);
-                Cancel = new KeyGesture(Key.Escape);
+                Cancel = new WpfKeyGesture(Key.Escape);
             }
 
             /// <summary>
@@ -118,7 +119,7 @@ namespace Nodify.Interactivity
                     Selection.Invert);
 
                 Drag = new AnyGesture(Selection.Replace, Selection.Remove, Selection.Append, Selection.Invert);
-                CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new KeyGesture(Key.Escape));
+                CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new WpfKeyGesture(Key.Escape));
             }
 
             /// <summary>Gesture to select the container using a <see cref="SelectionGestures"/> strategy.</summary>
@@ -162,10 +163,10 @@ namespace Nodify.Interactivity
         {
             public DirectionalNavigationGestures(ModifierKeys modifierKeys = ModifierKeys.None)
             {
-                Up = new KeyGesture(Key.Up, modifierKeys);
-                Left = new KeyGesture(Key.Left, modifierKeys);
-                Down = new KeyGesture(Key.Down, modifierKeys);
-                Right = new KeyGesture(Key.Right, modifierKeys);
+                Up = new WpfKeyGesture(Key.Up, modifierKeys);
+                Left = new WpfKeyGesture(Key.Left, modifierKeys);
+                Down = new WpfKeyGesture(Key.Down, modifierKeys);
+                Right = new WpfKeyGesture(Key.Right, modifierKeys);
             }
 
             public DirectionalNavigationGestures(Key triggerKey, ModifierKeys modifierKeys = ModifierKeys.None, bool repeated = false)
@@ -231,10 +232,10 @@ namespace Nodify.Interactivity
                     Pan = new DirectionalNavigationGestures(Key.Space, repeated: true);
                     DragSelection = new DirectionalNavigationGestures(ModifierKeys.Control);
                     NavigateSelection = new DirectionalNavigationGestures(ModifierKeys.None);
-                    ToggleSelected = new AnyGesture(new KeyGesture(Key.Space), new KeyGesture(Key.Enter));
-                    DeselectAll = new KeyGesture(Key.Escape);
-                    NextNavigationLayer = new KeyGesture(Key.OemCloseBrackets, ModifierKeys.Control);
-                    PrevNavigationLayer = new KeyGesture(Key.OemOpenBrackets, ModifierKeys.Control);
+                    ToggleSelected = new AnyGesture(new WpfKeyGesture(Key.Space), new WpfKeyGesture(Key.Enter));
+                    DeselectAll = new WpfKeyGesture(Key.Escape);
+                    NextNavigationLayer = new WpfKeyGesture(Key.OemCloseBrackets, ModifierKeys.Control);
+                    PrevNavigationLayer = new WpfKeyGesture(Key.OemOpenBrackets, ModifierKeys.Control);
                 }
 
                 /// <summary>
@@ -311,16 +312,17 @@ namespace Nodify.Interactivity
             {
                 Keyboard = new KeyboardGestures();
                 Selection = new SelectionGestures();
-                SelectAll = ApplicationCommands.SelectAll.InputGestures[0].AsRef();
+                // Avalonia doesn't have ApplicationCommands.SelectAll, use default Ctrl+A gesture
+                SelectAll = new WpfKeyGesture(Key.A, ModifierKeys.Control);
                 Cutting = new MouseGesture(MouseAction.LeftClick, ModifierKeys.Alt | ModifierKeys.Shift, true);
                 PushItems = new MouseGesture(MouseAction.LeftClick, ModifierKeys.Control | ModifierKeys.Shift, true);
                 Pan = new AnyGesture(new MouseGesture(MouseAction.RightClick), new MouseGesture(MouseAction.MiddleClick));
                 ZoomModifierKey = ModifierKeys.None;
-                ZoomIn = new AnyGesture(new KeyGesture(Key.OemPlus, ModifierKeys.Control), new KeyGesture(Key.Add, ModifierKeys.Control));
-                ZoomOut = new AnyGesture(new KeyGesture(Key.OemMinus, ModifierKeys.Control), new KeyGesture(Key.Subtract, ModifierKeys.Control));
-                ResetViewport = new KeyGesture(Key.Home);
-                FitToScreen = new KeyGesture(Key.Home, ModifierKeys.Shift);
-                CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new KeyGesture(Key.Escape));
+                ZoomIn = new AnyGesture(new WpfKeyGesture(Key.OemPlus, ModifierKeys.Control), new WpfKeyGesture(Key.Add, ModifierKeys.Control));
+                ZoomOut = new AnyGesture(new WpfKeyGesture(Key.OemMinus, ModifierKeys.Control), new WpfKeyGesture(Key.Subtract, ModifierKeys.Control));
+                ResetViewport = new WpfKeyGesture(Key.Home);
+                FitToScreen = new WpfKeyGesture(Key.Home, ModifierKeys.Shift);
+                CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new WpfKeyGesture(Key.Escape));
                 PanWithMouseWheel = false;
                 PanHorizontalModifierKey = ModifierKeys.Shift;
                 PanVerticalModifierKey = ModifierKeys.None;
@@ -426,9 +428,9 @@ namespace Nodify.Interactivity
         {
             public ConnectorGestures()
             {
-                Disconnect = new AnyGesture(new MouseGesture(MouseAction.LeftClick, ModifierKeys.Alt), new KeyGesture(Key.Delete));
-                Connect = new AnyGesture(new MouseGesture(MouseAction.LeftClick), new KeyGesture(Key.Space));
-                CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new KeyGesture(Key.Escape));
+                Disconnect = new AnyGesture(new MouseGesture(MouseAction.LeftClick, ModifierKeys.Alt), new WpfKeyGesture(Key.Delete));
+                Connect = new AnyGesture(new MouseGesture(MouseAction.LeftClick), new WpfKeyGesture(Key.Space));
+                CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new WpfKeyGesture(Key.Escape));
             }
 
             /// <summary>Gesture to call the <see cref="Connector.DisconnectCommand"/>.</summary>
@@ -510,7 +512,7 @@ namespace Nodify.Interactivity
             public GroupingNodeGestures()
             {
                 SwitchMovementMode = ModifierKeys.Shift;
-                ToggleContentSelection = new AnyGesture(new KeyGesture(Key.Space, ModifierKeys.Control), new KeyGesture(Key.Enter, ModifierKeys.Control));
+                ToggleContentSelection = new AnyGesture(new WpfKeyGesture(Key.Space, ModifierKeys.Control), new WpfKeyGesture(Key.Enter, ModifierKeys.Control));
             }
 
             /// <summary>The key modifier that will toggle between <see cref="GroupingMovementMode"/>s.</summary>
@@ -547,10 +549,10 @@ namespace Nodify.Interactivity
             {
                 Pan = new DirectionalNavigationGestures();
                 DragViewport = new MouseGesture(MouseAction.LeftClick);
-                ResetViewport = new KeyGesture(Key.Home);
-                CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new KeyGesture(Key.Escape));
-                ZoomIn = new AnyGesture(new KeyGesture(Key.OemPlus, ModifierKeys.Control), new KeyGesture(Key.Add, ModifierKeys.Control));
-                ZoomOut = new AnyGesture(new KeyGesture(Key.OemMinus, ModifierKeys.Control), new KeyGesture(Key.Subtract, ModifierKeys.Control));
+                ResetViewport = new WpfKeyGesture(Key.Home);
+                CancelAction = new AnyGesture(new MouseGesture(MouseAction.RightClick), new WpfKeyGesture(Key.Escape));
+                ZoomIn = new AnyGesture(new WpfKeyGesture(Key.OemPlus, ModifierKeys.Control), new WpfKeyGesture(Key.Add, ModifierKeys.Control));
+                ZoomOut = new AnyGesture(new WpfKeyGesture(Key.OemMinus, ModifierKeys.Control), new WpfKeyGesture(Key.Subtract, ModifierKeys.Control));
                 ZoomModifierKey = ModifierKeys.None;
             }
 

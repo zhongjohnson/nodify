@@ -10,8 +10,9 @@ namespace Nodify
     {
         static KnotNode()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(KnotNode), new StyledPropertyMetadata(typeof(KnotNode)));
-            FocusableProperty.OverrideMetadata(typeof(KnotNode), new StyledPropertyMetadata(BoxValue.False));
+            // In Avalonia, style keys are automatically inferred from type
+            // No need to override DefaultStyleKeyProperty explicitly
+            FocusableProperty.OverrideDefaultValue<KnotNode>(false);
         }
     }
 }
