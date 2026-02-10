@@ -1,7 +1,7 @@
-﻿using System;
-using System.Windows;
+using System;
+using Avalonia;
 using System.Globalization;
-using System.Windows.Data;
+using Avalonia.Data.Converters;
 
 namespace Nodify.StateMachine
 {

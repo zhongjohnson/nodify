@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using System.Windows;
+using System.Linq;
+using Avalonia;
 
 namespace Nodify.Calculator
 {
@@ -164,7 +164,7 @@ namespace Nodify.Calculator
             Operations.Add(new OperationGroupViewModel
             {
                 Title = "Operations",
-                Location = bounding.Location,
+                Location = new Point(bounding.X, bounding.Y),
                 GroupSize = new Size(bounding.Width, bounding.Height)
             });
         }

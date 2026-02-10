@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Input;
 
 namespace Nodify
@@ -8,11 +8,7 @@ namespace Nodify
         private readonly Action _action;
         private readonly Func<bool>? _condition;
 
-        public event EventHandler? CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
+        public event EventHandler? CanExecuteChanged;
 
         public RequeryCommand(Action action, Func<bool>? executeCondition = default)
         {
@@ -26,7 +22,8 @@ namespace Nodify
         public void Execute(object? parameter)
             => _action();
 
-        public void RaiseCanExecuteChanged() { }
+        public void RaiseCanExecuteChanged()
+            => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public class RequeryCommand<T> : INodifyCommand
@@ -34,11 +31,7 @@ namespace Nodify
         private readonly Action<T> _action;
         private readonly Func<T, bool>? _condition;
 
-        public event EventHandler? CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
+        public event EventHandler? CanExecuteChanged;
 
         public RequeryCommand(Action<T> action, Func<T, bool>? executeCondition = default)
         {
@@ -68,6 +61,7 @@ namespace Nodify
             }
         }
 
-        public void RaiseCanExecuteChanged() { }
+        public void RaiseCanExecuteChanged()
+            => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 }

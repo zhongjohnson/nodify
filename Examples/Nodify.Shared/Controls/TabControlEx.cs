@@ -1,41 +1,36 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Nodify
 {
-    [TemplatePart(Name = ElementScrollViewer, Type = typeof(ScrollViewer))]
     public class TabControlEx : TabControl
     {
         private const string ElementScrollViewer = "PART_ScrollViewer";
 
-        public static readonly DependencyProperty AddTabCommandProperty = DependencyProperty.Register(nameof(AddTabCommand), typeof(ICommand), typeof(TabControlEx), new PropertyMetadata(null));
-        public static readonly DependencyProperty AutoScrollToEndProperty = DependencyProperty.Register(nameof(AutoScrollToEnd), typeof(bool), typeof(TabControlEx), new PropertyMetadata(false));
+        public static readonly StyledProperty<ICommand?> AddTabCommandProperty = AvaloniaProperty.Register<TabControlEx, ICommand?>(nameof(AddTabCommand));
+        public static readonly StyledProperty<bool> AutoScrollToEndProperty = AvaloniaProperty.Register<TabControlEx, bool>(nameof(AutoScrollToEnd));
 
-        public ICommand AddTabCommand
+        public ICommand? AddTabCommand
         {
-            get { return (ICommand)GetValue(AddTabCommandProperty); }
-            set { SetValue(AddTabCommandProperty, value); }
+            get => GetValue(AddTabCommandProperty);
+            set => SetValue(AddTabCommandProperty, value);
         }
         public bool AutoScrollToEnd
         {
-            get { return (bool)GetValue(AutoScrollToEndProperty); }
-            set { SetValue(AutoScrollToEndProperty, value); }
+            get => GetValue(AutoScrollToEndProperty);
+            set => SetValue(AutoScrollToEndProperty, value);
         }
 
         protected ScrollViewer? ScrollViewer { get; private set; }
 
-        static TabControlEx()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(TabControlEx), new FrameworkPropertyMetadata(typeof(TabControlEx)));
-        }
+            base.OnApplyTemplate(e);
 
-        public override void OnApplyTemplate()
-        {
-            base.OnApplyTemplate();
-
-            ScrollViewer =  GetTemplateChild(ElementScrollViewer) as ScrollViewer;
-            if(ScrollViewer != null)
+            ScrollViewer = e.NameScope.Find<ScrollViewer>(ElementScrollViewer);
+            if (ScrollViewer != null)
             {
                 ScrollViewer.ScrollChanged += OnScrollChanged;
             }
@@ -43,15 +38,13 @@ namespace Nodify
 
         private void OnScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if(e.ExtentWidthChange > 0 && e.ViewportWidth < e.ExtentWidth && AutoScrollToEnd)
+            if (e.ExtentDelta.X > 0 && ScrollViewer != null && AutoScrollToEnd && ScrollViewer.Viewport.Width < ScrollViewer.Extent.Width)
             {
-                ScrollViewer?.ScrollToRightEnd();
+                ScrollViewer.Offset = new Vector(ScrollViewer.Extent.Width, ScrollViewer.Offset.Y);
             }
         }
 
-        protected override DependencyObject GetContainerForItemOverride()
-        {
-            return new TabItemEx();
-        }
+        protected override Control CreateContainerForItemOverride(object? item, int index, object? recycleKey)
+            => new TabItemEx();
     }
 }

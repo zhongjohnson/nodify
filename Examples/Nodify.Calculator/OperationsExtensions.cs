@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Windows;
+using System.Collections.Generic;
+using Avalonia;
 
 namespace Nodify.Calculator
 {
@@ -42,9 +42,9 @@ namespace Nodify.Calculator
             }
 
             var result = new Rect(minX - padding, minY - padding, maxX - minX + padding * 2, maxY - minY + padding * 2);
-            result.X = (int)result.X / gridCellSize * gridCellSize;
-            result.Y = (int)result.Y / gridCellSize * gridCellSize;
-            return result;
+            var snappedX = (int)result.X / gridCellSize * gridCellSize;
+            var snappedY = (int)result.Y / gridCellSize * gridCellSize;
+            return new Rect(snappedX, snappedY, result.Width, result.Height);
         }
     }
 }

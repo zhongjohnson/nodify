@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using System.Globalization;
-using System.Windows;
-using System.Windows.Data;
-using System.Windows.Markup;
+using Avalonia.Controls;
+using Avalonia.Data.Converters;
+using Avalonia.Markup.Xaml;
 
 namespace Nodify
 {
     public class StringToVisibilityConverter : MarkupExtension, IValueConverter
     {
-        public Visibility NullVisibility { get; set; } = Visibility.Collapsed;
+        public bool NullVisibility { get; set; } = false;
 
         public object? Convert(object value, Type targetType, object parameter, CultureInfo culture) 
-            => string.IsNullOrEmpty(value as string) ? NullVisibility : Visibility.Visible;
+            => string.IsNullOrEmpty(value as string) ? NullVisibility : true;
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
             => throw new NotImplementedException();

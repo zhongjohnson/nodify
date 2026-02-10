@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Nodify.Playground"
+             x:Class="Nodify.Playground.EditorSettingsView"
+             mc:Ignorable="d">
+  <StackPanel>
+    <Border BorderThickness="1" Padding="10" HorizontalAlignment="Stretch">
+      <local:SettingsView Items="{Binding Source={x:Static local:EditorSettings.Instance}, Path=Settings}" />
+    </Border>
+    <TextBlock Text="Advanced" Margin="0 8 0 4" />
+    <Border BorderThickness="1" Padding="10" HorizontalAlignment="Stretch">
+      <local:SettingsView Items="{Binding Source={x:Static local:EditorSettings.Instance}, Path=AdvancedSettings}" />
+    </Border>
+  </StackPanel>
+</UserControl>

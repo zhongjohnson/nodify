@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Nodify.Playground"
+             x:Class="Nodify.Playground.SettingsView"
+             mc:Ignorable="d">
+  <ItemsControl ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=UserControl}}">
+    <ItemsControl.ItemTemplate>
+      <DataTemplate DataType="{x:Type local:ISettingViewModel}">
+        <Grid Margin="0 4 0 0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="{Binding Name}" Margin="0 0 8 0" />
+          <TextBox Grid.Column="1" Text="{Binding Value}" />
+        </Grid>
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>

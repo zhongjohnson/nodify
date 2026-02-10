@@ -1,7 +1,8 @@
-﻿using Nodify.UndoRedo;
+using Nodify.UndoRedo;
+using System;
 using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Media;
 
 namespace Nodify.Shapes.Canvas
 {
@@ -55,7 +56,15 @@ namespace Nodify.Shapes.Canvas
             set => SetProperty(ref _color, value).Then(x => OnPropertyChanged(nameof(BorderColor)));
         }
 
-        public Color BorderColor => Color * 1.5f;
+        public Color BorderColor => Brighten(Color, 1.5f);
+
+        private static Color Brighten(Color color, float factor)
+        {
+            byte r = (byte)Math.Clamp(color.R * factor, byte.MinValue, byte.MaxValue);
+            byte g = (byte)Math.Clamp(color.G * factor, byte.MinValue, byte.MaxValue);
+            byte b = (byte)Math.Clamp(color.B * factor, byte.MinValue, byte.MaxValue);
+            return Color.FromArgb(color.A, r, g, b);
+        }
 
         private string? _text;
         public string? Text

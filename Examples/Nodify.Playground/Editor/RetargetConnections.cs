@@ -1,6 +1,9 @@
-﻿using Nodify.Interactivity;
-using System.Windows;
-using System.Windows.Controls;
+using Nodify.Interactivity;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Layout;
 using System.Windows.Input;
 
 namespace Nodify.Playground
@@ -44,7 +47,7 @@ namespace Nodify.Playground
             PositionElement = Element.Editor ?? (IInputElement)Element;
         }
 
-        protected override void OnBegin(InputEventArgs e)
+        protected override void OnBegin(RoutedEventArgs e)
         {
             _connectorOffset = ViewModel.Node.Orientation == Orientation.Horizontal
                 ? (Vector)EditorSettings.Instance.ConnectionTargetOffset.Value
@@ -79,7 +82,7 @@ namespace Nodify.Playground
             }
         }
 
-        protected override void OnEnd(InputEventArgs e)
+        protected override void OnEnd(RoutedEventArgs e)
         {
             var position = Element.Editor!.MouseLocation;
             var target = Element.FindTargetConnector(position);
@@ -97,7 +100,7 @@ namespace Nodify.Playground
             InProgress = false;
         }
 
-        protected override void OnCancel(InputEventArgs e)
+        protected override void OnCancel(RoutedEventArgs e)
         {
             SetTargetConnector(null);
 

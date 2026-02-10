@@ -1,4 +1,4 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System.Windows.Input;
 
 namespace Nodify.Shapes.Canvas

@@ -1,4 +1,4 @@
-﻿using Nodify.Shapes.Canvas;
+using Nodify.Shapes.Canvas;
 
 namespace Nodify.Shapes
 {

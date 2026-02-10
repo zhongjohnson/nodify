@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Nodify.StateMachine"
+             xmlns:shared="clr-namespace:Nodify;assembly=Nodify.Shared"
+             x:Class="Nodify.StateMachine.BlackboardKeyEditorView"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type={x:Type local:BlackboardKeyEditorViewModel}, IsDesignTimeCreatable=True}">
+  <StackPanel Orientation="Horizontal" Spacing="8">
+    <TextBox Width="160"
+             Text="{Binding Target.Name}" />
+    <ComboBox Width="140"
+              ItemsSource="{Binding Target.Type, Converter={shared:EnumValuesConverter}}"
+              SelectedItem="{Binding Target.Type}" />
+    <TextBox Width="180"
+             Text="{Binding Target.Value}" />
+  </StackPanel>
+</UserControl>

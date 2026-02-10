@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Threading.Tasks;
-using System.Windows.Data;
 using System.Windows.Input;
+using Avalonia;
 
 namespace Nodify.Playground
 {
@@ -16,9 +16,6 @@ namespace Nodify.Playground
             PerformanceTestCommand = new DelegateCommand(PerformanceTest);
             ToggleConnectionsCommand = new DelegateCommand(ToggleConnections);
             ResetCommand = new DelegateCommand(ResetGraph);
-
-            BindingOperations.EnableCollectionSynchronization(GraphViewModel.Nodes, GraphViewModel.Nodes);
-            BindingOperations.EnableCollectionSynchronization(GraphViewModel.Connections, GraphViewModel.Connections);
 
             Settings.PropertyChanged += OnSettingsChanged;
         }
@@ -40,7 +37,7 @@ namespace Nodify.Playground
         private void ResetGraph()
         {
             GraphViewModel.Nodes.Clear();
-            EditorSettings.Instance.Location = new System.Windows.Point(0, 0);
+            EditorSettings.Instance.Location = new Point(0, 0);
             EditorSettings.Instance.Zoom = 1.0d;
         }
 
@@ -101,7 +98,7 @@ namespace Nodify.Playground
 
             var nodes = RandomNodesGenerator.GenerateNodes<FlowNodeViewModel>(new NodesGeneratorSettings(count)
             {
-                NodeLocationGenerator = (s, i) => new System.Windows.Point(i % size * distance, i / size * distance),
+                NodeLocationGenerator = (s, i) => new Point(i % size * distance, i / size * distance),
                 MinInputCount = Settings.MinConnectors,
                 MaxInputCount = Settings.MaxConnectors,
                 MinOutputCount = Settings.MinConnectors,

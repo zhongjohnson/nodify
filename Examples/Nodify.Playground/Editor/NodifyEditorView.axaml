@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Nodify.Playground"
+             xmlns:nodify="https://miroiu.github.io/nodify"
+             x:Class="Nodify.Playground.NodifyEditorView"
+             mc:Ignorable="d">
+  <UserControl.DataContext>
+    <local:NodifyEditorViewModel />
+  </UserControl.DataContext>
+  <nodify:NodifyEditor x:Name="Editor" />
+</UserControl>

@@ -1,4 +1,4 @@
-﻿using StringMath;
+using StringMath;
 using System.Collections.Generic;
 using System.Linq;
 

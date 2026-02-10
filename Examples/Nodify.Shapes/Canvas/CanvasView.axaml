@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Nodify.Shapes.Canvas"
+             xmlns:nodify="https://miroiu.github.io/nodify"
+             xmlns:shared="clr-namespace:Nodify;assembly=Nodify.Shared"
+             x:Class="Nodify.Shapes.Canvas.CanvasView">
+  <UserControl.Resources>
+    <shared:ColorToSolidColorBrushConverter x:Key="ColorToSolidColorBrushConverter" />
+  </UserControl.Resources>
+  <nodify:NodifyEditor x:Name="Editor"
+                       ItemsSource="{Binding Shapes}"
+                       SelectedItems="{Binding SelectedShapes}"
+                       Connections="{Binding Connections}"
+                       Decorators="{Binding Decorators}"
+                       Background="{DynamicResource BackgroundBrush}"
+                       ConnectionCompletedCommand="{Binding CreateConnectionCommand}"
+                       ItemsDragStartedCommand="{Binding MoveShapesStartedCommand}"
+                       ItemsDragCompletedCommand="{Binding MoveShapesCompletedCommand}"
+                       RemoveConnectionCommand="{Binding RemoveConnectionCommand}"
+                       SelectionChanged="Editor_SelectionChanged"
+                       ItemsMoved="Editor_ItemsMoved"
+                       PointerPressed="Editor_MouseDown"
+                       PointerMoved="Editor_MouseMove"
+                       PointerReleased="Editor_MouseUp"
+                       GridCellSize="5" />
+</UserControl>

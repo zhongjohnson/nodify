@@ -1,0 +1,10 @@
+<Styles xmlns="https://github.com/avaloniaui"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+         xmlns:local="clr-namespace:Nodify">
+  <Style Selector="local|EditableTextBlock" />
+  <Style Selector="local|TabControlEx" />
+  <Style Selector="local|TabItemEx" />
+  <Style Selector="local|ResizablePanel" />
+  <Style Selector="local|Resizer" />
+  <Style Selector="local|Swatches" />
+</Styles>

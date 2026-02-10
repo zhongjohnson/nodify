@@ -1,4 +1,4 @@
-﻿using Nodify.UndoRedo;
+using Nodify.UndoRedo;
 using System.Collections.Generic;
 
 namespace Nodify.Shapes.Canvas.UndoRedo

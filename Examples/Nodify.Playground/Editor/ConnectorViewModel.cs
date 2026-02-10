@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using System.Windows;
+using System.Linq;
+using Avalonia;
 
 namespace Nodify.Playground
 {

@@ -1,4 +1,4 @@
-﻿namespace Nodify.Playground
+namespace Nodify.Playground
 {
     public enum SettingsType
     {

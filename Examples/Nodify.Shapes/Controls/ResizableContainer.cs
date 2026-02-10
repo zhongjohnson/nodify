@@ -1,14 +1,14 @@
-﻿using System.Windows;
+using Avalonia;
 
 namespace Nodify.Shapes.Controls
 {
     internal class ResizableContainer : ResizablePanel
     {
-        public static readonly DependencyProperty GridCellSizeProperty = NodifyEditor.GridCellSizeProperty.AddOwner(typeof(ResizableContainer));
+        public static readonly StyledProperty<uint> GridCellSizeProperty = NodifyEditor.GridCellSizeProperty.AddOwner<ResizableContainer>();
 
         public uint GridCellSize
         {
-            get => (uint)GetValue(GridCellSizeProperty);
+            get => GetValue(GridCellSizeProperty);
             set => SetValue(GridCellSizeProperty, value);
         }
 

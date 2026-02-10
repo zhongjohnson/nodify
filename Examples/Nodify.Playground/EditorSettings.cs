@@ -1,6 +1,6 @@
-﻿using Nodify.Interactivity;
+using Nodify.Interactivity;
 using System.Collections.Generic;
-using System.Windows;
+using Avalonia;
 
 namespace Nodify.Playground
 {

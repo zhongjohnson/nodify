@@ -1,4 +1,4 @@
-﻿namespace Nodify.Calculator
+namespace Nodify.Calculator
 {
     public class ExpandoOperationViewModel : OperationViewModel
     {

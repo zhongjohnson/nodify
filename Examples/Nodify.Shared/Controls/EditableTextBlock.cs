@@ -1,89 +1,80 @@
-﻿using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.VisualTree;
 using Nodify.Shared;
 
 namespace Nodify
 {
-    [TemplatePart(Name = ElementTextBox, Type = typeof(TextBox))]
-    public class EditableTextBlock : Control
+    public class EditableTextBlock : TemplatedControl
     {
         private const string ElementTextBox = "PART_TextBox";
 
-        public static readonly DependencyProperty IsEditingProperty = DependencyProperty.Register(nameof(IsEditing), typeof(bool), typeof(EditableTextBlock), new FrameworkPropertyMetadata(BoxValue.False, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsEditingChanged, CoerceIsEditing));
-        public static readonly DependencyProperty IsEditableProperty = DependencyProperty.Register(nameof(IsEditable), typeof(bool), typeof(EditableTextBlock), new FrameworkPropertyMetadata(BoxValue.True));
-        public static readonly DependencyProperty TextProperty = TextBlock.TextProperty.AddOwner(typeof(EditableTextBlock), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
-        public static readonly DependencyProperty AcceptsReturnProperty = TextBoxBase.AcceptsReturnProperty.AddOwner(typeof(EditableTextBlock), new FrameworkPropertyMetadata(BoxValue.False));
-        public static readonly DependencyProperty TextWrappingProperty = TextBlock.TextWrappingProperty.AddOwner(typeof(EditableTextBlock), new FrameworkPropertyMetadata(TextWrapping.Wrap));
-        public static readonly DependencyProperty TextTrimmingProperty = TextBlock.TextTrimmingProperty.AddOwner(typeof(EditableTextBlock), new FrameworkPropertyMetadata(TextTrimming.CharacterEllipsis));
-        public static readonly DependencyProperty MinLinesProperty = TextBox.MinLinesProperty.AddOwner(typeof(EditableTextBlock));
-        public static readonly DependencyProperty MaxLinesProperty = TextBox.MaxLinesProperty.AddOwner(typeof(EditableTextBlock));
-        public static readonly DependencyProperty MaxLengthProperty = TextBox.MaxLengthProperty.AddOwner(typeof(EditableTextBlock));
+        public static readonly StyledProperty<bool> IsEditingProperty = AvaloniaProperty.Register<EditableTextBlock, bool>(nameof(IsEditing), defaultBindingMode: BindingMode.TwoWay);
+        public static readonly StyledProperty<bool> IsEditableProperty = AvaloniaProperty.Register<EditableTextBlock, bool>(nameof(IsEditable), defaultValue: true);
+        public static readonly StyledProperty<string?> TextProperty = AvaloniaProperty.Register<EditableTextBlock, string?>(nameof(Text), defaultBindingMode: BindingMode.TwoWay);
+        public static readonly StyledProperty<bool> AcceptsReturnProperty = AvaloniaProperty.Register<EditableTextBlock, bool>(nameof(AcceptsReturn));
+        public static readonly StyledProperty<TextWrapping> TextWrappingProperty = AvaloniaProperty.Register<EditableTextBlock, TextWrapping>(nameof(TextWrapping), TextWrapping.Wrap);
+        public static readonly StyledProperty<TextTrimming> TextTrimmingProperty = AvaloniaProperty.Register<EditableTextBlock, TextTrimming>(nameof(TextTrimming), TextTrimming.CharacterEllipsis);
+        public static readonly StyledProperty<int> MinLinesProperty = AvaloniaProperty.Register<EditableTextBlock, int>(nameof(MinLines));
+        public static readonly StyledProperty<int> MaxLinesProperty = AvaloniaProperty.Register<EditableTextBlock, int>(nameof(MaxLines));
+        public static readonly StyledProperty<int> MaxLengthProperty = AvaloniaProperty.Register<EditableTextBlock, int>(nameof(MaxLength));
 
-        private static void OnIsEditingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) { }
-
-        private static object CoerceIsEditing(DependencyObject d, object value)
+        public string? Text
         {
-            if (!((EditableTextBlock)d).IsEditable)
-            {
-                return BoxValue.False;
-            }
-
-            return value;
-        }
-
-        public string Text
-        {
-            get => (string)GetValue(TextProperty);
+            get => GetValue(TextProperty);
             set => SetValue(TextProperty, value);
         }
 
         public bool IsEditing
         {
-            get => (bool)GetValue(IsEditingProperty);
+            get => GetValue(IsEditingProperty);
             set => SetValue(IsEditingProperty, value);
         }
 
         public bool IsEditable
         {
-            get => (bool)GetValue(IsEditableProperty);
+            get => GetValue(IsEditableProperty);
             set => SetValue(IsEditableProperty, value);
         }
 
         public bool AcceptsReturn
         {
-            get => (bool)GetValue(AcceptsReturnProperty);
+            get => GetValue(AcceptsReturnProperty);
             set => SetValue(AcceptsReturnProperty, value);
         }
 
         public int MaxLength
         {
-            get => (int)GetValue(MaxLengthProperty);
+            get => GetValue(MaxLengthProperty);
             set => SetValue(MaxLengthProperty, value);
         }
 
         public int MinLines
         {
-            get => (int)GetValue(MinLinesProperty);
+            get => GetValue(MinLinesProperty);
             set => SetValue(MaxLinesProperty, value);
         }
 
         public int MaxLines
         {
-            get => (int)GetValue(MaxLinesProperty);
+            get => GetValue(MaxLinesProperty);
             set => SetValue(MaxLinesProperty, value);
         }
 
         public TextWrapping TextWrapping
         {
-            get => (TextWrapping)GetValue(TextWrappingProperty);
+            get => GetValue(TextWrappingProperty);
             set => SetValue(TextWrappingProperty, value);
         }
 
         public TextTrimming TextTrimming
         {
-            get => (TextTrimming)GetValue(TextTrimmingProperty);
+            get => GetValue(TextTrimmingProperty);
             set => SetValue(TextTrimmingProperty, value);
         }
 
@@ -91,28 +82,25 @@ namespace Nodify
 
         static EditableTextBlock()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(EditableTextBlock), new FrameworkPropertyMetadata(typeof(EditableTextBlock)));
-            FocusableProperty.OverrideMetadata(typeof(EditableTextBlock), new FrameworkPropertyMetadata(BoxValue.True));
+            FocusableProperty.OverrideDefaultValue<EditableTextBlock>(true);
         }
 
-        public override void OnApplyTemplate()
+        protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
         {
-            base.OnApplyTemplate();
+            base.OnApplyTemplate(e);
 
             if (TextBox != null)
             {
                 TextBox.LostFocus -= OnLostFocus;
-                TextBox.LostKeyboardFocus -= OnLostFocus;
-                TextBox.IsVisibleChanged -= OnTextBoxVisiblityChanged;
+                TextBox.PropertyChanged -= OnTextBoxPropertyChanged;
             }
 
-            TextBox = GetTemplateChild(ElementTextBox) as TextBox;
+            TextBox = e.NameScope.Find<TextBox>(ElementTextBox);
 
             if (TextBox != null)
             {
                 TextBox.LostFocus += OnLostFocus;
-                TextBox.LostKeyboardFocus += OnLostFocus;
-                TextBox.IsVisibleChanged += OnTextBoxVisiblityChanged;
+                TextBox.PropertyChanged += OnTextBoxPropertyChanged;
 
                 if (IsEditing)
                 {
@@ -122,9 +110,9 @@ namespace Nodify
             }
         }
 
-        private void OnTextBoxVisiblityChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void OnTextBoxPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
         {
-            if (IsEditing && TextBox != null)
+            if (e.Property == Visual.IsVisibleProperty && IsEditing && TextBox != null)
             {
                 if (TextBox.Focus())
                 {
@@ -137,20 +125,20 @@ namespace Nodify
             }
         }
 
-        protected override void OnMouseDown(MouseButtonEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
             if (IsEditing)
             {
                 e.Handled = true;
             }
-            else if (IsEditable && e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
+            else if (IsEditable && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed && e.ClickCount == 2)
             {
                 IsEditing = true;
                 e.Handled = true;
             }
         }
 
-        protected override void OnMouseUp(MouseButtonEventArgs e)
+        protected override void OnPointerReleased(PointerReleasedEventArgs e)
         {
             if (IsEditing)
             {
@@ -158,7 +146,7 @@ namespace Nodify
             }
         }
 
-        private void OnLostFocus(object sender, RoutedEventArgs e)
+        private void OnLostFocus(object? sender, RoutedEventArgs e)
         {
             IsEditing = false;
         }
@@ -173,6 +161,16 @@ namespace Nodify
             if (e.Key == Key.Enter && IsFocused && !IsEditing)
             {
                 IsEditing = true;
+            }
+        }
+
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+        {
+            base.OnPropertyChanged(change);
+
+            if (change.Property == IsEditableProperty && !(bool)change.NewValue!)
+            {
+                IsEditing = false;
             }
         }
     }

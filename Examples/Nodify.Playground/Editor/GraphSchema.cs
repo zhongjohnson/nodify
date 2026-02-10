@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
+using Avalonia;
 
 namespace Nodify.Playground
 {
@@ -102,8 +102,8 @@ namespace Nodify.Playground
             var rect = nodes.GetBoundingBox(50);
             var comment = new CommentNodeViewModel
             {
-                Location = rect.Location,
-                Size = rect.Size,
+                Location = new Point(rect.X, rect.Y),
+                Size = new Size(rect.Width, rect.Height),
                 Title = text ?? "New comment"
             };
 

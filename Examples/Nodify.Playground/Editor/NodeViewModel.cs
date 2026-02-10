@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using Avalonia;
+using Avalonia.Layout;
 using System.Windows.Input;
 
 namespace Nodify.Playground

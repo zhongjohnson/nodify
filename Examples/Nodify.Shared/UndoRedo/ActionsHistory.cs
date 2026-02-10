@@ -1,214 +1,150 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace Nodify.UndoRedo
 {
-    public interface IActionsHistory : INotifyPropertyChanged
-    {
-        int MaxSize { get; set; }
-        bool CanUndo { get; }
-        bool CanRedo { get; }
-        bool IsEnabled { get; set; }
-        IAction? Current { get; }
-
-        void Undo();
-        void Redo();
-
-        void Clear();
-
-        /// <summary>
-        /// All future modifications will be merged together to create a single history item until batch is disposed.
-        /// </summary>
-        IDisposable Batch(string? label = default);
-
-        void Record(IAction action);
-
-        /// <summary>
-        /// All future modifications will be merged together to create a single history item until history is resumed.
-        /// </summary>
-        void Pause(string? label = default);
-
-        /// <summary>Each future modifications will create a new history item.</summary>
-        void Resume();
-    }
-
     public interface IAction
     {
         string? Label { get; }
-
         void Execute();
         void Undo();
     }
 
-    public static class ActionsHistoryExtensions
+    public interface IActionsHistory
     {
-        public static void Record(this IActionsHistory history, Action execute, Action unexecute, string? label = default)
-            => history.Record(new DelegateAction(execute, unexecute, label));
+        bool IsEnabled { get; set; }
+        bool CanUndo { get; }
+        bool CanRedo { get; }
+        IAction? Current { get; }
 
-        public static void ExecuteAction(this IActionsHistory history, IAction action)
-        {
-            history.Record(action);
-            action.Execute();
-        }
+        void ExecuteAction(IAction action);
+        void Record(Action apply, Action unapply, string? label = null);
+        void Record(IAction action);
+        void Undo();
+        void Redo();
+        IDisposable Batch(string? label = null);
+        void Clear();
     }
 
-    public class ActionsHistory : IActionsHistory
+    public sealed class ActionsHistory : IActionsHistory
     {
-        private readonly List<IAction> _history = new List<IAction>();
-        private readonly List<IAction> _batchHistory = new List<IAction>();
-        private int _position = -1;
-        private bool _isApplyingOperation = false;
-        private string? _batchLabel;
-        private int _batchDepth;
+        private readonly Stack<IAction> _undo = new Stack<IAction>();
+        private readonly Stack<IAction> _redo = new Stack<IAction>();
+        private readonly Stack<List<IAction>> _batchStack = new Stack<List<IAction>>();
 
-        private static readonly PropertyChangedEventArgs _canRedoArgs = new PropertyChangedEventArgs(nameof(CanRedo));
-        private static readonly PropertyChangedEventArgs _canUndoArgs = new PropertyChangedEventArgs(nameof(CanUndo));
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public static readonly ActionsHistory Global = new ActionsHistory();
-
-        public bool IsBatching { get; private set; }
-
-        public int MaxSize { get; set; } = 50;
-
-        public bool CanRedo => _history.Count > 0 && _position < _history.Count - 1;
-
-        public bool CanUndo => _position > -1;
+        public static ActionsHistory Global { get; } = new ActionsHistory();
 
         public bool IsEnabled { get; set; } = true;
 
-        public IAction? Current => CanUndo ? _history[_position] : null;
+        public bool CanUndo => _undo.Count > 0;
+        public bool CanRedo => _redo.Count > 0;
+        public IAction? Current => _undo.Count > 0 ? _undo.Peek() : null;
 
-        public IDisposable Batch(string? label = default)
-            => new BatchOperation(label, this);
-
-        public void Record(IAction op)
+        public void ExecuteAction(IAction action)
         {
-            // Prevent recording the undo or redo operation
-            if (_isApplyingOperation || !IsEnabled)
+            if (!IsEnabled)
+            {
+                action.Execute();
+                return;
+            }
+
+            action.Execute();
+            Record(action);
+        }
+
+        public void Record(Action apply, Action unapply, string? label = null)
+        {
+            Record(new DelegateAction(apply, unapply, label));
+        }
+
+        public void Record(IAction action)
+        {
+            if (!IsEnabled)
             {
                 return;
             }
 
-            if (IsBatching)
+            if (_batchStack.Count > 0)
             {
-                _batchHistory.Add(op);
-            }
-            else
-            {
-                AddToUndoStack(op);
-            }
-        }
-
-        private void AddToUndoStack(IAction op)
-        {
-            if (_position < _history.Count - 1)
-            {
-                _history.RemoveRange(_position + 1, _history.Count - _position - 1);
+                _batchStack.Peek().Add(action);
+                return;
             }
 
-            if (_history.Count >= MaxSize)
-            {
-                _history.RemoveAt(0);
-                _position--;
-            }
-
-            _history.Add(op);
-            _position++;
-
-            PropertyChanged?.Invoke(this, _canRedoArgs);
-            PropertyChanged?.Invoke(this, _canUndoArgs);
+            _undo.Push(action);
+            _redo.Clear();
         }
 
         public void Undo()
         {
-            if (IsBatching)
+            if (!CanUndo)
             {
-                throw new InvalidOperationException($"{nameof(Undo)} is not allowed during a batch.");
+                return;
             }
 
-            if (CanUndo)
-            {
-                var op = _history[_position];
-                _isApplyingOperation = true;
-                op.Undo();
-                _isApplyingOperation = false;
-                _position--;
-            }
+            var action = _undo.Pop();
+            action.Undo();
+            _redo.Push(action);
         }
 
         public void Redo()
         {
-            if (IsBatching)
+            if (!CanRedo)
             {
-                throw new InvalidOperationException($"{nameof(Redo)} is not allowed during a batch.");
+                return;
             }
 
-            if (CanRedo)
-            {
-                _position++;
-                var op = _history[_position];
-                _isApplyingOperation = true;
-                op.Execute();
-                _isApplyingOperation = false;
-            }
+            var action = _redo.Pop();
+            action.Execute();
+            _undo.Push(action);
+        }
+
+        public IDisposable Batch(string? label = null)
+        {
+            var batch = new List<IAction>();
+            _batchStack.Push(batch);
+            return new BatchScope(this, label, batch);
         }
 
         public void Clear()
         {
-            _history.Clear();
-            _batchHistory.Clear();
+            _undo.Clear();
+            _redo.Clear();
         }
 
-        public void Pause(string? label = default)
+        private void EndBatch(string? label, List<IAction> actions)
         {
-            if (_batchDepth > 0)
+            _batchStack.Pop();
+            if (actions.Count == 0)
             {
                 return;
             }
 
-            _batchLabel = label;
-            IsBatching = true;
+            Record(new BatchAction(label, actions));
         }
 
-        public void Resume()
-        {
-            if (_batchDepth > 0)
-            {
-                return;
-            }
-
-            if (_batchHistory.Count > 0)
-            {
-                AddToUndoStack(new BatchAction(_batchLabel, _batchHistory));
-                _batchHistory.Clear();
-            }
-
-            _batchLabel = null;
-            IsBatching = false;
-        }
-
-        private class BatchOperation : IDisposable
+        private sealed class BatchScope : IDisposable
         {
             private readonly ActionsHistory _history;
+            private readonly string? _label;
+            private readonly List<IAction> _actions;
             private bool _disposed;
 
-            public BatchOperation(string? label, ActionsHistory history)
+            public BatchScope(ActionsHistory history, string? label, List<IAction> actions)
             {
                 _history = history;
-                _history.Pause(label);
-                _history._batchDepth++;
+                _label = label;
+                _actions = actions;
             }
 
             public void Dispose()
             {
-                if (!_disposed)
+                if (_disposed)
                 {
-                    _disposed = true;
-                    _history._batchDepth--;
-                    _history.Resume();
+                    return;
                 }
+
+                _disposed = true;
+                _history.EndBatch(_label, _actions);
             }
         }
     }

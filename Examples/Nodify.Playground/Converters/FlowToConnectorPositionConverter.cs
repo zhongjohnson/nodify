@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using System.Globalization;
-using System.Windows.Controls;
-using System.Windows.Data;
+using Avalonia.Layout;
+using Avalonia.Data.Converters;
 
 namespace Nodify.Playground
 {

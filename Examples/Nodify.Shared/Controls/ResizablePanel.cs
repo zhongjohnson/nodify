@@ -1,7 +1,9 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
+using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using System.Windows.Input;
 
 namespace Nodify
@@ -10,143 +12,170 @@ namespace Nodify
     {
         internal static readonly object BoxedResizeDirection = ResizeDirections.All;
 
-        public static readonly DependencyProperty DirectionsProperty
-            = DependencyProperty.Register(nameof(Directions), typeof(ResizeDirections), typeof(ResizablePanel), new FrameworkPropertyMetadata(BoxedResizeDirection));
+        public static readonly StyledProperty<ResizeDirections> DirectionsProperty
+            = AvaloniaProperty.Register<ResizablePanel, ResizeDirections>(nameof(Directions), (ResizeDirections)BoxedResizeDirection);
 
-        public static readonly DependencyProperty ResizeStartedCommandProperty = DependencyProperty.Register(nameof(ResizeStartedCommand), typeof(ICommand), typeof(ResizablePanel));
+        public static readonly StyledProperty<ICommand?> ResizeStartedCommandProperty = AvaloniaProperty.Register<ResizablePanel, ICommand?>(nameof(ResizeStartedCommand));
 
-        public static readonly DependencyProperty ResizeCompletedCommandProperty = DependencyProperty.Register(nameof(ResizeCompletedCommand), typeof(ICommand), typeof(ResizablePanel));
+        public static readonly StyledProperty<ICommand?> ResizeCompletedCommandProperty = AvaloniaProperty.Register<ResizablePanel, ICommand?>(nameof(ResizeCompletedCommand));
 
         public ResizeDirections Directions
         {
-            get => (ResizeDirections)GetValue(DirectionsProperty);
+            get => GetValue(DirectionsProperty);
             set => SetValue(DirectionsProperty, value);
         }
 
         public ICommand? ResizeStartedCommand
         {
-            get => (ICommand)GetValue(ResizeStartedCommandProperty);
+            get => GetValue(ResizeStartedCommandProperty);
             set => SetValue(ResizeStartedCommandProperty, value);
         }
 
         public ICommand? ResizeCompletedCommand
         {
-            get => (ICommand)GetValue(ResizeCompletedCommandProperty);
+            get => GetValue(ResizeCompletedCommandProperty);
             set => SetValue(ResizeCompletedCommandProperty, value);
         }
 
-        static ResizablePanel()
-        {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(ResizablePanel), new FrameworkPropertyMetadata(typeof(ResizablePanel)));
-        }
+        private Resizer? _activeResizer;
+        private Point _lastPointerPosition;
+        private bool _isDragging;
 
         public ResizablePanel()
         {
-            AddHandler(Thumb.DragDeltaEvent, new DragDeltaEventHandler(OnResize));
-            AddHandler(Thumb.DragStartedEvent, new DragStartedEventHandler(OnDragStarted));
-            AddHandler(Thumb.DragCompletedEvent, new DragCompletedEventHandler(OnDragCompleted));
+            AddHandler(PointerPressedEvent, OnPointerPressed, RoutingStrategies.Tunnel);
+            AddHandler(PointerReleasedEvent, OnPointerReleased, RoutingStrategies.Tunnel);
+            AddHandler(PointerMovedEvent, OnPointerMoved, RoutingStrategies.Tunnel);
         }
 
-        private void OnDragStarted(object sender, DragStartedEventArgs e)
+        private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (ResizeStartedCommand?.CanExecute(null) ?? false)
+            if (e.Source is Resizer resizer && e.GetCurrentPoint(resizer).Properties.IsLeftButtonPressed)
             {
-                ResizeStartedCommand.Execute(null);
-            }
-        }
+                _activeResizer = resizer;
+                _lastPointerPosition = e.GetPosition(this);
+                _isDragging = true;
+                e.Pointer.Capture(resizer);
 
-        private void OnDragCompleted(object sender, DragCompletedEventArgs e)
-        {
-            if (ResizeCompletedCommand?.CanExecute(null) ?? false)
-            {
-                ResizeCompletedCommand.Execute(null);
-            }
-        }
-
-        private void OnResize(object sender, DragDeltaEventArgs e)
-        {
-            if (e.OriginalSource is Resizer resizer)
-            {
-                double resizeX = 0;
-                double resizeY = 0;
-
-                double moveX = 0;
-                double moveY = 0;
-
-                if (resizer.Direction.HasFlag(ResizeDirections.Top))
+                if (ResizeStartedCommand?.CanExecute(null) ?? false)
                 {
-                    moveY = resizeY = ResizeTop(e);
+                    ResizeStartedCommand.Execute(null);
                 }
-
-                if (resizer.Direction.HasFlag(ResizeDirections.Bottom))
-                {
-                    resizeY = ResizeBottom(e);
-                }
-
-                if (resizer.Direction.HasFlag(ResizeDirections.Left))
-                {
-                    moveX = resizeX = ResizeLeft(e);
-                }
-
-                if (resizer.Direction.HasFlag(ResizeDirections.Right))
-                {
-                    resizeX = ResizeRight(e);
-                }
-
-                if (resizer.Direction.HasFlag(ResizeDirections.TopLeft))
-                {
-                    moveY = resizeY = ResizeTop(e);
-                    moveX = resizeX = ResizeLeft(e);
-                }
-
-                if (resizer.Direction.HasFlag(ResizeDirections.TopRight))
-                {
-                    moveY = resizeY = ResizeTop(e);
-                    resizeX = ResizeRight(e);
-                }
-
-                if (resizer.Direction.HasFlag(ResizeDirections.BottomLeft))
-                {
-                    resizeY = ResizeBottom(e);
-                    moveX = resizeX = ResizeLeft(e);
-                }
-
-                if (resizer.Direction.HasFlag(ResizeDirections.BottomRight))
-                {
-                    resizeY = ResizeBottom(e);
-                    resizeX = ResizeRight(e);
-                }
-
-                OnProcessDelta(ref resizeX, ref resizeY);
-                OnProcessDelta(ref moveX, ref moveY);
-
-                OnMove(moveX, moveY);
-
-                Width -= resizeX;
-                Height -= resizeY;
 
                 e.Handled = true;
             }
         }
 
-        private double ResizeBottom(DragDeltaEventArgs e)
+        private void OnPointerMoved(object? sender, PointerEventArgs e)
         {
-            return Math.Min(-e.VerticalChange, ActualHeight - MinHeight);
+            if (_isDragging && _activeResizer != null)
+            {
+                var current = e.GetPosition(this);
+                var deltaX = current.X - _lastPointerPosition.X;
+                var deltaY = current.Y - _lastPointerPosition.Y;
+                _lastPointerPosition = current;
+
+                OnResize(_activeResizer, deltaX, deltaY);
+                e.Handled = true;
+            }
         }
 
-        private double ResizeTop(DragDeltaEventArgs e)
+        private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
-            return Math.Min(e.VerticalChange, ActualHeight - MinHeight);
+            if (_isDragging && _activeResizer != null)
+            {
+                e.Pointer.Capture(null);
+                _activeResizer = null;
+                _isDragging = false;
+
+                if (ResizeCompletedCommand?.CanExecute(null) ?? false)
+                {
+                    ResizeCompletedCommand.Execute(null);
+                }
+
+                e.Handled = true;
+            }
         }
 
-        private double ResizeRight(DragDeltaEventArgs e)
+        private void OnResize(Resizer resizer, double horizontalChange, double verticalChange)
         {
-            return Math.Min(-e.HorizontalChange, ActualWidth - MinWidth);
+            double resizeX = 0;
+            double resizeY = 0;
+
+            double moveX = 0;
+            double moveY = 0;
+
+            if (resizer.Direction.HasFlag(ResizeDirections.Top))
+            {
+                moveY = resizeY = ResizeTop(verticalChange);
+            }
+
+            if (resizer.Direction.HasFlag(ResizeDirections.Bottom))
+            {
+                resizeY = ResizeBottom(verticalChange);
+            }
+
+            if (resizer.Direction.HasFlag(ResizeDirections.Left))
+            {
+                moveX = resizeX = ResizeLeft(horizontalChange);
+            }
+
+            if (resizer.Direction.HasFlag(ResizeDirections.Right))
+            {
+                resizeX = ResizeRight(horizontalChange);
+            }
+
+            if (resizer.Direction.HasFlag(ResizeDirections.TopLeft))
+            {
+                moveY = resizeY = ResizeTop(verticalChange);
+                moveX = resizeX = ResizeLeft(horizontalChange);
+            }
+
+            if (resizer.Direction.HasFlag(ResizeDirections.TopRight))
+            {
+                moveY = resizeY = ResizeTop(verticalChange);
+                resizeX = ResizeRight(horizontalChange);
+            }
+
+            if (resizer.Direction.HasFlag(ResizeDirections.BottomLeft))
+            {
+                resizeY = ResizeBottom(verticalChange);
+                moveX = resizeX = ResizeLeft(horizontalChange);
+            }
+
+            if (resizer.Direction.HasFlag(ResizeDirections.BottomRight))
+            {
+                resizeY = ResizeBottom(verticalChange);
+                resizeX = ResizeRight(horizontalChange);
+            }
+
+            OnProcessDelta(ref resizeX, ref resizeY);
+            OnProcessDelta(ref moveX, ref moveY);
+
+            OnMove(moveX, moveY);
+
+            Width -= resizeX;
+            Height -= resizeY;
         }
 
-        private double ResizeLeft(DragDeltaEventArgs e)
+        private double ResizeBottom(double verticalChange)
         {
-            return Math.Min(e.HorizontalChange, ActualWidth - MinWidth);
+            return Math.Min(-verticalChange, Bounds.Height - MinHeight);
+        }
+
+        private double ResizeTop(double verticalChange)
+        {
+            return Math.Min(verticalChange, Bounds.Height - MinHeight);
+        }
+
+        private double ResizeRight(double horizontalChange)
+        {
+            return Math.Min(-horizontalChange, Bounds.Width - MinWidth);
+        }
+
+        private double ResizeLeft(double horizontalChange)
+        {
+            return Math.Min(horizontalChange, Bounds.Width - MinWidth);
         }
 
         protected virtual void OnMove(double x, double y)
@@ -162,19 +191,15 @@ namespace Nodify
 
     public class Resizer : Thumb
     {
-        public static readonly DependencyProperty DirectionProperty
-            = DependencyProperty.Register(nameof(Direction), typeof(ResizeDirections), typeof(Resizer), new FrameworkPropertyMetadata(ResizablePanel.BoxedResizeDirection));
+        public static readonly StyledProperty<ResizeDirections> DirectionProperty
+            = AvaloniaProperty.Register<Resizer, ResizeDirections>(nameof(Direction), (ResizeDirections)ResizablePanel.BoxedResizeDirection);
 
         public ResizeDirections Direction
         {
-            get => (ResizeDirections)GetValue(DirectionProperty);
+            get => GetValue(DirectionProperty);
             set => SetValue(DirectionProperty, value);
         }
 
-        static Resizer()
-        {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(Resizer), new FrameworkPropertyMetadata(typeof(Resizer)));
-        }
     }
 
     [Flags]

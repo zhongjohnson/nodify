@@ -1,5 +1,5 @@
-﻿using System;
-using System.Windows;
+using System;
+using Avalonia;
 
 namespace Nodify.StateMachine
 {

@@ -1,6 +1,6 @@
-﻿using Nodify.UndoRedo;
+using Nodify.UndoRedo;
 using System.Collections.Generic;
-using System.Windows;
+using Avalonia;
 
 namespace Nodify.Shapes.Canvas.UndoRedo
 {
