@@ -1,5 +1,6 @@
 using Nodify.Interactivity;
 using Avalonia;
+using Avalonia.Markup.Xaml;
 using System.Windows.Input;
 
 namespace Nodify.Shapes
@@ -11,6 +12,7 @@ namespace Nodify.Shapes
     {
         public App()
         {
+            AvaloniaXamlLoader.Load(this);
             NodifyEditor.EnableDraggingContainersOptimizations = false;
             NodifyEditor.EnableCuttingLinePreview = true;
 
