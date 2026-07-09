@@ -30,4 +30,34 @@
 
   <!-- Option A source-fork port. See PORTING.md for strategy, subsystem checklist and status. -->
 
+  <!--
+    Phase 3b: link the CONTROL-INDEPENDENT interactivity primitives directly from the upstream
+    Nodify sources so they stay in sync on future merges. These compile purely against the WPF
+    compatibility shim under Compatibility\Wpf.
+
+    DEFERRED to the control phase (do NOT link yet, they reference concrete controls / device APIs):
+      Interactivity\InputProcessor.Shared.cs         (hard-refs NodifyEditor/ItemContainer/Connector/Minimap/BaseConnection)
+      Interactivity\DragState.cs                     (Mouse/Stylus devices, Element context menu)
+      Interactivity\InputElementStateStack.DragState.cs (NodifyEditor.ViewportUpdatedEvent, Mouse/Stylus)
+      Interactivity\KeyboardNavigation\*             (navigator layers tied to controls)
+      Utilities\EditorGesturesExtensions.cs          (needs SelectionType declared on NodifyEditor)
+  -->
+  <ItemGroup Label="Nodify.Interactivity (control-independent core)">
+    <Compile Include="..\Nodify\Interactivity\IInputHandler.cs" Link="Interactivity\IInputHandler.cs" />
+    <Compile Include="..\Nodify\Interactivity\InputProcessor.cs" Link="Interactivity\InputProcessor.cs" />
+    <Compile Include="..\Nodify\Interactivity\InputElementState.cs" Link="Interactivity\InputElementState.cs" />
+    <Compile Include="..\Nodify\Interactivity\InputElementStateStack.cs" Link="Interactivity\InputElementStateStack.cs" />
+    <Compile Include="..\Nodify\Interactivity\InputElementStateStack.InputElementState.cs" Link="Interactivity\InputElementStateStack.InputElementState.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.Interactivity (gestures)">
+    <Compile Include="..\Nodify\Interactivity\Gestures\AllGestures.cs" Link="Interactivity\Gestures\AllGestures.cs" />
+    <Compile Include="..\Nodify\Interactivity\Gestures\AnyGesture.cs" Link="Interactivity\Gestures\AnyGesture.cs" />
+    <Compile Include="..\Nodify\Interactivity\Gestures\MultiGesture.cs" Link="Interactivity\Gestures\MultiGesture.cs" />
+    <Compile Include="..\Nodify\Interactivity\Gestures\InputGestureRef.cs" Link="Interactivity\Gestures\InputGestureRef.cs" />
+    <Compile Include="..\Nodify\Interactivity\Gestures\KeyComboGesture.cs" Link="Interactivity\Gestures\KeyComboGesture.cs" />
+    <Compile Include="..\Nodify\Interactivity\Gestures\MouseGesture.cs" Link="Interactivity\Gestures\MouseGesture.cs" />
+    <Compile Include="..\Nodify\Interactivity\Gestures\EditorGestures.cs" Link="Interactivity\Gestures\EditorGestures.cs" />
+  </ItemGroup>
+
 </Project>

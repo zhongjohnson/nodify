@@ -116,7 +116,17 @@ namespace System.Windows
         /// <summary>Registers a routed event, mirroring WPF's signature.</summary>
         public static RoutedEvent RegisterRoutedEvent(string name, RoutingStrategy routingStrategy, Type handlerType, Type ownerType)
             => new RoutedEvent(name, routingStrategy, handlerType, ownerType);
+
+        /// <summary>
+        /// Registers a class handler for a routed event on all instances of the given type,
+        /// mirroring WPF's signature. The registration is recorded by the shim; the runtime
+        /// bridge onto Avalonia's class-handler system is wired when the owning controls are
+        /// ported. Used by <c>KeyComboGesture</c> to observe global key-up / focus-lost.
+        /// </summary>
+        public static void RegisterClassHandler(Type classType, RoutedEvent routedEvent, Delegate handler, bool handledEventsToo = false)
+            => ClassHandlerRegistry.Register(classType, routedEvent, handler, handledEventsToo);
     }
+
 
     /// <summary>WPF's standard non-typed routed event handler.</summary>
     public delegate void RoutedEventHandler(object sender, RoutedEventArgs e);

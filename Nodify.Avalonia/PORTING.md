@@ -76,6 +76,23 @@ two different UI frameworks.
     `InputStateTracker` (fed by the ported control overrides in Phase 3b).
   - `InputGestures.cs` — `InputGesture` base + `KeyGesture`/`MouseGesture` with WPF
     gesture-matching semantics reimplemented (Avalonia has no `InputGesture.Matches`).
+  - `Commands.cs` — WPF-shaped `RoutedCommand`/`RoutedUICommand` (over the BCL
+    `ICommand`), `InputGestureCollection`, and an `ApplicationCommands` subset
+    (`SelectAll` seeded with Ctrl+A) consumed by `EditorGestures` (and later
+    `EditorCommands`).
+- **Interactivity primitives (control-independent, Phase 3b)** — **linked** directly
+  from the upstream sources (via `<Compile Include="..\Nodify\..." Link=... />`) so they
+  stay byte-for-byte in sync on future merges. They compile unchanged against the
+  compatibility shim:
+  - Core: `Interactivity/IInputHandler.cs`, `InputProcessor.cs`,
+    `InputElementState.cs`, `InputElementStateStack.cs` (+ `.InputElementState` partial).
+  - Gestures: `AllGestures`, `AnyGesture`, `MultiGesture`, `InputGestureRef`,
+    `KeyComboGesture`, `MouseGesture`, `EditorGestures`.
+  - Framework shim backing these: `Compatibility/Wpf/FrameworkElement.cs` —
+    `UIElement`/`FrameworkElement` (over Avalonia `Control`), the WPF input
+    `RoutedEvent` identities used for state dispatch, `EventManager.RegisterClassHandler`
+    (currently record-only; runtime bridge wired in the control phase),
+    `FocusNavigationDirection`, and `KeyboardFocusChangedEventArgs`/handler.
 
 ### 🚧 Remaining work (per subsystem)
 
@@ -84,7 +101,8 @@ Port order is bottom-up so lower layers compile before the controls that use the
 1. **Utilities & value helpers** — ✅ `BoxValue`, `MathExtensions`,
    `WeakReferenceCollection` ported. ⏳ Still to do: `DependencyObjectExtensions`
    (rewrite `HitTest` usages — see "Hit testing" below), `SelectionHelper`,
-   converters (`UnscaleTransformConverter`), `EditorGesturesExtensions`.
+   converters (`UnscaleTransformConverter`). `EditorGesturesExtensions` is deferred to
+   the control phase (depends on `SelectionType` declared on `NodifyEditor`).
 2. **Routed-event compatibility** — ✅ Done. Chose option (a): a shim
    `EventManager`/`RoutingStrategy`/`RoutedEvent`/`RoutedEventArgs` mapping onto
    Avalonia's `Avalonia.Interactivity` routed events (the shim `RoutedEvent`/
@@ -97,15 +115,24 @@ Port order is bottom-up so lower layers compile before the controls that use the
      `MouseButtonState`, the mouse/key event-arg hierarchy, and the
      `InputGesture`/`MouseGesture`/`KeyGesture` matching model) is implemented under
      `Compatibility/Wpf/Input/` (see "Done" above). Builds clean.
-   - **Phase 3b (consumer ports) — ⏳ Next up.** Port the `Interactivity\` files
-     (`InputProcessor`, `IInputHandler`, gestures `MouseGesture`/`KeyComboGesture`/
-     `MultiGesture`/`InputGestureRef`, `EditorGestures`, states `DragState`/
-     `InputElementState`, keyboard navigation) and the control `OnMouseDown/Move/Up/
-     Wheel`/`OnKeyDown/Up` overrides to Avalonia's `OnPointer*`/`OnKey*` methods and
-     `e.Pointer.Capture`, feeding `InputStateTracker` from those overrides. Also needs
-     `IInputElement`, `FrameworkElement.ContextMenu`, `UIElement` class-handler events
-     (`PreviewKeyUp`/`LostKeyboardFocus`) and `KeyboardFocusChangedEventArgs` used by
-     `KeyComboGesture` (control/framework-level shims).
+   - **Phase 3b (consumer ports) — 🔶 In progress.**
+     - ✅ **Control-independent primitives linked and building:** the `Interactivity\`
+       core (`InputProcessor`, `IInputHandler`, `InputElementState`,
+       `InputElementStateStack` + its `InputElementState` partial) and the full gesture
+       set (`MouseGesture`, `KeyComboGesture`, `MultiGesture`, `AllGestures`,
+       `AnyGesture`, `InputGestureRef`, `EditorGestures`) are linked from upstream and
+       compile against the shim (incl. the new `FrameworkElement.cs`/`Commands.cs`
+       shims). `EventManager.RegisterClassHandler` used by `KeyComboGesture` is
+       currently record-only.
+     - ⏳ **Deferred to the control phase (control/device coupled):**
+       `InputProcessor.Shared.cs` (hard-refs `NodifyEditor`/`ItemContainer`/`Connector`/
+       `Minimap`/`BaseConnection`), `DragState.cs` and
+       `InputElementStateStack.DragState.cs` (`Mouse`/`Stylus` devices,
+       `NodifyEditor.ViewportUpdatedEvent`, `Element.ContextMenu`), the
+       `Interactivity\KeyboardNavigation\` navigators, `EditorGesturesExtensions.cs`
+       (needs `SelectionType` declared on `NodifyEditor`), and every control `*State`
+       class. These arrive with the control `OnPointer*`/`OnKey*` overrides that feed
+       `InputStateTracker` and with the `KeyComboGesture` runtime class-handler bridge.
 4. **Shapes & rendering** — `BaseConnection`, `LineConnection`, `CircuitConnection`,
    `StepConnection`, `CuttingLine`: port `Shape`/`OnRender(DrawingContext)`/`DefiningGeometry`
    to Avalonia's `Shape`/`Render`. (`CuttingLine` may be blocked — see nodify-avalonia,
