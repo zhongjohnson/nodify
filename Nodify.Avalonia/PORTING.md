@@ -52,21 +52,38 @@ two different UI frameworks.
 - New `Nodify.Avalonia` project (`net8.0`, Avalonia `11.3.18`), added to `Nodify.sln`.
 - Dependency-property compatibility layer.
 - `VisualTreeHelper` navigation shim.
+- **Routed-event compatibility layer** (`Compatibility/Wpf/RoutedEvents.cs`,
+  `RoutedEventServices.cs`) — `EventManager.RegisterRoutedEvent`, `RoutingStrategy`,
+  `RoutedEvent` (+ `AddOwner`) and `RoutedEventArgs` mapped onto Avalonia's
+  `Avalonia.Interactivity.RoutedEvent`/`RoutedEventArgs`; WPF `AddHandler`
+  (2-arg / 3-arg) bridged to Avalonia's `Interactive`. `RaiseEvent` and 2-arg
+  `RemoveHandler` are used from Avalonia natively.
+- **Framework-agnostic utilities** ported verbatim: `Utilities/MathExtensions.cs`,
+  `Utilities/WeakReferenceCollection.cs`, `Utilities/BoxValue.cs`.
+- **Event-argument classes** ported verbatim into `Events/`: `ConnectorEventArgs`,
+  `ConnectionEventArgs`, `PendingConnectionEventArgs` (with their handler delegates).
 
 ### 🚧 Remaining work (per subsystem)
 
 Port order is bottom-up so lower layers compile before the controls that use them.
 
-1. **Utilities & value helpers** — `BoxValue`, `MathExtensions`, `DependencyObjectExtensions`
-   (rewrite `HitTest` usages), `SelectionHelper`, converters. `BoxValue` boxing is
-   mostly framework-agnostic; watch `Point`/`Rect`/`Vector` (now Avalonia types).
-2. **Routed-event compatibility** — decide between (a) a shim `EventManager`/`RoutedEvent`
-   mapping to Avalonia's `RoutedEvent.Register<T>` + `RoutingStrategies`, or (b) porting
-   each `RegisterRoutedEvent` call to Avalonia directly. Update `RoutedEventArgs`-derived
-   event-arg classes (`ConnectorEventArgs`, `PendingConnectionEventArgs`, …).
-3. **Input / interactivity** — port `Interactivity\` (InputProcessor, gestures, states)
-   from `Mouse`/`Keyboard`/`MouseButtonEventArgs` to Avalonia pointer/key APIs and
-   `e.Pointer.Capture`.
+1. **Utilities & value helpers** — ✅ `BoxValue`, `MathExtensions`,
+   `WeakReferenceCollection` ported. ⏳ Still to do: `DependencyObjectExtensions`
+   (rewrite `HitTest` usages — see "Hit testing" below), `SelectionHelper`,
+   converters (`UnscaleTransformConverter`), `EditorGesturesExtensions`.
+2. **Routed-event compatibility** — ✅ Done. Chose option (a): a shim
+   `EventManager`/`RoutingStrategy`/`RoutedEvent`/`RoutedEventArgs` mapping onto
+   Avalonia's `Avalonia.Interactivity` routed events (the shim `RoutedEvent`/
+   `RoutedEventArgs` *derive from* the Avalonia types, so `RaiseEvent`/`AddHandler`/
+   `RemoveHandler` work natively; only WPF's shorter `AddHandler` overloads are
+   bridged). The `RoutedEventArgs`-derived event-arg classes are ported verbatim.
+3. **Input / interactivity** — ⏳ Next up. Port `Interactivity\` (InputProcessor,
+   gestures, states, keyboard navigation) from `Mouse`/`Keyboard`/`MouseButtonEventArgs`/
+   `InputGesture`/`ModifierKeys` to Avalonia pointer/key APIs and `e.Pointer.Capture`.
+   This is the largest remaining foundational piece; it likely needs a small input
+   shim (`Mouse`/`Keyboard`/`ModifierKeys`/`Key`/`MouseButton` + pointer/key event-arg
+   adapters) plus per-file porting of the `OnMouseDown/Move/Up` overrides to the
+   Avalonia `OnPointer*` methods.
 4. **Shapes & rendering** — `BaseConnection`, `LineConnection`, `CircuitConnection`,
    `StepConnection`, `CuttingLine`: port `Shape`/`OnRender(DrawingContext)`/`DefiningGeometry`
    to Avalonia's `Shape`/`Render`. (`CuttingLine` may be blocked — see nodify-avalonia,
