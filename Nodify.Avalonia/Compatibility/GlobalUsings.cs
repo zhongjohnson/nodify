@@ -39,6 +39,12 @@ global using Colors = Avalonia.Media.Colors;
 global using Geometry = Avalonia.Media.Geometry;
 global using Visual = Avalonia.Visual;
 
+// Avalonia's DrawingContext is the render-time drawing surface, equivalent to WPF's
+// System.Windows.Media.DrawingContext. It is aliased so the ported shapes' OnRender(DrawingContext)
+// signatures match Avalonia's Render(DrawingContext); WPF-only draw helpers that Avalonia lacks
+// (e.g. DrawRoundedRectangle) are provided as extension methods in Compatibility/Wpf/DrawingContext.cs.
+global using DrawingContext = Avalonia.Media.DrawingContext;
+
 // Layout enums (identical members between WPF and Avalonia).
 global using HorizontalAlignment = Avalonia.Layout.HorizontalAlignment;
 global using VerticalAlignment = Avalonia.Layout.VerticalAlignment;

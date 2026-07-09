@@ -81,4 +81,24 @@
     <Compile Include="..\Nodify\Utilities\DependencyObjectExtensions.cs" Link="Utilities\DependencyObjectExtensions.cs" />
   </ItemGroup>
 
+  <!--
+    Phase 4b: Shapes & rendering. The reusable WPF-shaped rendering surface is provided as compat
+    shims under Compatibility\Wpf (globbed automatically, no <Compile> link needed):
+      Compatibility\Wpf\StreamGeometry.cs  (System.Windows.Media.StreamGeometry/StreamGeometryContext + FillRule/SweepDirection over Avalonia)
+      Compatibility\Wpf\Shape.cs           (System.Windows.Shapes.Shape over Avalonia.Controls.Shapes.Shape; OnRender <-> Render)
+      GlobalUsings.cs                       (DrawingContext = Avalonia.Media.DrawingContext alias)
+
+    No upstream shape .cs files are linked yet. Every Nodify shape turned out to be control-coupled,
+    so they are DEFERRED to the control/adorner phase to preserve bottom-up order:
+      Connections\BaseConnection.cs         (IKeyboardFocusTarget<FrameworkElement>, InputProcessor.AddSharedHandlers,
+                                             ConnectionContainer, AdornerLayer/FocusVisualAdorner, Geometry.Combine/
+                                             GetWidenedPathGeometry/GetOutlinedPathGeometry, FormattedText)
+      Connections\Connection.cs, LineConnection.cs, CircuitConnection.cs, StepConnection.cs  (derive from BaseConnection)
+      CuttingLine\CuttingLine.cs            (IsOverElementProperty = PendingConnection.IsOverElementProperty.AddOwner(...),
+                                             i.e. depends on the deferred PendingConnection connector control)
+
+    The Pen/Brush/FormattedText draw shims and DrawingContext.DrawRoundedRectangle helper are only
+    needed by the above deferred code and are therefore also deferred to the control/adorner phase.
+  -->
+
 </Project>

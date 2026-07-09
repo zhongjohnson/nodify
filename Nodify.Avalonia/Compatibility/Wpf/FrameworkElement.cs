@@ -42,6 +42,27 @@ namespace System.Windows
     /// </summary>
     public class UIElement : Control
     {
+        /// <summary>WPF-style value accessor. Shadows Avalonia's <c>GetValue(AvaloniaProperty)</c> so
+        /// unqualified <c>GetValue(dp)</c> in ported controls binds the WPF <see cref="DependencyProperty"/>.</summary>
+        public object? GetValue(DependencyProperty property)
+            => DependencyPropertyServices.GetValue(this, property);
+
+        /// <summary>WPF-style value setter for a <see cref="DependencyProperty"/>.</summary>
+        public void SetValue(DependencyProperty property, object? value)
+            => DependencyPropertyServices.SetValue(this, property, value);
+
+        /// <summary>WPF-style value setter for a read-only <see cref="DependencyPropertyKey"/>.</summary>
+        public void SetValue(DependencyPropertyKey key, object? value)
+            => DependencyPropertyServices.SetValue(this, key, value);
+
+        /// <summary>WPF-style local-value setter (no coercion re-entry) for a <see cref="DependencyProperty"/>.</summary>
+        public void SetCurrentValue(DependencyProperty property, object? value)
+            => DependencyPropertyServices.SetCurrentValue(this, property, value);
+
+        /// <summary>WPF-style value clear for a <see cref="DependencyProperty"/>.</summary>
+        public void ClearValue(DependencyProperty property)
+            => DependencyPropertyServices.ClearValue(this, property);
+
         /// <summary>Identity for WPF's <c>MouseMove</c> routed event.</summary>
         public static readonly RoutedEvent MouseMoveEvent =
             EventManager.RegisterRoutedEvent("MouseMove", RoutingStrategy.Bubble, typeof(MouseEventHandler), typeof(UIElement));

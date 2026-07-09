@@ -107,7 +107,28 @@ two different UI frameworks.
     `UIElement`/`FrameworkElement` (over Avalonia `Control`), the WPF input
     `RoutedEvent` identities used for state dispatch, `EventManager.RegisterClassHandler`
     (currently record-only; runtime bridge wired in the control phase),
-    `FocusNavigationDirection`, and `KeyboardFocusChangedEventArgs`/handler.
+    `FocusNavigationDirection`, and `KeyboardFocusChangedEventArgs`/handler. The WPF
+    instance value accessors (`GetValue(DependencyProperty)`/`SetValue`/`SetCurrentValue`/
+    `ClearValue`) that shadow Avalonia's `GetValue(AvaloniaProperty)` for unqualified
+    `GetValue(dp)` calls also live here (added in Phase 4b).
+- **Rendering primitives (control-independent, Phase 4b)** — the reusable WPF-shaped
+  geometry/shape surface, provided as shims (globbed, not linked):
+  - `Compatibility/Wpf/StreamGeometry.cs` — `System.Windows.Media.StreamGeometry`
+    (over `Avalonia.Media.StreamGeometry`) with the WPF `FillRule`, plus a
+    `StreamGeometryContext` wrapper that re-exposes WPF `BeginFigure(pt, isFilled, isClosed)`/
+    `LineTo`/`BezierTo`/`QuadraticBezierTo`/`ArcTo` and defers Avalonia's required
+    `EndFigure(isClosed)` until the next figure or `Dispose`. Also `FillRule`/`SweepDirection`.
+  - `Compatibility/Wpf/Shape.cs` — `System.Windows.Shapes.Shape` (over
+    `Avalonia.Controls.Shapes.Shape`). Bridges the API-shape mismatch: Avalonia's
+    `DefiningGeometry` is non-virtual and `Render` is sealed, so the shim shadows a WPF-style
+    virtual `DefiningGeometry`, implements Avalonia's abstract `CreateDefiningGeometry()` to
+    return it, and exposes a WPF-style virtual `OnRender(DrawingContext)` hook (base no-op;
+    runtime wiring of `OnRender` extras deferred to the control/adorner phase). Carries the
+    same WPF instance value accessors as `UIElement`.
+  - `GlobalUsings.cs` — `DrawingContext = Avalonia.Media.DrawingContext` alias.
+  - Verified by `Compatibility/_ShimValidation/ShimValidationShape.cs`, a local shape that
+    mirrors `CuttingLine`'s render surface (`StreamGeometry` + `StreamGeometryContext` +
+    `Shape.OnRender` + `DrawingContext.DrawEllipse`) and compiles/links against the shims.
 
 ### 🚧 Remaining work (per subsystem)
 
@@ -152,10 +173,21 @@ Port order is bottom-up so lower layers compile before the controls that use the
        (needs `SelectionType` declared on `NodifyEditor`), and every control `*State`
        class. These arrive with the control `OnPointer*`/`OnKey*` overrides that feed
        `InputStateTracker` and with the `KeyComboGesture` runtime class-handler bridge.
-4. **Shapes & rendering** — `BaseConnection`, `LineConnection`, `CircuitConnection`,
-   `StepConnection`, `CuttingLine`: port `Shape`/`OnRender(DrawingContext)`/`DefiningGeometry`
-   to Avalonia's `Shape`/`Render`. (`CuttingLine` may be blocked — see nodify-avalonia,
-   which lists Cutting Lines as unsupported pending an Avalonia fix.)
+4. **Shapes & rendering** — 🔶 **Shim layer done (Phase 4b); shape files deferred.**
+   The reusable WPF-shaped rendering surface (`StreamGeometry`/`StreamGeometryContext`,
+   `Shape` with the `CreateDefiningGeometry`/`OnRender` bridge, `DrawingContext` alias) is
+   implemented and build-verified (see the Phase 4b entry under **Done**). The upstream shape
+   `.cs` files themselves are **not linked yet** because every one turned out to be
+   control-coupled, so they stay with the control/adorner phase to preserve bottom-up order:
+   - `BaseConnection` (and the derived `Connection`/`LineConnection`/`CircuitConnection`/
+     `StepConnection`) — implements `IKeyboardFocusTarget<FrameworkElement>`, calls
+     `InputProcessor.AddSharedHandlers`, resolves a `ConnectionContainer`, drives an
+     `AdornerLayer`/`FocusVisualAdorner`, and uses WPF-only geometry ops (`Geometry.Combine`,
+     `GetWidenedPathGeometry`, `GetOutlinedPathGeometry`) plus `FormattedText`.
+   - `CuttingLine` — its `IsOverElement` is `PendingConnection.IsOverElementProperty.AddOwner(...)`,
+     i.e. it depends on the deferred `PendingConnection` connector control.
+   The `Pen`/`Brush`/`FormattedText` draw shims and the WPF `DrawingContext.DrawRoundedRectangle`
+   helper are only needed by the above, so they are also deferred to the control/adorner phase.
 5. **Adorners** — reimplement `FocusVisualAdorner` / `HotKeyAdorner` on Avalonia's
    `AdornerLayer`.
 6. **Containers & core controls** — `ItemContainer`, `DecoratorContainer`,
