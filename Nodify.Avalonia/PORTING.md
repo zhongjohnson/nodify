@@ -62,6 +62,20 @@ two different UI frameworks.
   `Utilities/WeakReferenceCollection.cs`, `Utilities/BoxValue.cs`.
 - **Event-argument classes** ported verbatim into `Events/`: `ConnectorEventArgs`,
   `ConnectionEventArgs`, `PendingConnectionEventArgs` (with their handler delegates).
+- **Input compatibility layer** (Phase 3a, `Compatibility/Wpf/Input/*.cs`) — WPF
+  `System.Windows.Input` surface mapped onto Avalonia's pointer/key system:
+  - `InputEnums.cs` — `Key`/`MouseButton` aliased to `Avalonia.Input` enums; WPF-shaped
+    `ModifierKeys` (`[Flags]`), `MouseAction`, `MouseButtonState` + `ModifierKeys`↔
+    `KeyModifiers` conversions.
+  - `InputEventArgs.cs` — `InputEventArgs`/`MouseEventArgs`/`MouseButtonEventArgs`/
+    `MouseWheelEventArgs`/`KeyEventArgs` (deriving from the routed-event args shim),
+    wrapping Avalonia `PointerEventArgs`/`KeyEventArgs` for `GetPosition`/`Pointer`/
+    `Key`/`Delta`, + handler delegates.
+  - `InputState.cs` — `Keyboard` (`Modifiers`, `IsKeyDown`) and `Mouse`
+    (`Left/Right/MiddleButton`, `MouseWheelDeltaForOneLine`, `GetPosition`) over an
+    `InputStateTracker` (fed by the ported control overrides in Phase 3b).
+  - `InputGestures.cs` — `InputGesture` base + `KeyGesture`/`MouseGesture` with WPF
+    gesture-matching semantics reimplemented (Avalonia has no `InputGesture.Matches`).
 
 ### 🚧 Remaining work (per subsystem)
 
@@ -77,13 +91,21 @@ Port order is bottom-up so lower layers compile before the controls that use the
    `RoutedEventArgs` *derive from* the Avalonia types, so `RaiseEvent`/`AddHandler`/
    `RemoveHandler` work natively; only WPF's shorter `AddHandler` overloads are
    bridged). The `RoutedEventArgs`-derived event-arg classes are ported verbatim.
-3. **Input / interactivity** — ⏳ Next up. Port `Interactivity\` (InputProcessor,
-   gestures, states, keyboard navigation) from `Mouse`/`Keyboard`/`MouseButtonEventArgs`/
-   `InputGesture`/`ModifierKeys` to Avalonia pointer/key APIs and `e.Pointer.Capture`.
-   This is the largest remaining foundational piece; it likely needs a small input
-   shim (`Mouse`/`Keyboard`/`ModifierKeys`/`Key`/`MouseButton` + pointer/key event-arg
-   adapters) plus per-file porting of the `OnMouseDown/Move/Up` overrides to the
-   Avalonia `OnPointer*` methods.
+3. **Input / interactivity** — 🔶 In progress.
+   - **Phase 3a (input shim) — ✅ Done.** WPF `System.Windows.Input` surface
+     (`Mouse`/`Keyboard`/`ModifierKeys`/`Key`/`MouseButton`/`MouseAction`/
+     `MouseButtonState`, the mouse/key event-arg hierarchy, and the
+     `InputGesture`/`MouseGesture`/`KeyGesture` matching model) is implemented under
+     `Compatibility/Wpf/Input/` (see "Done" above). Builds clean.
+   - **Phase 3b (consumer ports) — ⏳ Next up.** Port the `Interactivity\` files
+     (`InputProcessor`, `IInputHandler`, gestures `MouseGesture`/`KeyComboGesture`/
+     `MultiGesture`/`InputGestureRef`, `EditorGestures`, states `DragState`/
+     `InputElementState`, keyboard navigation) and the control `OnMouseDown/Move/Up/
+     Wheel`/`OnKeyDown/Up` overrides to Avalonia's `OnPointer*`/`OnKey*` methods and
+     `e.Pointer.Capture`, feeding `InputStateTracker` from those overrides. Also needs
+     `IInputElement`, `FrameworkElement.ContextMenu`, `UIElement` class-handler events
+     (`PreviewKeyUp`/`LostKeyboardFocus`) and `KeyboardFocusChangedEventArgs` used by
+     `KeyComboGesture` (control/framework-level shims).
 4. **Shapes & rendering** — `BaseConnection`, `LineConnection`, `CircuitConnection`,
    `StepConnection`, `CuttingLine`: port `Shape`/`OnRender(DrawingContext)`/`DefiningGeometry`
    to Avalonia's `Shape`/`Render`. (`CuttingLine` may be blocked — see nodify-avalonia,
