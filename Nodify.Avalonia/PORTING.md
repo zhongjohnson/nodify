@@ -129,6 +129,19 @@ two different UI frameworks.
   - Verified by `Compatibility/_ShimValidation/ShimValidationShape.cs`, a local shape that
     mirrors `CuttingLine`'s render surface (`StreamGeometry` + `StreamGeometryContext` +
     `Shape.OnRender` + `DrawingContext.DrawEllipse`) and compiles/links against the shims.
+- **Adorner primitives (control-independent, Phase 5)** — the reusable WPF adorner surface,
+  provided as a shim (globbed, not linked):
+  - `Compatibility/Wpf/Adorner.cs` — `System.Windows.Documents.Adorner` (over Avalonia
+    `Control`): records the adorned element (WPF ctor), routes Avalonia's virtual `Render` to a
+    WPF-style `OnRender(DrawingContext)` hook, exposes `IsClipEnabled` (→ `AdornerLayer.SetIsClipEnabled`),
+    the WPF instance value accessors, `AddVisualChild`/`AddLogicalChild` (over `VisualChildren`/
+    `LogicalChildren`), overridable `VisualChildrenCount`/`GetVisualChild`, and `TryFindResource`.
+    Plus `System.Windows.Documents.AdornerLayer` — a façade over
+    `Avalonia.Controls.Primitives.AdornerLayer` exposing WPF `GetAdornerLayer`/`Add`/`Remove`/`Update`
+    (mapped onto the layer's `Children` + the `AdornedElement`/`IsClipEnabled` attached properties).
+  - Verified by `Compatibility/_ShimValidation/ShimValidationAdorner.cs`, a local adorner that
+    mirrors `FocusVisualAdorner`'s surface (adorned-element ctor, `IsHitTestVisible`/`IsEnabled`/
+    `IsClipEnabled`, `OnRender`) and exercises the layer `Add`/`Update`/`Remove` API.
 
 ### 🚧 Remaining work (per subsystem)
 
@@ -188,8 +201,17 @@ Port order is bottom-up so lower layers compile before the controls that use the
      i.e. it depends on the deferred `PendingConnection` connector control.
    The `Pen`/`Brush`/`FormattedText` draw shims and the WPF `DrawingContext.DrawRoundedRectangle`
    helper are only needed by the above, so they are also deferred to the control/adorner phase.
-5. **Adorners** — reimplement `FocusVisualAdorner` / `HotKeyAdorner` on Avalonia's
-   `AdornerLayer`.
+5. **Adorners** — 🔶 **Shim layer done (Phase 5); nested adorners deferred.**
+   The reusable WPF `Adorner`/`AdornerLayer` surface is implemented over Avalonia's
+   `Avalonia.Controls.Primitives.AdornerLayer` and build-verified (see the Phase 5 entry under
+   **Done**). The actual adorners are **private nested classes of deferred controls** and
+   additionally need `Pen`/WPF geometry ops/`HotKeyControl`/`Connector.Thumb`, so they arrive with
+   their hosts in the control phase:
+   - `FocusVisualAdorner` (nested in `BaseConnection`) — draws the focus outline via `Pen` +
+     `Geometry.Combine`/`GetWidenedPathGeometry`/`GetOutlinedPathGeometry`.
+   - `HotKeyAdorner` (nested in `PendingConnection`) — hosts a `HotKeyControl` visual child and
+     positions it with `Connector.Thumb.TranslatePoint(...)`. (`HotKeyControl` itself is a small
+     standalone `Control` but uses `DefaultStyleKey`/a template, so it too is control-phase.)
 6. **Containers & core controls** — `ItemContainer`, `DecoratorContainer`,
    `ConnectionContainer`, `Node`, `KnotNode`, `GroupingNode`, `StateNode`, `Connector`,
    `PendingConnection`.

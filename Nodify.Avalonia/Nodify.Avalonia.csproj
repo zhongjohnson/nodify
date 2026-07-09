@@ -101,4 +101,20 @@
     needed by the above deferred code and are therefore also deferred to the control/adorner phase.
   -->
 
+  <!--
+    Phase 5: Adorners. The reusable WPF Adorner/AdornerLayer surface is provided as a compat shim
+    under Compatibility\Wpf (globbed automatically, no <Compile> link needed):
+      Compatibility\Wpf\Adorner.cs  (System.Windows.Documents.Adorner over Avalonia Control with the
+                                     OnRender<->Render bridge + WPF value accessors + AddVisual/LogicalChild +
+                                     TryFindResource + IsClipEnabled; and a System.Windows.Documents.AdornerLayer
+                                     fa?ade over Avalonia.Controls.Primitives.AdornerLayer exposing WPF
+                                     GetAdornerLayer/Add/Remove/Update).
+
+    The actual adorners stay DEFERRED to the control phase ¡ª they are private nested classes of
+    deferred controls and additionally need Pen / WPF geometry ops / HotKeyControl / Connector.Thumb:
+      Connections\BaseConnection.cs   -> nested FocusVisualAdorner (Pen, Geometry.Combine/GetWidened/GetOutlined)
+      Connectors\PendingConnection.cs -> nested HotKeyAdorner (hosts HotKeyControl, Connector.Thumb.TranslatePoint)
+      Connectors\HotKeyControl.cs     (standalone Control, but uses DefaultStyleKey/template -> control phase)
+  -->
+
 </Project>
