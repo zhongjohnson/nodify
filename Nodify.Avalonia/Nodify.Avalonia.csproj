@@ -10,6 +10,14 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <!-- The upstream Nodify sources ship their own doc comments; suppress the noise while porting. -->
     <NoWarn>$(NoWarn);CS1591;CS1573;CS1734</NoWarn>
+    <!--
+      The linked upstream sources were written against WPF's non-nullable APIs
+      (VisualTreeHelper.GetParent, DependencyObject.GetValue, ...). The Avalonia compat shims are
+      nullable-annotated, so verbatim upstream code trips CS8600 (null->non-nullable) and CS8605
+      (unbox possibly-null). These are inherent to keeping the linked sources unmodified for easy
+      re-sync and are safe here (the shims never return null in these call sites), so they are suppressed.
+    -->
+    <NoWarn>$(NoWarn);CS8600;CS8605</NoWarn>
 
     <!-- Package metadata (mirrors Nodify, retargeted to Avalonia). -->
     <PackageId>Nodify.Avalonia</PackageId>
@@ -58,6 +66,19 @@
     <Compile Include="..\Nodify\Interactivity\Gestures\KeyComboGesture.cs" Link="Interactivity\Gestures\KeyComboGesture.cs" />
     <Compile Include="..\Nodify\Interactivity\Gestures\MouseGesture.cs" Link="Interactivity\Gestures\MouseGesture.cs" />
     <Compile Include="..\Nodify\Interactivity\Gestures\EditorGestures.cs" Link="Interactivity\Gestures\EditorGestures.cs" />
+  </ItemGroup>
+
+  <!--
+    Phase 4a: link the CONTROL-INDEPENDENT utility helpers from the upstream Nodify sources.
+    These compile against the WPF compatibility shim (VisualTreeHelper hit testing, the animation
+    slice, and the Rect.IntersectsWith alias) under Compatibility\Wpf.
+
+    NOT linked (adapted/copied instead or deferred):
+      Utilities\UnscaleTransformConverter.cs  (copied to Utilities\ - uses WPF Transform.Inverse; adapted to Matrix.TryInvert)
+      Utilities\SelectionHelper.cs            (DEFERRED - control-coupled: references ItemContainer / SelectionType)
+  -->
+  <ItemGroup Label="Nodify.Utilities (control-independent)">
+    <Compile Include="..\Nodify\Utilities\DependencyObjectExtensions.cs" Link="Utilities\DependencyObjectExtensions.cs" />
   </ItemGroup>
 
 </Project>

@@ -24,7 +24,8 @@ controls hard-depend on WPF subsystems whose Avalonia equivalents have a
 | `Shape` + `OnRender(DrawingContext)` + `DefiningGeometry` | `Avalonia.Controls.Shapes.Shape`, `Render(DrawingContext)`, different `DrawingContext` API | ⚠️ partial (custom base + adapter) |
 | `Adorner` / `AdornerLayer` | `Avalonia.Controls.Primitives.AdornerLayer` (different model) | ⚠️ needs reimplementation |
 | `VisualTreeHelper` navigation (`GetParent/GetChild/GetChildrenCount`) | `Avalonia.VisualTree` extensions | ✅ done (shim) |
-| `VisualTreeHelper.HitTest(filter, result, params)` callback traversal | `InputHitTest` / `GetVisualsAt` (no callback model) | ❌ needs hand-written walk |
+| `VisualTreeHelper.HitTest(filter, result, params)` callback traversal | `InputHitTest` / `GetVisualsAt` (no callback model) | ✅ done (hand-written recursive walk in the shim) |
+| `Transform.Inverse` / `DoubleAnimation`/`PointAnimation` + `BeginAnimation` | `Matrix.TryInvert` / no `BeginAnimation(DP, timeline)` API | ✅ done (adapted converter + `DispatcherTimer` animator shim) |
 | `DependencyProperty` / `FrameworkPropertyMetadata` / DP accessors | `StyledProperty<T>` / `AttachedProperty<T>` | ✅ done (shim) |
 
 Therefore the ported `.cs` files live under this project's **own** folders and are
@@ -40,7 +41,21 @@ future merge conflicts):
   `RegisterReadOnly` / `AddOwner` / `OverrideMetadata`, `GetValue` / `SetValue` /
   `CoerceValue`, property-changed & coerce callbacks) bridged onto Avalonia's
   strongly-typed properties.
-- `Compatibility/Wpf/VisualTreeHelper.cs` — visual-tree navigation over Avalonia.
+- `Compatibility/Wpf/VisualTreeHelper.cs` — visual-tree navigation **and** a WPF-compatible
+  callback-based `HitTest(filter, result, params)` reimplemented as a recursive Avalonia
+  visual-tree walk (top-most-first; honors filter skip/stop; point-contains + geometry-bounds
+  intersection in root coordinates).
+- `Compatibility/Wpf/HitTesting.cs` — WPF hit-test vocabulary (`HitTestFilterBehavior`,
+  `HitTestResultBehavior`, `PointHitTestParameters`/`GeometryHitTestParameters`,
+  `HitTestResult`/`PointHitTestResult`/`GeometryHitTestResult`, callback delegates).
+- `Compatibility/Wpf/Converters.cs` — WPF-shaped `IMultiValueConverter` (`object[]` +
+  `ConvertBack`) that also implements Avalonia's `IMultiValueConverter` (bridges `IList<object?>`);
+  `IValueConverter` is aliased directly to Avalonia's signature-compatible interface.
+- `Compatibility/Wpf/Animation.cs` — the small WPF animation slice Nodify needs: `Duration`,
+  `RepeatBehavior` (`Forever`), `AnimationTimeline`/`DoubleAnimation`/`PointAnimation` (linear),
+  and a `DispatcherTimer`-driven `BeginAnimation`(cancel via `null`) property animator.
+- `Compatibility/Wpf/RectExtensions.cs` — WPF `Rect.IntersectsWith` mapped to Avalonia
+  `Rect.Intersects`.
 
 **Consequence:** upstream sync is a **periodic manual merge** (as in
 nodify-avalonia), not automatic. This is an inherent trade-off of porting between
@@ -98,11 +113,15 @@ two different UI frameworks.
 
 Port order is bottom-up so lower layers compile before the controls that use them.
 
-1. **Utilities & value helpers** — ✅ `BoxValue`, `MathExtensions`,
-   `WeakReferenceCollection` ported. ⏳ Still to do: `DependencyObjectExtensions`
-   (rewrite `HitTest` usages — see "Hit testing" below), `SelectionHelper`,
-   converters (`UnscaleTransformConverter`). `EditorGesturesExtensions` is deferred to
-   the control phase (depends on `SelectionType` declared on `NodifyEditor`).
+1. **Utilities & value helpers** — ✅ **Done (Phase 4a).** `BoxValue`, `MathExtensions`,
+   `WeakReferenceCollection` ported; `DependencyObjectExtensions` **linked verbatim** from
+   upstream (its hit-test + animation call sites now resolve through the
+   `VisualTreeHelper.HitTest`/`HitTesting`/`Animation`/`RectExtensions` shims);
+   `UnscaleTransformConverter` **copied & adapted** to `Utilities/` (WPF `Transform.Inverse` →
+   `Matrix.TryInvert`), with its `Scale*Converter`s over the multi-value converter shim.
+   ⏳ `SelectionHelper` is **deferred to the control phase** (control-coupled: references
+   `ItemContainer` and `SelectionType`), as is `EditorGesturesExtensions` (needs `SelectionType`
+   declared on `NodifyEditor`).
 2. **Routed-event compatibility** — ✅ Done. Chose option (a): a shim
    `EventManager`/`RoutingStrategy`/`RoutedEvent`/`RoutedEventArgs` mapping onto
    Avalonia's `Avalonia.Interactivity` routed events (the shim `RoutedEvent`/

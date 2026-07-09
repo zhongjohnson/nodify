@@ -33,7 +33,20 @@ global using DependencyObject = Avalonia.AvaloniaObject;
 global using Color = Avalonia.Media.Color;
 global using Colors = Avalonia.Media.Colors;
 
+// Media reference types used by the ported utilities/controls. Avalonia's Geometry/Visual are
+// the natural equivalents of WPF's System.Windows.Media.Geometry / System.Windows.Media.Visual,
+// so they are aliased (they are used in signatures and generic constraints in the ported code).
+global using Geometry = Avalonia.Media.Geometry;
+global using Visual = Avalonia.Visual;
+
 // Layout enums (identical members between WPF and Avalonia).
 global using HorizontalAlignment = Avalonia.Layout.HorizontalAlignment;
 global using VerticalAlignment = Avalonia.Layout.VerticalAlignment;
 global using Orientation = Avalonia.Layout.Orientation;
+
+// Single-value converter: Avalonia's IValueConverter is signature-compatible with WPF's,
+// so it is aliased rather than reshimmed (upstream converters that implement the WPF
+// System.Windows.Data.IValueConverter compile verbatim against Avalonia's interface).
+// NOTE: IMultiValueConverter is NOT aliased -- it has a different shape and is provided as a
+// WPF-shaped shim in Compatibility/Wpf/Converters.cs.
+global using IValueConverter = Avalonia.Data.Converters.IValueConverter;
