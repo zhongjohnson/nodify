@@ -6,6 +6,31 @@
 > - Features:
 > - Bugfixes:
 
+#### **Version 7.3.0**
+
+> - Breaking Changes:
+>	- Renamed BeginGesture to DragGesture in DragState
+>	- DragState uses virtual properties to retrieve the required gestures instead of constructor arguments
+> - Features:
+>	- Added InputGestures dependency property to NodifyEditor and Minimap to specify which gestures mappings to use
+>	- Added ActualGestures to Minimap, NodifyEditor and its elements
+>	- Added ContentPadding dependency property to Node to allow adjusting the spacing between input and output panels
+>	- Added IsContentHitTestVisible dependency property to GroupingNode to allow selecting nodes and connections behind it when clicking on its content area
+>	- Added ResizeThumbTemplate dependency property to GroupingNode to allow customizing the resize thumb
+> - Bugfixes:
+>	- Fixed StepConnection applying SourceOffset in the wrong direction in some cases
+
+#### **Version 7.2.0**
+
+> - Features:
+>	- Added ConnectionTemplateSelector, DecoratorTemplateSelector and PendingConnectionTemplateSelector to NodifyEditor to allow selecting the data template based on custom rules
+>	- Added TextBackground, TextPadding and TextCornerRadius dependency properties to BaseConnection to allow styling the background of the connection text
+>	- Added DrawTextBackground to BaseConnection to allow customizing the drawing of the text background
+> - Bugfixes:
+>	- Fixed focus navigation exception when the editor is collapsed
+>	- Fixed connection focus outline drawing inner overlapping lines
+>	- Fixed connection focus outline not updating on directional arrow animation
+
 #### **Version 7.1.0**
 
 > - Breaking Changes:

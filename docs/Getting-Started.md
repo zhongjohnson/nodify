@@ -44,6 +44,8 @@ Merge one of the following themes into your resource dictionary in `App.xaml`:
 <ResourceDictionary Source="pack://application:,,,/Nodify;component/Themes/Nodify.xaml" />
 ```
 
+For custom themes, color overrides, and runtime theme switching, see [Theming](Theming).
+
 ## A minimal example
 
 Import the `nodify` namespace: `xmlns:nodify="https://miroiu.github.io/nodify"` or `xmlns:nodify="clr-namespace:Nodify;assembly=Nodify"` in your file and create an instance of the editor `<nodify:NodifyEditor />`. If you start the application, you will see an empty space where you can create a selection rectangle.

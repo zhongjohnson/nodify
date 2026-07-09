@@ -22,6 +22,7 @@
 - [Selecting items](Editor-Overview#selecting)
 - [Pushing items](Editor-Overview#pushing-items)
 - [Snapping to grid](Editor-Overview#snapping)
+- [Editor gestures](Editor-Gestures)
 - [Commands](Editor-Overview#commands)
 
 [ItemContainer overview](ItemContainer-Overview)
@@ -60,6 +61,8 @@
 - [Moving the viewport](Minimap-Overview#panning)
 - [Zooming](Minimap-Overview#zooming)
 - [Customization](Minimap-Overview#customization)
+
+[Theming](Theming)
 
 [API Reference](API-Reference)
 

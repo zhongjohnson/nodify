@@ -9,7 +9,7 @@ A2: The `Anchor` of the connectors updates only if the `IsConnected` property is
 
 #### Q: Can I change the mouse/key bindings?
 
-A: Yes! You can configure the [editor gestures](https://github.com/miroiu/nodify/blob/master/Nodify/EditorGestures.cs) to your liking.
+A: Yes! You can configure the [editor gestures](Editor-Gestures) to your liking.
 
 ***
 
@@ -77,3 +77,8 @@ A: https://github.com/miroiu/nodify/issues/206
 
 A:  https://github.com/miroiu/nodify/issues/73
 
+***
+
+#### Q: How can I create nodes with connectors of different data types?
+
+A: https://github.com/miroiu/nodify/discussions/273

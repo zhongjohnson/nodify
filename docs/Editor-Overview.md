@@ -7,6 +7,7 @@
   - [Selection API](#selection-api)
 - [Snapping to grid](#snapping)
 - [Pushing items](#pushing-items)
+- [Editor gestures](#editor-gestures)
 - [Commands](#commands)
 - [Editor API](#editor-api)
 
@@ -120,6 +121,10 @@ To initiate the push operation, hold `CTRL+SHIFT` and click with the **Left Mous
 To cancel the push operation, press the `Escape` key or release `CTRL+SHIFT` and click the **Right Mouse Button**. You can configure the default keybindings by modifying the `EditorGestures.Editor.PushItems` gesture. To prevent cancellation, set `NodifyEditor.AllowPushItemsCancellation` to `false`.
 
 The visual appearance of the push area can be customized by setting the `PushedAreaStyle` property.
+
+## Editor gestures
+
+For custom mouse and keyboard mappings, see [Editor gestures](Editor-Gestures).
 
 ## Commands
 
