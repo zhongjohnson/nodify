@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <!-- Activates the minimal WPF->Avalonia guards inside linked upstream sources. -->
+    <DefineConstants>$(DefineConstants);AVALONIA</DefineConstants>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- The upstream Nodify sources ship their own doc comments; suppress the noise while porting. -->
+    <NoWarn>$(NoWarn);CS1591;CS1573;CS1734</NoWarn>
+
+    <!-- Package metadata (mirrors Nodify, retargeted to Avalonia). -->
+    <PackageId>Nodify.Avalonia</PackageId>
+    <Product>Nodify.Avalonia</Product>
+    <Description>The core controls for a node based editor (designed for MVVM) - Avalonia port that shares the upstream Nodify sources via a WPF compatibility shim.</Description>
+    <Authors>miroiu</Authors>
+    <Copyright>Miroiu Emanuel</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/miroiu/nodify</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/miroiu/nodify</RepositoryUrl>
+    <PackageTags>avalonia mvvm node network node-editor graph controls</PackageTags>
+    <Version>7.3.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.18" />
+  </ItemGroup>
+
+  <!-- Option A source-fork port. See PORTING.md for strategy, subsystem checklist and status. -->
+
+</Project>
