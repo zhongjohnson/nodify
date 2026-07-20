@@ -68,3 +68,8 @@ global using IValueConverter = Avalonia.Data.Converters.IValueConverter;
 global using DataTemplate = Avalonia.Controls.Templates.IDataTemplate;
 global using ControlTemplate = Avalonia.Controls.Templates.IControlTemplate;
 global using Style = Avalonia.Styling.Style;
+
+// WPF's UIElementCollection (Panel.InternalChildren) maps onto Avalonia's indexable child
+// collection. Upstream panels only use it as `collection[i]` + `.Count`, both of which Avalonia's
+// Controls type provides, so a straight alias is sufficient.
+global using UIElementCollection = Avalonia.Controls.Controls;

@@ -139,4 +139,17 @@
     <Compile Include="..\Nodify\Nodes\KnotNode.cs" Link="Nodes\KnotNode.cs" />
   </ItemGroup>
 
+  <!--
+    Phase 6c: Panel primitive + first panel control. Reusable shim (globbed automatically):
+      Compatibility\Wpf\Panel.cs   (System.Windows.Controls.Panel over Avalonia Panel: InternalChildren,
+                                    Panel.ZIndex GetZIndex/SetZIndex + ZIndexProperty via FromExisting,
+                                    WPF value accessors + OnPropertyChanged routing)
+      GlobalUsings.cs              (UIElementCollection -> Avalonia.Controls.Controls alias)
+
+    NodifyCanvas is COPIED & ADAPTED (not linked) into Editor\NodifyCanvas.cs and auto-globbed. The
+    only change vs. upstream is children[i].RenderSize -> children[i].Bounds.Size (Avalonia Control has
+    no WPF RenderSize); isolated behind // PORT: comments. It carries the INodifyCanvasItem interface,
+    which is declared in the same upstream file.
+  -->
+
 </Project>

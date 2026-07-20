@@ -174,6 +174,20 @@ two different UI frameworks.
     that mirrors how `StateNode`/`Node`/`GroupingNode` consume these primitives (AddOwner of
     `ContentTemplate`/`CornerRadius`, `DataTemplate`/`ControlTemplate`/`Style`-typed DPs,
     `DefaultStyleKeyProperty`/`FocusableProperty` overrides).
+- **Panel primitive + first panel control (Phase 6c)** — the reusable WPF `Panel` surface and the
+  first real editor control that uses it:
+  - `Compatibility/Wpf/Panel.cs` — `System.Windows.Controls.Panel` (over Avalonia `Panel`)
+    exposing the WPF `InternalChildren` spelling (maps to Avalonia's `Children`), the
+    `Panel.ZIndex` attached-property helpers `GetZIndex`/`SetZIndex` (over Avalonia's
+    `Visual.ZIndex`), a `ZIndexProperty` WPF DP wrapping the real Avalonia property (for upstream
+    `Panel.ZIndexProperty.OverrideMetadata`), and the WPF value accessors + change routing.
+  - `GlobalUsings.cs` — `UIElementCollection` -> `Avalonia.Controls.Controls` (upstream panels use
+    it only as `collection[i]` + `.Count`).
+  - `Editor/NodifyCanvas.cs` — **copied & adapted** from upstream (carrying the `INodifyCanvasItem`
+    interface declared in the same file). The single adaptation vs. upstream is
+    `children[i].RenderSize` -> `children[i].Bounds.Size` (Avalonia's `Control` has no WPF
+    `RenderSize`), isolated behind `// PORT:` comments. This is the first control that lays out
+    `INodifyCanvasItem`s and is a prerequisite for the editor's item host.
 
 ### 🚧 Remaining work (per subsystem)
 
@@ -260,7 +274,8 @@ Port order is bottom-up so lower layers compile before the controls that use the
      `KeyboardNavigation` attached properties, `Selector.IsSelectedProperty`).
    - `Connector`, `PendingConnection`, `StateNode` (derives from `Connector`) — connector stack;
      `PendingConnection` also hosts the deferred `HotKeyAdorner`/`HotKeyControl`.
-7. **Editor** — `NodifyEditor` (+ partials), `NodifyCanvas`, `EditorCommands`.
+7. **Editor** — 🔶 `NodifyCanvas` done (Phase 6c: copy-adapted + `Panel` shim). Remaining:
+   `NodifyEditor` (+ partials), `EditorCommands`.
 8. **Minimap** — `Minimap`, `MinimapItem`, `MinimapPanel`.
 9. **Theme** — rewrite `Themes\**\*.xaml` (WPF `ControlTemplate`s) into Avalonia
    `.axaml` control themes/`ResourceDictionary`s; expose an includable `Theme.axaml`.
