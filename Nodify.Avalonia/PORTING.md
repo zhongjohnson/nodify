@@ -142,6 +142,23 @@ two different UI frameworks.
   - Verified by `Compatibility/_ShimValidation/ShimValidationAdorner.cs`, a local adorner that
     mirrors `FocusVisualAdorner`'s surface (adorned-element ctor, `IsHitTestVisible`/`IsEnabled`/
     `IsClipEnabled`, `OnRender`) and exercises the layer `Add`/`Update`/`Remove` API.
+- **Control bases + first foundational control (Phase 6a)** — the reusable WPF templated-control
+  bases, provided as a shim (globbed, not linked):
+  - `Compatibility/Wpf/Controls.cs` — `System.Windows.Controls.ContentControl` (over Avalonia
+    `ContentControl`) and `HeaderedContentControl` (over Avalonia
+    `Primitives.HeaderedContentControl`). Each exposes the WPF control statics that upstream static
+    ctors use — `DefaultStyleKeyProperty` (**record-only**; Avalonia themes by type, so overriding
+    it is a no-op today and the style key is just captured for the theme phase) and
+    `FocusableProperty` (wraps Avalonia's real `InputElement.FocusableProperty`, so
+    `OverrideMetadata(type, new FrameworkPropertyMetadata(false))` actually flips the focus default)
+    — plus the WPF value accessors and an `OnPropertyChanged` override that runs WPF coercion/change
+    routing via `DependencyPropertyServices`.
+  - `Compatibility/Wpf/DependencyProperty.cs` — added `DependencyProperty.FromExisting(...)` to wrap
+    an already-existing Avalonia property (e.g. `InputElement.FocusableProperty`) in a WPF DP so
+    `OverrideMetadata`/`AddOwner` work against built-in Avalonia properties.
+  - **First control ported, linked verbatim from upstream:** `Nodes/KnotNode.cs`
+    (`ContentControl` + `DefaultStyleKeyProperty`/`FocusableProperty` overrides only) — the
+    least-coupled control, compiles unchanged against the new bases.
 
 ### 🚧 Remaining work (per subsystem)
 
@@ -212,9 +229,20 @@ Port order is bottom-up so lower layers compile before the controls that use the
    - `HotKeyAdorner` (nested in `PendingConnection`) — hosts a `HotKeyControl` visual child and
      positions it with `Connector.Thumb.TranslatePoint(...)`. (`HotKeyControl` itself is a small
      standalone `Control` but uses `DefaultStyleKey`/a template, so it too is control-phase.)
-6. **Containers & core controls** — `ItemContainer`, `DecoratorContainer`,
-   `ConnectionContainer`, `Node`, `KnotNode`, `GroupingNode`, `StateNode`, `Connector`,
-   `PendingConnection`.
+6. **Containers & core controls** — 🔶 **In progress (Phase 6a).**
+   The reusable WPF templated-control bases (`ContentControl`/`HeaderedContentControl` with
+   `DefaultStyleKeyProperty` [record-only] + `FocusableProperty` + WPF accessors) are implemented
+   and build-verified (see the Phase 6a entry under **Done**), and `KnotNode` is ported.
+   Remaining controls each need their own increment because they pull in larger shim surfaces or
+   deferred dependencies:
+   - `Node`, `GroupingNode` — need `GroupStyle` + `ItemsControl.GroupStyle` (Avalonia has no
+     `GroupStyle`), `ContentPresenter.Content`/`ContentTemplate`, `Border.CornerRadius`,
+     `DataTemplate`, and `Style` shims.
+   - `ItemContainer`, `DecoratorContainer`, `ConnectionContainer` — editor-coupled
+     (`NodifyEditor`, `INodifyCanvasItem`, `IKeyboardFocusTarget<T>`, container `*State` classes,
+     `KeyboardNavigation` attached properties).
+   - `Connector`, `PendingConnection`, `StateNode` (derives from `Connector`) — connector stack;
+     `PendingConnection` also hosts the deferred `HotKeyAdorner`/`HotKeyControl`.
 7. **Editor** — `NodifyEditor` (+ partials), `NodifyCanvas`, `EditorCommands`.
 8. **Minimap** — `Minimap`, `MinimapItem`, `MinimapPanel`.
 9. **Theme** — rewrite `Themes\**\*.xaml` (WPF `ControlTemplate`s) into Avalonia

@@ -117,4 +117,20 @@
       Connectors\HotKeyControl.cs     (standalone Control, but uses DefaultStyleKey/template -> control phase)
   -->
 
+  <!--
+    Phase 6a: Foundational containers/nodes (logic-first; themes deferred to Phase 9).
+    The reusable WPF control bases are provided as compat shims under Compatibility\Wpf
+    (globbed automatically, no <Compile> link needed):
+      Compatibility\Wpf\Controls.cs  (System.Windows.Controls.ContentControl/HeaderedContentControl over
+                                      Avalonia, exposing DefaultStyleKeyProperty [record-only; theming
+                                      deferred] + FocusableProperty [wraps Avalonia InputElement.Focusable]
+                                      + WPF value accessors + OnPropertyChanged coercion/change routing).
+
+    Least-coupled control ported first, linked verbatim from upstream so it stays in sync:
+      Nodes\KnotNode.cs  (ContentControl + DefaultStyleKeyProperty/FocusableProperty overrides only)
+  -->
+  <ItemGroup Label="Nodify.Nodes (foundational, control-independent)">
+    <Compile Include="..\Nodify\Nodes\KnotNode.cs" Link="Nodes\KnotNode.cs" />
+  </ItemGroup>
+
 </Project>

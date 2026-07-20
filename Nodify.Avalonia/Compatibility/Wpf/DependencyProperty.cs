@@ -67,6 +67,24 @@ namespace System.Windows
             }
         }
 
+        /// <summary>
+        /// Wraps an already-existing Avalonia property (e.g. <c>InputElement.FocusableProperty</c>) in a WPF
+        /// <see cref="DependencyProperty"/> so upstream controls can call <see cref="OverrideMetadata"/> /
+        /// <see cref="AddOwner(Type)"/> against a built-in Avalonia property. Reuses the existing wrapper if
+        /// one was already created for the same Avalonia property.
+        /// </summary>
+        internal static DependencyProperty FromExisting(AvaloniaProperty avaloniaProperty, Type ownerType, PropertyMetadata? defaultMetadata = null)
+        {
+            DependencyProperty? existing = FromAvalonia(avaloniaProperty);
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            PropertyMetadata metadata = defaultMetadata ?? new FrameworkPropertyMetadata();
+            return new DependencyProperty(avaloniaProperty, avaloniaProperty.Name, avaloniaProperty.PropertyType, ownerType, metadata, avaloniaProperty.IsAttached);
+        }
+
         /// <summary>Returns the metadata that applies to <paramref name="forType"/> (most derived override wins).</summary>
         internal PropertyMetadata GetMetadata(Type forType)
         {
