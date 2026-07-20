@@ -126,6 +126,12 @@
                                       deferred] + FocusableProperty [wraps Avalonia InputElement.Focusable]
                                       + WPF value accessors + OnPropertyChanged coercion/change routing).
 
+    Phase 6b adds the reusable templating/styling/presenter primitives (also globbed):
+      GlobalUsings.cs                (DataTemplate/ControlTemplate/Style aliases -> Avalonia interfaces/Style)
+      Compatibility\Wpf\Controls.cs  (also System.Windows.Controls.ContentPresenter/Border shims exposing
+                                      Content/ContentTemplate/CornerRadius DP statics via DependencyProperty.FromExisting
+                                      so upstream AddOwner(...) works)
+
     Least-coupled control ported first, linked verbatim from upstream so it stays in sync:
       Nodes\KnotNode.cs  (ContentControl + DefaultStyleKeyProperty/FocusableProperty overrides only)
   -->

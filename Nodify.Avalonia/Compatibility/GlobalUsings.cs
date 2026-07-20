@@ -56,3 +56,15 @@ global using Orientation = Avalonia.Layout.Orientation;
 // NOTE: IMultiValueConverter is NOT aliased -- it has a different shape and is provided as a
 // WPF-shaped shim in Compatibility/Wpf/Converters.cs.
 global using IValueConverter = Avalonia.Data.Converters.IValueConverter;
+
+// Templating / styling reference types. Upstream Nodify uses these only as dependency-property
+// value types, cast targets, and opaque "template/style" handles (e.g. ContentTemplate,
+// ResizeThumbTemplate, ContentContainerStyle) -- never through WPF-only API -- so they map
+// straight onto Avalonia's equivalents:
+//   * WPF DataTemplate/ControlTemplate  -> Avalonia's template INTERFACES (the concrete
+//     Avalonia.Markup.Xaml.Templates.* live in a XAML assembly; the interfaces are the natural
+//     signature-compatible counterparts and keep this core library free of a XAML dependency).
+//   * WPF Style -> Avalonia.Styling.Style.
+global using DataTemplate = Avalonia.Controls.Templates.IDataTemplate;
+global using ControlTemplate = Avalonia.Controls.Templates.IControlTemplate;
+global using Style = Avalonia.Styling.Style;

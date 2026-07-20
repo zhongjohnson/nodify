@@ -30,6 +30,8 @@ using Avalonia;
 using AvContentControl = Avalonia.Controls.ContentControl;
 using AvHeaderedContentControl = Avalonia.Controls.Primitives.HeaderedContentControl;
 using AvInputElement = Avalonia.Input.InputElement;
+using AvContentPresenter = Avalonia.Controls.Presenters.ContentPresenter;
+using AvBorder = Avalonia.Controls.Border;
 
 namespace System.Windows.Controls
 {
@@ -134,5 +136,35 @@ namespace System.Windows.Controls
             base.OnPropertyChanged(change);
             DependencyPropertyServices.OnPropertyChanged(this, change);
         }
+    }
+
+    /// <summary>
+    /// WPF-compatible <see cref="ContentPresenter"/> over Avalonia's
+    /// <see cref="Avalonia.Controls.Presenters.ContentPresenter"/>. Upstream controls only reference
+    /// its dependency-property statics via <c>AddOwner(...)</c> (e.g. <c>StateNode</c> reuses
+    /// <c>ContentPresenter.ContentProperty</c>/<c>ContentTemplateProperty</c>); those statics wrap the
+    /// real Avalonia properties so binding/templating behave normally.
+    /// </summary>
+    public class ContentPresenter : AvContentPresenter
+    {
+        /// <summary>WPF <c>Content</c> property, wrapping Avalonia's <see cref="AvContentPresenter.ContentProperty"/>.</summary>
+        public static new readonly DependencyProperty ContentProperty =
+            DependencyProperty.FromExisting(AvContentPresenter.ContentProperty, typeof(ContentPresenter));
+
+        /// <summary>WPF <c>ContentTemplate</c> property, wrapping Avalonia's <see cref="AvContentPresenter.ContentTemplateProperty"/>.</summary>
+        public static new readonly DependencyProperty ContentTemplateProperty =
+            DependencyProperty.FromExisting(AvContentPresenter.ContentTemplateProperty, typeof(ContentPresenter));
+    }
+
+    /// <summary>
+    /// WPF-compatible <see cref="Border"/> over Avalonia's <see cref="Avalonia.Controls.Border"/>.
+    /// Upstream controls only reference <c>Border.CornerRadiusProperty</c> via <c>AddOwner(...)</c>
+    /// (e.g. <c>StateNode</c>), so the static wraps the real Avalonia property.
+    /// </summary>
+    public class Border : AvBorder
+    {
+        /// <summary>WPF <c>CornerRadius</c> property, wrapping Avalonia's <see cref="AvBorder.CornerRadiusProperty"/>.</summary>
+        public static new readonly DependencyProperty CornerRadiusProperty =
+            DependencyProperty.FromExisting(AvBorder.CornerRadiusProperty, typeof(Border));
     }
 }

@@ -159,6 +159,21 @@ two different UI frameworks.
   - **First control ported, linked verbatim from upstream:** `Nodes/KnotNode.cs`
     (`ContentControl` + `DefaultStyleKeyProperty`/`FocusableProperty` overrides only) — the
     least-coupled control, compiles unchanged against the new bases.
+- **Template / style / presenter primitives (Phase 6b)** — the reusable templating surface the
+  deferred templated controls (`Node`/`GroupingNode`/`StateNode`) consume:
+  - `GlobalUsings.cs` — aliases for the types used only as DP value types / cast targets:
+    `DataTemplate` -> `Avalonia.Controls.Templates.IDataTemplate`, `ControlTemplate` ->
+    `IControlTemplate`, `Style` -> `Avalonia.Styling.Style`. (Interfaces are used for the templates
+    so this core library stays free of a XAML-assembly dependency.)
+  - `Compatibility/Wpf/Controls.cs` — `System.Windows.Controls.ContentPresenter` (over Avalonia
+    `Presenters.ContentPresenter`) and `Border` (over Avalonia `Border`), each re-exposing the WPF
+    DP statics upstream reuses via `AddOwner(...)` — `ContentPresenter.ContentProperty`/
+    `ContentTemplateProperty` and `Border.CornerRadiusProperty` — wrapping the real Avalonia
+    `StyledProperty` fields through `DependencyProperty.FromExisting`.
+  - Verified by `Compatibility/_ShimValidation/ShimValidationTemplatedControl.cs`, a local control
+    that mirrors how `StateNode`/`Node`/`GroupingNode` consume these primitives (AddOwner of
+    `ContentTemplate`/`CornerRadius`, `DataTemplate`/`ControlTemplate`/`Style`-typed DPs,
+    `DefaultStyleKeyProperty`/`FocusableProperty` overrides).
 
 ### 🚧 Remaining work (per subsystem)
 
@@ -229,18 +244,20 @@ Port order is bottom-up so lower layers compile before the controls that use the
    - `HotKeyAdorner` (nested in `PendingConnection`) — hosts a `HotKeyControl` visual child and
      positions it with `Connector.Thumb.TranslatePoint(...)`. (`HotKeyControl` itself is a small
      standalone `Control` but uses `DefaultStyleKey`/a template, so it too is control-phase.)
-6. **Containers & core controls** — 🔶 **In progress (Phase 6a).**
+6. **Containers & core controls** — 🔶 **In progress (Phase 6a–6b).**
    The reusable WPF templated-control bases (`ContentControl`/`HeaderedContentControl` with
-   `DefaultStyleKeyProperty` [record-only] + `FocusableProperty` + WPF accessors) are implemented
-   and build-verified (see the Phase 6a entry under **Done**), and `KnotNode` is ported.
-   Remaining controls each need their own increment because they pull in larger shim surfaces or
-   deferred dependencies:
-   - `Node`, `GroupingNode` — need `GroupStyle` + `ItemsControl.GroupStyle` (Avalonia has no
-     `GroupStyle`), `ContentPresenter.Content`/`ContentTemplate`, `Border.CornerRadius`,
-     `DataTemplate`, and `Style` shims.
+   `DefaultStyleKeyProperty` [record-only] + `FocusableProperty` + WPF accessors) and the
+   template/style/presenter primitives (`DataTemplate`/`ControlTemplate`/`Style` aliases,
+   `ContentPresenter`/`Border` DP-owner shims) are implemented and build-verified (see the Phase
+   6a/6b entries under **Done**), and `KnotNode` is ported. Remaining controls each need their own
+   increment for their still-missing dependencies:
+   - `Node` — still needs `GroupStyle` + `ItemsControl.GroupStyle` (Avalonia has no `GroupStyle`);
+     the presenter/template/style primitives it uses are now available.
+   - `GroupingNode` — editor-coupled (`NodifyEditor`, `ItemContainer`, `Panel.ZIndex`,
+     `Thumb.Drag*` events/`DragDeltaEventHandler`, `EditorGestures`).
    - `ItemContainer`, `DecoratorContainer`, `ConnectionContainer` — editor-coupled
      (`NodifyEditor`, `INodifyCanvasItem`, `IKeyboardFocusTarget<T>`, container `*State` classes,
-     `KeyboardNavigation` attached properties).
+     `KeyboardNavigation` attached properties, `Selector.IsSelectedProperty`).
    - `Connector`, `PendingConnection`, `StateNode` (derives from `Connector`) — connector stack;
      `PendingConnection` also hosts the deferred `HotKeyAdorner`/`HotKeyControl`.
 7. **Editor** — `NodifyEditor` (+ partials), `NodifyCanvas`, `EditorCommands`.
