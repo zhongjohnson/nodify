@@ -137,6 +137,7 @@
   -->
   <ItemGroup Label="Nodify.Nodes (foundational, control-independent)">
     <Compile Include="..\Nodify\Nodes\KnotNode.cs" Link="Nodes\KnotNode.cs" />
+    <Compile Include="..\Nodify\Nodes\Node.cs" Link="Nodes\Node.cs" />
   </ItemGroup>
 
   <!--

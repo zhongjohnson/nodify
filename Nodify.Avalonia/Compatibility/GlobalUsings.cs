@@ -33,6 +33,11 @@ global using DependencyObject = Avalonia.AvaloniaObject;
 global using Color = Avalonia.Media.Color;
 global using Colors = Avalonia.Media.Colors;
 
+// WPF's System.Windows.Media.Brush maps onto Avalonia's brush abstraction. Upstream Nodify uses
+// Brush only as a dependency-property value type / property type (ContentBrush, HeaderBrush, ...),
+// never through WPF-only Brush API, so the interface is the natural signature-compatible counterpart.
+global using Brush = Avalonia.Media.IBrush;
+
 // Media reference types used by the ported utilities/controls. Avalonia's Geometry/Visual are
 // the natural equivalents of WPF's System.Windows.Media.Geometry / System.Windows.Media.Visual,
 // so they are aliased (they are used in signatures and generic constraints in the ported code).

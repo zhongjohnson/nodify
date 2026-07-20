@@ -27,6 +27,8 @@
 
 using System.Windows;
 using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using AvContentControl = Avalonia.Controls.ContentControl;
 using AvHeaderedContentControl = Avalonia.Controls.Primitives.HeaderedContentControl;
 using AvInputElement = Avalonia.Input.InputElement;
@@ -55,6 +57,23 @@ namespace System.Windows.Controls
         /// </summary>
         public static readonly DependencyProperty FocusableProperty =
             DependencyProperty.FromExisting(AvInputElement.FocusableProperty, typeof(WpfControlServices));
+    }
+
+    /// <summary>
+    /// Bridges WPF's <c>GetTemplateChild(string)</c> / no-arg <c>OnApplyTemplate()</c> template idiom onto
+    /// Avalonia's <see cref="TemplateAppliedEventArgs"/>-based <c>OnApplyTemplate(TemplateAppliedEventArgs)</c>.
+    /// Upstream controls (e.g. <c>Node</c>) override the WPF <c>OnApplyTemplate()</c> and resolve named template
+    /// parts via <c>GetTemplateChild(name)</c>; this captures the applied <see cref="INameScope"/> so those
+    /// lookups resolve against the real Avalonia template.
+    /// </summary>
+    internal static class WpfTemplateServices
+    {
+        /// <summary>Resolves a named template part from the last-applied name scope, mirroring WPF's <c>GetTemplateChild</c>.</summary>
+        public static object? GetTemplateChild(INameScope? nameScope, string childName)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(childName);
+            return nameScope?.Find(childName);
+        }
     }
 
     /// <summary>
@@ -110,6 +129,8 @@ namespace System.Windows.Controls
         /// <summary>WPF focusable property wrapping Avalonia's real <c>Focusable</c>.</summary>
         public static new readonly DependencyProperty FocusableProperty = WpfControlServices.FocusableProperty;
 
+        private INameScope? _templateNameScope;
+
         /// <summary>WPF-style value accessor. Shadows Avalonia's <c>GetValue(AvaloniaProperty)</c>.</summary>
         public object? GetValue(DependencyProperty property)
             => DependencyPropertyServices.GetValue(this, property);
@@ -136,6 +157,26 @@ namespace System.Windows.Controls
             base.OnPropertyChanged(change);
             DependencyPropertyServices.OnPropertyChanged(this, change);
         }
+
+        /// <summary>
+        /// Captures the applied template's name scope so WPF-style <see cref="GetTemplateChild"/> lookups
+        /// resolve, then invokes the WPF-style parameterless <see cref="OnApplyTemplate()"/> override.
+        /// </summary>
+        protected sealed override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
+            _templateNameScope = e.NameScope;
+            OnApplyTemplate();
+        }
+
+        /// <summary>WPF-style template-applied hook. Override this to resolve named parts via <see cref="GetTemplateChild"/>.</summary>
+        public virtual void OnApplyTemplate()
+        {
+        }
+
+        /// <summary>Resolves a named template part, mirroring WPF's <c>FrameworkElement.GetTemplateChild</c>.</summary>
+        protected object? GetTemplateChild(string childName)
+            => WpfTemplateServices.GetTemplateChild(_templateNameScope, childName);
     }
 
     /// <summary>

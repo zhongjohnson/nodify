@@ -189,6 +189,23 @@ two different UI frameworks.
     `RenderSize`), isolated behind `// PORT:` comments. This is the first control that lays out
     `INodifyCanvasItem`s and is a prerequisite for the editor's item host.
 
+- **Node control + templating/items bridge (Phase 6d)** — the reusable WPF templating and
+  items-host surface plus the first connector-hosting node control that uses it:
+  - `Compatibility/Wpf/Controls.cs` — the `HeaderedContentControl` shim now bridges WPF's
+    template idiom: it seals Avalonia's `OnApplyTemplate(TemplateAppliedEventArgs)`, captures the
+    applied `INameScope`, invokes the WPF-style parameterless `OnApplyTemplate()`, and exposes
+    `GetTemplateChild(name)` (resolves named parts via the captured name scope).
+  - `Compatibility/Wpf/ItemsControl.cs` — `System.Windows.Controls.ItemsControl` (over Avalonia
+    `ItemsControl`) plus a `System.Windows.Controls.GroupStyle` carrier. `GroupStyle` is a passive
+    placeholder today (item grouping is a theme/behavior concern deferred to a later phase); it
+    exists so `Node` can mirror its `InputGroupStyle`/`OutputGroupStyle` into `ItemsControl.GroupStyle`.
+  - `Compatibility/Wpf/AuthoringAttributes.cs` — inert `[TemplatePart]` / `[StyleTypedProperty]`
+    attribute shims (metadata only; no runtime behavior in WPF either).
+  - `GlobalUsings.cs` — `Brush` -> `Avalonia.Media.IBrush` (upstream uses `Brush` only as a
+    dependency-property value type).
+  - `Nodes/Node.cs` — **linked verbatim** from upstream (`HeaderedContentControl` with
+    `PART_Input`/`PART_Output` `ItemsControl` template parts).
+
 ### 🚧 Remaining work (per subsystem)
 
 Port order is bottom-up so lower layers compile before the controls that use them.
