@@ -153,4 +153,29 @@
     which is declared in the same upstream file.
   -->
 
+  <!--
+    Phase 6d: Node (input/output connector host). Reusable shims (globbed automatically):
+      Compatibility\Wpf\Controls.cs             (HeaderedContentControl now bridges WPF templating:
+                                                parameterless OnApplyTemplate() + GetTemplateChild(name), mapped from
+                                                Avalonia's OnApplyTemplate(TemplateAppliedEventArgs) via the applied INameScope)
+      Compatibility\Wpf\ItemsControl.cs         (System.Windows.Controls.ItemsControl over Avalonia ItemsControl +
+                                                GroupStyle carrier; grouping behavior deferred to theme phase)
+      Compatibility\Wpf\AuthoringAttributes.cs  (inert [TemplatePart]/[StyleTypedProperty] attributes; metadata only)
+      GlobalUsings.cs                           (Brush -> Avalonia.Media.IBrush)
+
+    Node is linked verbatim from upstream (in the Nodify.Nodes ItemGroup above).
+  -->
+
+  <!--
+    Phase 7a: Editor-core primitive shims (prep for the ItemContainer/NodifyEditor/Connector cluster,
+    whose controls are mutually coupled and must land together in a later phase). Reusable shims
+    (globbed automatically):
+      Compatibility\Wpf\SelectorAndStackPanel.cs  (System.Windows.Controls.Primitives.Selector.IsSelectedProperty
+                                                  over Avalonia SelectingItemsControl.IsSelected; and
+                                                  System.Windows.Controls.StackPanel.OrientationProperty over
+                                                  Avalonia StackPanel.Orientation -- both via FromExisting for AddOwner)
+      Compatibility\Wpf\Controls.cs               (HeaderedContentControl now also exposes Header/HeaderTemplate WPF
+                                                  DP statics via FromExisting so NodeInput/NodeOutput AddOwner(...) works)
+  -->
+
 </Project>

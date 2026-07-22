@@ -206,6 +206,23 @@ two different UI frameworks.
   - `Nodes/Node.cs` — **linked verbatim** from upstream (`HeaderedContentControl` with
     `PART_Input`/`PART_Output` `ItemsControl` template parts).
 
+- **Editor-core primitive shims (Phase 7a)** — the reusable WPF framework dependency-property
+  statics the editor-core cluster reuses via `AddOwner(...)`, landed ahead of the coupled controls
+  to preserve bottom-up order:
+  - `Compatibility/Wpf/SelectorAndStackPanel.cs` — `System.Windows.Controls.Primitives.Selector`
+    exposing `IsSelectedProperty` (over Avalonia's attached `SelectingItemsControl.IsSelected`,
+    used by `ItemContainer`), and `System.Windows.Controls.StackPanel` exposing `OrientationProperty`
+    (over Avalonia's `StackPanel.Orientation`, used by `NodeInput`/`NodeOutput`).
+  - `Compatibility/Wpf/Controls.cs` — the `HeaderedContentControl` shim now also exposes WPF
+    `Header`/`HeaderTemplate` DP statics (via `DependencyProperty.FromExisting`) so
+    `NodeInput`/`NodeOutput` `AddOwner(...)` calls compile.
+
+  > **Note:** the remaining node/connector/container controls (`ItemContainer`, `Connector` and its
+  > `NodeInput`/`NodeOutput`/`StateNode` subclasses, `DecoratorContainer`, `MinimapPanel`) all fan
+  > into `NodifyEditor` ↔ `ItemContainer` and the shared `InputProcessor` handlers, so they are
+  > mutually coupled and must land **together** in the editor-core phase rather than as small
+  > increments.
+
 ### 🚧 Remaining work (per subsystem)
 
 Port order is bottom-up so lower layers compile before the controls that use them.

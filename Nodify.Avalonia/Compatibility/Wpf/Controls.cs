@@ -129,6 +129,14 @@ namespace System.Windows.Controls
         /// <summary>WPF focusable property wrapping Avalonia's real <c>Focusable</c>.</summary>
         public static new readonly DependencyProperty FocusableProperty = WpfControlServices.FocusableProperty;
 
+        /// <summary>WPF <c>Header</c> property, wrapping Avalonia's <see cref="AvHeaderedContentControl.HeaderProperty"/>.</summary>
+        public static new readonly DependencyProperty HeaderProperty =
+            DependencyProperty.FromExisting(AvHeaderedContentControl.HeaderProperty, typeof(HeaderedContentControl));
+
+        /// <summary>WPF <c>HeaderTemplate</c> property, wrapping Avalonia's <see cref="AvHeaderedContentControl.HeaderTemplateProperty"/>.</summary>
+        public static new readonly DependencyProperty HeaderTemplateProperty =
+            DependencyProperty.FromExisting(AvHeaderedContentControl.HeaderTemplateProperty, typeof(HeaderedContentControl));
+
         private INameScope? _templateNameScope;
 
         /// <summary>WPF-style value accessor. Shadows Avalonia's <c>GetValue(AvaloniaProperty)</c>.</summary>
