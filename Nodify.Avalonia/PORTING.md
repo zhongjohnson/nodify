@@ -223,6 +223,19 @@ two different UI frameworks.
   > mutually coupled and must land **together** in the editor-core phase rather than as small
   > increments.
 
+- **FrameworkElement layout/input primitive surface (Phase 7b)** — the reusable WPF element members
+  the editor-core cluster (and the deferred `DragState`) call, landed on the `UIElement` shim ahead
+  of the coupled controls:
+  - `Compatibility/Wpf/FrameworkElement.cs` — added `SizeChangedInfo` plus, on `UIElement`:
+    `RenderSize` (over Avalonia `Bounds.Size`), an `OnRenderSizeChanged(SizeChangedInfo)` hook wired
+    from Avalonia's `SizeChanged`, `TranslatePoint(point, relativeTo)` and `IsAncestorOf(descendant)`
+    (over `Avalonia.VisualTree` extensions), and pointer-capture members `IsMouseCaptured` /
+    `CaptureMouse()` / `ReleaseMouseCapture()` (over the cached `InputStateTracker.Pointer`).
+  - `Compatibility/Wpf/Input/InputState.cs` — `Mouse.Captured` (over `IPointer.Captured`), used by
+    `DragState`'s capture checks.
+  - `GlobalUsings.cs` — `SizeChangedEventArgs` -> `Avalonia.Controls.SizeChangedEventArgs` (upstream
+    `SizeChanged` handlers use `e.NewSize`/`e.PreviousSize`).
+
 ### 🚧 Remaining work (per subsystem)
 
 Port order is bottom-up so lower layers compile before the controls that use them.

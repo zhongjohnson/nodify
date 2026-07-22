@@ -55,6 +55,11 @@ global using HorizontalAlignment = Avalonia.Layout.HorizontalAlignment;
 global using VerticalAlignment = Avalonia.Layout.VerticalAlignment;
 global using Orientation = Avalonia.Layout.Orientation;
 
+// WPF's System.Windows.SizeChangedEventArgs maps onto Avalonia's equivalent. Upstream size-changed
+// handlers (Connector/GroupingNode) use `(object sender, SizeChangedEventArgs e)` with `e.NewSize`/
+// `e.PreviousSize`, all of which Avalonia's type provides, so a straight alias is sufficient.
+global using SizeChangedEventArgs = Avalonia.Controls.SizeChangedEventArgs;
+
 // Single-value converter: Avalonia's IValueConverter is signature-compatible with WPF's,
 // so it is aliased rather than reshimmed (upstream converters that implement the WPF
 // System.Windows.Data.IValueConverter compile verbatim against Avalonia's interface).

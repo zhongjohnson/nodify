@@ -138,6 +138,9 @@ namespace System.Windows.Input
         /// <summary>Gets the state of the middle mouse button.</summary>
         public static MouseButtonState MiddleButton => InputStateTracker.MiddleButton;
 
+        /// <summary>Gets the element that currently has pointer capture, or <c>null</c> if none (WPF <c>Mouse.Captured</c>).</summary>
+        public static IInputElement? Captured => InputStateTracker.Pointer?.Captured;
+
         /// <summary>
         /// Returns the last-known pointer position relative to the specified element.
         /// </summary>

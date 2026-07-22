@@ -32,9 +32,31 @@ using System.Collections.Generic;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 
 namespace System.Windows
 {
+    /// <summary>
+    /// WPF-compatible <c>SizeChangedInfo</c>. Carries the new/previous render size for the
+    /// <see cref="UIElement.OnRenderSizeChanged"/> override, mirroring WPF's type. Only the members
+    /// used by upstream controls (<c>NewSize</c>/<c>PreviousSize</c>) are provided.
+    /// </summary>
+    public class SizeChangedInfo
+    {
+        /// <summary>Initializes a new instance of the <see cref="SizeChangedInfo"/> class.</summary>
+        public SizeChangedInfo(Size newSize, Size previousSize)
+        {
+            NewSize = newSize;
+            PreviousSize = previousSize;
+        }
+
+        /// <summary>Gets the new render size of the element.</summary>
+        public Size NewSize { get; }
+
+        /// <summary>Gets the previous render size of the element.</summary>
+        public Size PreviousSize { get; }
+    }
+
     /// <summary>
     /// WPF-compatible base for input-aware elements. Derives from Avalonia's
     /// <see cref="Control"/> so ported controls can inherit it, and hosts the WPF-shaped
@@ -42,6 +64,63 @@ namespace System.Windows
     /// </summary>
     public class UIElement : Control
     {
+        /// <summary>Bridges Avalonia's <see cref="Control.SizeChanged"/> to the WPF
+        /// <see cref="OnRenderSizeChanged"/> override so upstream layout code runs unchanged.</summary>
+        public UIElement()
+        {
+            SizeChanged += OnSizeChangedBridge;
+        }
+
+        private void OnSizeChangedBridge(object? sender, global::Avalonia.Controls.SizeChangedEventArgs e)
+            => OnRenderSizeChanged(new SizeChangedInfo(e.NewSize, e.PreviousSize));
+
+        /// <summary>WPF-compatible render size. Maps onto Avalonia's <see cref="Visual.Bounds"/> size.</summary>
+        public Size RenderSize => Bounds.Size;
+
+        /// <summary>
+        /// WPF-compatible <c>OnRenderSizeChanged</c> hook. Invoked from Avalonia's <c>SizeChanged</c>
+        /// event; override to react to size changes. The base implementation does nothing.
+        /// </summary>
+        protected virtual void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+        }
+
+        /// <summary>
+        /// WPF-compatible <c>TranslatePoint</c>. Transforms <paramref name="point"/> from this element's
+        /// coordinate space into <paramref name="relativeTo"/>'s, mirroring WPF's method (returns the
+        /// zero point if the elements are not connected in the visual tree).
+        /// </summary>
+        public Point TranslatePoint(Point point, Visual relativeTo)
+            => global::Avalonia.VisualExtensions.TranslatePoint(this, point, relativeTo) ?? default;
+
+        /// <summary>
+        /// WPF-compatible <c>IsAncestorOf</c>. Returns whether this element is a visual ancestor of
+        /// <paramref name="descendant"/>.
+        /// </summary>
+        public bool IsAncestorOf(Visual descendant)
+            => descendant != null && this.IsVisualAncestorOf(descendant);
+
+        /// <summary>Gets whether this element currently has the captured pointer (WPF <c>IsMouseCaptured</c>).</summary>
+        public bool IsMouseCaptured
+            => ReferenceEquals(InputStateTracker.Pointer?.Captured, this);
+
+        /// <summary>Captures the current pointer to this element (WPF <c>CaptureMouse</c>).</summary>
+        /// <returns>True if capture was acquired; otherwise false.</returns>
+        public bool CaptureMouse()
+        {
+            InputStateTracker.Pointer?.Capture(this);
+            return IsMouseCaptured;
+        }
+
+        /// <summary>Releases the pointer capture held by this element (WPF <c>ReleaseMouseCapture</c>).</summary>
+        public void ReleaseMouseCapture()
+        {
+            if (IsMouseCaptured)
+            {
+                InputStateTracker.Pointer?.Capture(null);
+            }
+        }
+
         /// <summary>WPF-style value accessor. Shadows Avalonia's <c>GetValue(AvaloniaProperty)</c> so
         /// unqualified <c>GetValue(dp)</c> in ported controls binds the WPF <see cref="DependencyProperty"/>.</summary>
         public object? GetValue(DependencyProperty property)

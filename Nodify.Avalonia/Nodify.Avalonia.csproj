@@ -110,7 +110,7 @@
                                      fa?ade over Avalonia.Controls.Primitives.AdornerLayer exposing WPF
                                      GetAdornerLayer/Add/Remove/Update).
 
-    The actual adorners stay DEFERRED to the control phase ¡ª they are private nested classes of
+    The actual adorners stay DEFERRED to the control phase â€” they are private nested classes of
     deferred controls and additionally need Pen / WPF geometry ops / HotKeyControl / Connector.Thumb:
       Connections\BaseConnection.cs   -> nested FocusVisualAdorner (Pen, Geometry.Combine/GetWidened/GetOutlined)
       Connectors\PendingConnection.cs -> nested HotKeyAdorner (hosts HotKeyControl, Connector.Thumb.TranslatePoint)
@@ -173,9 +173,21 @@
       Compatibility\Wpf\SelectorAndStackPanel.cs  (System.Windows.Controls.Primitives.Selector.IsSelectedProperty
                                                   over Avalonia SelectingItemsControl.IsSelected; and
                                                   System.Windows.Controls.StackPanel.OrientationProperty over
-                                                  Avalonia StackPanel.Orientation -- both via FromExisting for AddOwner)
+                                                  Avalonia StackPanel.Orientation - both via FromExisting for AddOwner)
       Compatibility\Wpf\Controls.cs               (HeaderedContentControl now also exposes Header/HeaderTemplate WPF
                                                   DP statics via FromExisting so NodeInput/NodeOutput AddOwner(...) works)
+  -->
+
+  <!--
+    Phase 7b: FrameworkElement layout/input primitive surface (also prep for the editor-core cluster
+    and the deferred DragState). Reusable shims (globbed automatically):
+      Compatibility\Wpf\FrameworkElement.cs   (UIElement gains RenderSize [over Bounds.Size],
+                                              OnRenderSizeChanged(SizeChangedInfo) wired from Avalonia SizeChanged,
+                                              TranslatePoint/IsAncestorOf [over Avalonia.VisualTree], and pointer-capture
+                                              IsMouseCaptured/CaptureMouse/ReleaseMouseCapture [over InputStateTracker.Pointer];
+                                              new SizeChangedInfo type)
+      Compatibility\Wpf\Input\InputState.cs   (Mouse.Captured over IPointer.Captured)
+      GlobalUsings.cs                          (SizeChangedEventArgs -> Avalonia.Controls.SizeChangedEventArgs)
   -->
 
 </Project>
