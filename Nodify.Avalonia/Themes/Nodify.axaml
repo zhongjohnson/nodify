@@ -1,0 +1,74 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:nodify="clr-namespace:Nodify;assembly=Nodify.Avalonia">
+  <!--
+    Minimal smoke-test theme for the Avalonia port.
+
+    Only properties that resolve to REAL Avalonia base-class properties are used here
+    (Background/BorderBrush/BorderThickness/Padding/Template/Content). The upstream
+    Nodify dependency properties (Location, ViewportTransform, Input, Output, Header,
+    ...) are exposed by the WPF compatibility shim as `DependencyProperty`, not
+    `AvaloniaProperty`, so compiled XAML cannot bind to them yet. Data-driven theming
+    that needs those is deferred until the shim surfaces them as AvaloniaProperties.
+  -->
+  <Style Selector="nodify|NodifyEditor">
+    <Setter Property="Background" Value="#1E1E1E" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                ClipToBounds="True">
+          <Grid>
+            <nodify:NodifyCanvas x:Name="PART_ItemsHost" />
+            <Canvas x:Name="PART_ConnectionsHost" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="nodify|Connector">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Ellipse x:Name="PART_Connector"
+                 Width="10"
+                 Height="10"
+                 Fill="#E6E6E6"
+                 Stroke="#222222"
+                 StrokeThickness="1" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="nodify|KnotNode">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Padding="6"
+                CornerRadius="4"
+                Background="#2A2A2A"
+                BorderBrush="#555555"
+                BorderThickness="1">
+          <ContentPresenter Content="{TemplateBinding Content}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="nodify|ItemContainer">
+    <Setter Property="Background" Value="#252526" />
+    <Setter Property="BorderBrush" Value="DodgerBlue" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Padding="{TemplateBinding Padding}"
+                CornerRadius="3">
+          <ContentPresenter Content="{TemplateBinding Content}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+</Styles>

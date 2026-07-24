@@ -16,7 +16,7 @@ namespace Nodify
     /// Represents a connector control that can start and complete a <see cref="PendingConnection"/>.
     /// Has a <see cref="ElementConnector"/> that the <see cref="Anchor"/> is calculated from for the <see cref="PendingConnection"/>. Center of this control is used if missing.
     /// </summary>
-    [TemplatePart(Name = ElementConnector, Type = typeof(FrameworkElement))]
+    [TemplatePart(Name = ElementConnector, Type = typeof(ConnectorElement))]
     public class Connector : Control
     {
         protected const string ElementConnector = "PART_Connector";

@@ -9,6 +9,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
+#if AVALONIA
+using ConnectionsHostElement = global::Avalonia.Controls.Control;
+#else
+using ConnectionsHostElement = System.Windows.FrameworkElement;
+#endif
 
 namespace Nodify
 {
@@ -29,7 +34,7 @@ namespace Nodify
     /// Groups <see cref="ItemContainer"/>s and <see cref="Connection"/>s in an area that you can drag, zoom and select.
     /// </summary>
     [TemplatePart(Name = ElementItemsHost, Type = typeof(Panel))]
-    [TemplatePart(Name = ElementConnectionsHost, Type = typeof(FrameworkElement))]
+    [TemplatePart(Name = ElementConnectionsHost, Type = typeof(ConnectionsHostElement))]
     [StyleTypedProperty(Property = nameof(ItemContainerStyle), StyleTargetType = typeof(ItemContainer))]
     [StyleTypedProperty(Property = nameof(DecoratorContainerStyle), StyleTargetType = typeof(DecoratorContainer))]
     [ContentProperty(nameof(Decorators))]

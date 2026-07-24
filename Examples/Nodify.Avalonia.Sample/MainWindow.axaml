@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:nodify="clr-namespace:Nodify;assembly=Nodify.Avalonia"
+        x:Class="Nodify.Avalonia.Sample.MainWindow"
+        Title="Nodify Avalonia Sample"
+        Width="1000"
+        Height="650"
+        MinWidth="640"
+        MinHeight="400">
+  <Grid>
+    <nodify:NodifyEditor x:Name="Editor" />
+
+    <Border HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Margin="16"
+            Padding="10,6"
+            CornerRadius="4"
+            Background="#CC111111">
+      <TextBlock Foreground="White" Text="Nodify.Avalonia 7.3.0 data-driven sample" />
+    </Border>
+  </Grid>
+</Window>

@@ -324,10 +324,27 @@ Port order is bottom-up so lower layers compile before the controls that use the
 7. **Editor** — 🔶 `NodifyCanvas` done (Phase 6c: copy-adapted + `Panel` shim). Remaining:
    `NodifyEditor` (+ partials), `EditorCommands`.
 8. **Minimap** — `Minimap`, `MinimapItem`, `MinimapPanel`.
-9. **Theme** — rewrite `Themes\**\*.xaml` (WPF `ControlTemplate`s) into Avalonia
-   `.axaml` control themes/`ResourceDictionary`s; expose an includable `Theme.axaml`.
-10. **Example app** — one runnable Avalonia desktop sample validating the controls
-    (e.g., a minimal editor with a few nodes + connections).
+9. **Theme** — 🔶 **Minimal smoke-test theme done (Phase 9).** `Themes/Nodify.axaml`
+    provides `ControlTemplate`s for `NodifyEditor`, `Connector`, `KnotNode`, and
+    `ItemContainer` using only properties that resolve to **real Avalonia base-class
+    properties** (`Background`/`BorderBrush`/`BorderThickness`/`Padding`/`Template`/
+    `Content`). Full data-driven templating (binding to upstream DPs such as
+    `ItemContainer.Location`, `NodifyEditor.ViewportTransform`, `Node.Input`/`Output`/
+    `Header`) is **deferred**: those DPs are exposed by the compatibility shim as
+    `DependencyProperty`, not `AvaloniaProperty`, so **compiled Avalonia XAML cannot
+    resolve them** in `Setter`/`TemplateBinding` (`MC3073`). Surfacing them as
+    `AvaloniaProperty`s (or providing an `AddOwner`-style bridge to real styled
+    properties) is a prerequisite for the richer theme and is tracked as its own work item.
+10. **Example app** — ✅ **Done (Phase 9); data-driven via code-behind (Phase 10).**
+     `Examples/Nodify.Avalonia.Sample` is a runnable Avalonia desktop app (`net8.0`,
+     `Avalonia.Desktop` + `FluentTheme` + the port's `Themes/Nodify.axaml`). It now binds
+     `NodifyEditor.ItemsSource` to `EditorViewModel.Nodes` and configures each generated
+     `ItemContainer` in the `ContainerPrepared` handler (`MainWindow.axaml.cs`), setting
+     `ItemContainer.Location` and building node content **from code using the public CLR
+     properties**. This sidesteps the compiled-XAML DP-binding limitation above: the shim
+     DPs are unusable in compiled `Setter`/`TemplateBinding`, but the same properties are
+     fully usable at runtime in C#. Full XAML-based data templating still depends on
+     surfacing those DPs as `AvaloniaProperty`s (tracked in item 9).
 
 ## Conventions for keeping merges tractable
 

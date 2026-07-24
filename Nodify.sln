@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodify.Workflow", "Examples
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodify.Avalonia", "Nodify.Avalonia\Nodify.Avalonia.csproj", "{7D1DD393-6021-4772-BFD9-0A5F708E05D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodify.Avalonia.Sample", "Examples\Nodify.Avalonia.Sample\Nodify.Avalonia.Sample.csproj", "{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,6 +134,18 @@ Global
 		{7D1DD393-6021-4772-BFD9-0A5F708E05D2}.Release|x64.Build.0 = Release|Any CPU
 		{7D1DD393-6021-4772-BFD9-0A5F708E05D2}.Release|x86.ActiveCfg = Release|Any CPU
 		{7D1DD393-6021-4772-BFD9-0A5F708E05D2}.Release|x86.Build.0 = Release|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Debug|x64.Build.0 = Debug|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Debug|x86.Build.0 = Debug|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Release|x64.ActiveCfg = Release|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Release|x64.Build.0 = Release|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Release|x86.ActiveCfg = Release|Any CPU
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,6 +157,7 @@ Global
 		{7ADD1DAF-B589-4742-8E72-872D2842E73D} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
 		{BAD92DB9-BDCA-4BB7-8F24-B7D3FE470476} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
 		{366E4499-057E-4D2E-9182-3CAAFA49C71A} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
+		{DBE09E55-ECFB-4E52-BAE9-4107B7EC6021} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9E59DB6-FB93-48F3-A8E0-1E549009E043}
