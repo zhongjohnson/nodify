@@ -561,7 +561,11 @@ namespace Nodify
         /// <summary>
         /// Gets the element that holds all the <see cref="BaseConnection"/>s and custom connections.
         /// </summary>
+#if AVALONIA
+        protected internal global::Avalonia.Controls.Control ConnectionsHost { get; private set; } = default!;
+#else
         protected internal UIElement ConnectionsHost { get; private set; } = default!;
+#endif
 
         /// <summary>
         /// Gets a list of all <see cref="ItemContainer"/>s.
@@ -638,7 +642,11 @@ namespace Nodify
             base.OnApplyTemplate();
 
             ItemsHost = GetTemplateChild(ElementItemsHost) as Panel ?? throw new InvalidOperationException($"{ElementItemsHost} is missing or is not of type Panel.");
+#if AVALONIA
+            ConnectionsHost = GetTemplateChild(ElementConnectionsHost) as global::Avalonia.Controls.Control ?? throw new InvalidOperationException($"{ElementConnectionsHost} is missing or is not a control.");
+#else
             ConnectionsHost = GetTemplateChild(ElementConnectionsHost) as UIElement ?? throw new InvalidOperationException($"{ElementConnectionsHost} is missing or is not of type UIElement.");
+#endif
 
             OnDisableAutoPanningChanged(DisableAutoPanning);
         }
@@ -673,12 +681,12 @@ namespace Nodify
         /// <summary>
         /// Zoom in at the viewport's center.
         /// </summary>
-        public void ZoomIn() => ZoomAtPosition(Math.Pow(2.0, 120.0 / 3.0 / Mouse.MouseWheelDeltaForOneLine), ViewportLocation + (Vector)ViewportSize / 2);
+        public void ZoomIn() => ZoomAtPosition(Math.Pow(2.0, 120.0 / 3.0 / Mouse.MouseWheelDeltaForOneLine), ViewportLocation + new Vector(ViewportSize.Width, ViewportSize.Height) / 2);
 
         /// <summary>
         /// Zoom out at the viewport's center.
         /// </summary>
-        public void ZoomOut() => ZoomAtPosition(Math.Pow(2.0, -120.0 / 3.0 / Mouse.MouseWheelDeltaForOneLine), ViewportLocation + (Vector)ViewportSize / 2);
+        public void ZoomOut() => ZoomAtPosition(Math.Pow(2.0, -120.0 / 3.0 / Mouse.MouseWheelDeltaForOneLine), ViewportLocation + new Vector(ViewportSize.Width, ViewportSize.Height) / 2);
 
         /// <summary>
         /// Zoom at the specified location in graph space coordinates.
@@ -716,7 +724,7 @@ namespace Nodify
         /// <remarks>Temporarily disables editor controls when animated.</remarks>
         public void BringIntoView(Point point, bool animated = true, Action? onFinish = null)
         {
-            Point newLocation = (Point)((Vector)point - (Vector)ViewportSize / 2);
+            Point newLocation = point - new Vector(ViewportSize.Width, ViewportSize.Height) / 2;
 
             if (animated && newLocation != ViewportLocation)
             {
@@ -724,7 +732,8 @@ namespace Nodify
                 SetCurrentValue(DisablePanningProperty, true);
                 SetCurrentValue(DisableZoomingProperty, true);
 
-                double distance = (newLocation - ViewportLocation).Length;
+                Vector locationDelta = newLocation - ViewportLocation;
+                double distance = Math.Sqrt(locationDelta.X * locationDelta.X + locationDelta.Y * locationDelta.Y);
                 double duration = distance / (BringIntoViewSpeed + (distance / 10)) * ViewportZoom;
                 duration = Math.Max(0.1, Math.Min(duration, BringIntoViewMaxDuration));
 
@@ -760,7 +769,11 @@ namespace Nodify
         {
             var viewport = new Rect(ViewportLocation, ViewportSize);
 
+#if AVALONIA
+            area = area.Inflate(offsetFromEdge);
+#else
             area.Inflate(offsetFromEdge, offsetFromEdge);
+#endif
 
             if (!viewport.Contains(area))
             {
@@ -827,7 +840,11 @@ namespace Nodify
         public void FitToScreen(Rect? area = null)
         {
             Rect extent = area ?? ItemsExtent;
+#if AVALONIA
+            extent = extent.Inflate(FitToScreenExtentMargin);
+#else
             extent.Inflate(FitToScreenExtentMargin, FitToScreenExtentMargin);
+#endif
 
             if (extent.Width > 0 && extent.Height > 0)
             {

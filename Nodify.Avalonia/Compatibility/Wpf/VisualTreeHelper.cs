@@ -48,6 +48,13 @@ namespace System.Windows.Media
             throw new ArgumentOutOfRangeException(nameof(childIndex));
         }
 
+        /// <summary>Gets the effective DPI scale for a visual.</summary>
+        public static DpiScale GetDpi(Visual visual)
+        {
+            double scale = Avalonia.Controls.TopLevel.GetTopLevel(visual)?.RenderScaling ?? 1d;
+            return new DpiScale(scale, scale);
+        }
+
         /// <summary>
         /// WPF-compatible callback-based hit test. Walks the visual subtree rooted at
         /// <paramref name="reference"/>, invoking <paramref name="filterCallback"/> to prune the

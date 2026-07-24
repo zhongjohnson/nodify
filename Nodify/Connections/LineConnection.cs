@@ -106,9 +106,9 @@ namespace Nodify
 
         protected static ((Point SegmentStart, Point SegmentEnd), Point InterpolatedPoint) InterpolateLine(Point p0, Point p1, Point p2, Point p3, double t)
         {
-            double length1 = (p1 - p0).Length;
-            double length2 = (p2 - p1).Length;
-            double length3 = (p3 - p2).Length;
+            double length1 = GetLength(p1 - p0);
+            double length2 = GetLength(p2 - p1);
+            double length3 = GetLength(p3 - p2);
             double totalLength = length1 + length2 + length3;
 
             double ratio1 = length1 / totalLength;
@@ -130,8 +130,8 @@ namespace Nodify
 
         protected static ((Point SegmentStart, Point SegmentEnd), Point InterpolatedPoint) InterpolateLine(Point p0, Point p1, Point p2, double t)
         {
-            double length1 = (p1 - p0).Length;
-            double length2 = (p2 - p1).Length;
+            double length1 = GetLength(p1 - p0);
+            double length2 = GetLength(p2 - p1);
             double totalLength = length1 + length2;
 
             double ratio1 = length1 / totalLength;
@@ -148,8 +148,8 @@ namespace Nodify
 
         protected static void AddSmoothCorner(StreamGeometryContext context, Point start, Point corner, Point end, double radius)
         {
-            double distAB = (corner - start).LengthSquared;
-            double distBC = (end - corner).LengthSquared;
+            double distAB = GetLengthSquared(corner - start);
+            double distBC = GetLengthSquared(end - corner);
 
             double bendSize = Math.Sqrt(Math.Min(distAB, distBC)) / 2;
             radius = Math.Min(bendSize, radius);
@@ -157,11 +157,13 @@ namespace Nodify
             Vector directionToCorner = corner - start;
             Vector directionFromCorner = end - corner;
 
-            if (directionToCorner.LengthSquared != 0)
-                directionToCorner.Normalize();
+            double directionToCornerLengthSquared = GetLengthSquared(directionToCorner);
+            if (directionToCornerLengthSquared != 0)
+                directionToCorner /= Math.Sqrt(directionToCornerLengthSquared);
 
-            if (directionFromCorner.LengthSquared != 0)
-                directionFromCorner.Normalize();
+            double directionFromCornerLengthSquared = GetLengthSquared(directionFromCorner);
+            if (directionFromCornerLengthSquared != 0)
+                directionFromCorner /= Math.Sqrt(directionFromCornerLengthSquared);
 
             Point curveStart = corner - directionToCorner * radius;
             Point curveEnd = corner + directionFromCorner * radius;
@@ -169,5 +171,11 @@ namespace Nodify
             context.LineTo(curveStart, true, true);
             context.QuadraticBezierTo(corner, curveEnd, true, true);
         }
+
+        private static double GetLength(Vector vector)
+            => Math.Sqrt(GetLengthSquared(vector));
+
+        private static double GetLengthSquared(Vector vector)
+            => vector.X * vector.X + vector.Y * vector.Y;
     }
 }

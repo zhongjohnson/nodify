@@ -4,6 +4,21 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+#if AVALONIA
+using AnimationElement = global::Avalonia.Controls.Control;
+#else
+using AnimationElement = System.Windows.UIElement;
+#endif
+#if AVALONIA
+using VisualElement = global::Avalonia.Controls.Control;
+#else
+using VisualElement = System.Windows.UIElement;
+#endif
+#if AVALONIA
+using FrameworkVisualElement = global::Avalonia.Controls.Control;
+#else
+using FrameworkVisualElement = System.Windows.FrameworkElement;
+#endif
 
 namespace Nodify
 {
@@ -62,13 +77,13 @@ namespace Nodify
             return default;
         }
 
-        public static T? GetElementAtPosition<T>(this UIElement container, Point position)
-            where T : UIElement
+        public static T? GetElementAtPosition<T>(this VisualElement container, Point position)
+            where T : VisualElement
         {
             T? result = default;
             VisualTreeHelper.HitTest(container, depObj =>
             {
-                if (depObj is UIElement elem && elem.IsHitTestVisible)
+                if (depObj is VisualElement elem && elem.IsHitTestVisible)
                 {
                     if (elem is T r)
                     {
@@ -93,12 +108,12 @@ namespace Nodify
             return result;
         }
 
-        public static List<FrameworkElement> GetIntersectingElements(this UIElement container, Geometry geometry, IReadOnlyCollection<Type> supportedTypes)
+        public static List<FrameworkVisualElement> GetIntersectingElements(this VisualElement container, Geometry geometry, IReadOnlyCollection<Type> supportedTypes)
         {
-            var result = new List<FrameworkElement>();
+            var result = new List<FrameworkVisualElement>();
             VisualTreeHelper.HitTest(container, depObj =>
             {
-                if (depObj is FrameworkElement elem && elem.IsHitTestVisible)
+                if (depObj is FrameworkVisualElement elem && elem.IsHitTestVisible)
                 {
                     if (supportedTypes.Contains(elem.GetType()))
                     {
@@ -111,14 +126,14 @@ namespace Nodify
                 return HitTestFilterBehavior.ContinueSkipSelfAndChildren;
             }, hitResult =>
             {
-                result.Add((FrameworkElement)hitResult.VisualHit);
+                result.Add((FrameworkVisualElement)hitResult.VisualHit);
                 return HitTestResultBehavior.Continue;
             }, new GeometryHitTestParameters(geometry));
 
             return result;
         }
 
-        public static IEnumerable<T> GetIntersectingElements<T>(this UIElement container, Rect area, Func<T, Rect> getBounds)
+        public static IEnumerable<T> GetIntersectingElements<T>(this VisualElement container, Rect area, Func<T, Rect> getBounds)
             where T : Visual
         {
             var stack = new Stack<DependencyObject>();
@@ -150,7 +165,7 @@ namespace Nodify
 
         #region Animation
 
-        public static void StartAnimation(this UIElement animatableElement, DependencyProperty dependencyProperty, Point toValue, double animationDurationSeconds, EventHandler? completedEvent = null)
+        public static void StartAnimation(this AnimationElement animatableElement, DependencyProperty dependencyProperty, Point toValue, double animationDurationSeconds, EventHandler? completedEvent = null)
         {
             var fromValue = (Point)animatableElement.GetValue(dependencyProperty);
 
@@ -174,7 +189,7 @@ namespace Nodify
             animatableElement.BeginAnimation(dependencyProperty, animation);
         }
 
-        public static void StartAnimation(this UIElement animatableElement, DependencyProperty dependencyProperty, double toValue, double animationDurationSeconds, EventHandler? completedEvent = null)
+        public static void StartAnimation(this AnimationElement animatableElement, DependencyProperty dependencyProperty, double toValue, double animationDurationSeconds, EventHandler? completedEvent = null)
         {
             var fromValue = (double)animatableElement.GetValue(dependencyProperty);
 
@@ -198,7 +213,7 @@ namespace Nodify
             animatableElement.BeginAnimation(dependencyProperty, animation);
         }
 
-        public static void StartLoopingAnimation(this UIElement animatableElement, DependencyProperty dependencyProperty, double toValue, double durationInSeconds)
+        public static void StartLoopingAnimation(this AnimationElement animatableElement, DependencyProperty dependencyProperty, double toValue, double durationInSeconds)
         {
             var fromValue = (double)animatableElement.GetValue(dependencyProperty);
 
@@ -215,7 +230,7 @@ namespace Nodify
             animatableElement.BeginAnimation(dependencyProperty, animation);
         }
 
-        public static void CancelAnimation(this UIElement animatableElement, DependencyProperty dependencyProperty)
+        public static void CancelAnimation(this AnimationElement animatableElement, DependencyProperty dependencyProperty)
             => animatableElement.BeginAnimation(dependencyProperty, null);
 
         #endregion

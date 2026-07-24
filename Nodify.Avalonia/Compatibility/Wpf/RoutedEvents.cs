@@ -87,6 +87,9 @@ namespace System.Windows
     /// </summary>
     public class RoutedEventArgs : AvRoutedEventArgs
     {
+        /// <summary>Gets the original event source. The compatibility layer preserves the routed source.</summary>
+        public object? OriginalSource => Source;
+
         public RoutedEventArgs()
         {
         }

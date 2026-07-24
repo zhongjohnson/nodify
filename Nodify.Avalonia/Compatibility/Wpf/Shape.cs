@@ -28,59 +28,107 @@
 // -----------------------------------------------------------------------------
 
 using System.Windows;
-using AvShape = Avalonia.Controls.Shapes.Shape;
+using System.Windows.Media;
+using AvGeometry = Avalonia.Media.Geometry;
 
 namespace System.Windows.Shapes
 {
     /// <summary>
-    /// WPF-compatible base for path-drawing shapes. Derives from Avalonia's
-    /// <see cref="Avalonia.Controls.Shapes.Shape"/> and adapts the geometry build hook and render
-    /// entry point so upstream shapes can override <c>DefiningGeometry</c> and <see cref="OnRender"/>
-    /// unchanged.
+    /// WPF-compatible base for path-drawing shapes. Derives from the compat
+    /// <see cref="FrameworkElement"/> (mirroring WPF's <c>Shape : FrameworkElement</c>) so
+    /// <c>BaseConnection</c> satisfies the interactivity constraint <c>TElement : FrameworkElement</c>,
+    /// and adapts the geometry build hook and render entry point so upstream shapes override
+    /// <c>DefiningGeometry</c> and <see cref="OnRender"/> unchanged.
     /// </summary>
-    public abstract class Shape : AvShape
+    public abstract class Shape : FrameworkElement
     {
-        /// <summary>WPF-style value accessor. Shadows Avalonia's <c>GetValue(AvaloniaProperty)</c> so
-        /// unqualified <c>GetValue(dp)</c> in upstream shapes binds the WPF <see cref="DependencyProperty"/>.</summary>
-        public object? GetValue(DependencyProperty property)
-            => DependencyPropertyServices.GetValue(this, property);
+        /// <summary>WPF default style key dependency property.</summary>
+        public static readonly DependencyProperty DefaultStyleKeyProperty =
+            System.Windows.Controls.WpfControlServices.DefaultStyleKeyProperty;
 
-        /// <summary>WPF-style value setter for a <see cref="DependencyProperty"/>.</summary>
-        public void SetValue(DependencyProperty property, object? value)
-            => DependencyPropertyServices.SetValue(this, property, value);
+        /// <summary>WPF hit-test-visible dependency property.</summary>
+        public static new readonly DependencyProperty IsHitTestVisibleProperty =
+            DependencyProperty.FromExisting(Avalonia.Input.InputElement.IsHitTestVisibleProperty, typeof(Shape));
 
-        /// <summary>WPF-style value setter for a read-only <see cref="DependencyPropertyKey"/>.</summary>
-        public void SetValue(DependencyPropertyKey key, object? value)
-            => DependencyPropertyServices.SetValue(this, key, value);
+        /// <summary>WPF enabled dependency property.</summary>
+        public static new readonly DependencyProperty IsEnabledProperty =
+            DependencyProperty.FromExisting(Avalonia.Input.InputElement.IsEnabledProperty, typeof(Shape));
 
-        /// <summary>WPF-style local-value setter (no coercion re-entry) for a <see cref="DependencyProperty"/>.</summary>
-        public void SetCurrentValue(DependencyProperty property, object? value)
-            => DependencyPropertyServices.SetCurrentValue(this, property, value);
+        /// <summary>WPF <c>Stroke</c> dependency property (brush used to draw the outline).</summary>
+        public static readonly DependencyProperty StrokeProperty =
+            DependencyProperty.Register(nameof(Stroke), typeof(Avalonia.Media.IBrush), typeof(Shape), new FrameworkPropertyMetadata(null));
 
-        /// <summary>WPF-style value clear for a <see cref="DependencyProperty"/>.</summary>
-        public void ClearValue(DependencyProperty property)
-            => DependencyPropertyServices.ClearValue(this, property);
+        /// <summary>WPF <c>Fill</c> dependency property (brush used to fill the interior).</summary>
+        public static readonly DependencyProperty FillProperty =
+            DependencyProperty.Register(nameof(Fill), typeof(Avalonia.Media.IBrush), typeof(Shape), new FrameworkPropertyMetadata(null));
+
+        /// <summary>WPF <c>StrokeThickness</c> dependency property.</summary>
+        public static readonly DependencyProperty StrokeThicknessProperty =
+            DependencyProperty.Register(nameof(StrokeThickness), typeof(double), typeof(Shape), new FrameworkPropertyMetadata(1d));
+
+        /// <summary>WPF <c>StrokeDashArray</c> dependency property.</summary>
+        public static readonly DependencyProperty StrokeDashArrayProperty =
+            DependencyProperty.Register(nameof(StrokeDashArray), typeof(DoubleCollection), typeof(Shape), new FrameworkPropertyMetadata(null));
+
+        /// <summary>Gets or sets the brush used to draw the shape's outline.</summary>
+        public Avalonia.Media.IBrush? Stroke
+        {
+            get => (Avalonia.Media.IBrush?)GetValue(StrokeProperty);
+            set => SetValue(StrokeProperty, value);
+        }
+
+        /// <summary>Gets or sets the brush used to fill the shape's interior.</summary>
+        public Avalonia.Media.IBrush? Fill
+        {
+            get => (Avalonia.Media.IBrush?)GetValue(FillProperty);
+            set => SetValue(FillProperty, value);
+        }
+
+        /// <summary>Gets or sets the width of the shape's outline.</summary>
+        public double StrokeThickness
+        {
+            get => (double)GetValue(StrokeThicknessProperty)!;
+            set => SetValue(StrokeThicknessProperty, value);
+        }
+
+        /// <summary>Gets or sets the pattern of dashes and gaps used to draw the outline.</summary>
+        public DoubleCollection? StrokeDashArray
+        {
+            get => (DoubleCollection?)GetValue(StrokeDashArrayProperty);
+            set => SetValue(StrokeDashArrayProperty, value);
+        }
 
         /// <summary>
-        /// WPF-style buildable geometry. Shadows Avalonia's non-virtual <c>DefiningGeometry</c> so
-        /// upstream shapes can <c>override</c> it to build their path. The base returns <see langword="null"/>.
+        /// WPF-style buildable geometry upstream shapes override to build their path. The base
+        /// returns <see langword="null"/>.
         /// </summary>
-        protected new virtual Geometry? DefiningGeometry => null;
+        protected virtual AvGeometry? DefiningGeometry => null;
 
         /// <summary>
-        /// Avalonia's abstract geometry build hook, bridged to the WPF-style <see cref="DefiningGeometry"/>
-        /// so Avalonia's sealed render draws the built path with Stroke/Fill.
+        /// Bridges Avalonia's render pass to the WPF <see cref="OnRender"/> hook so upstream shapes
+        /// render unchanged.
         /// </summary>
-        protected override Geometry? CreateDefiningGeometry() => DefiningGeometry;
+        public sealed override void Render(DrawingContext context) => OnRender(context);
 
         /// <summary>
-        /// WPF-style render callback that upstream shapes override to draw decorations on top of the
-        /// geometry. Avalonia already draws the geometry (via <see cref="CreateDefiningGeometry"/>), so the
-        /// base is a no-op; wiring the extra drawing into a render pass is deferred to the control phase.
+        /// WPF-style render callback. The base draws the built <see cref="DefiningGeometry"/> with
+        /// <see cref="Fill"/>/<see cref="Stroke"/>; upstream overrides draw decorations on top and call
+        /// <c>base.OnRender</c>.
         /// </summary>
         /// <param name="drawingContext">The drawing context to render into.</param>
         protected virtual void OnRender(DrawingContext drawingContext)
         {
+            AvGeometry? geometry = DefiningGeometry;
+            if (geometry is null)
+            {
+                return;
+            }
+
+            Avalonia.Media.IPen? pen = Stroke is null
+                ? null
+                : new Avalonia.Media.Pen(Stroke, StrokeThickness);
+
+            drawingContext.DrawGeometry(Fill, pen, geometry);
         }
     }
 }

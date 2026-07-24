@@ -9,7 +9,11 @@ namespace Nodify.Interactivity
     /// </summary>
     /// <typeparam name="TElement">The type of the associated FrameworkElement.</typeparam>
     public partial class InputElementStateStack<TElement> : IInputHandler
+#if AVALONIA
+        where TElement : global::Avalonia.Controls.Control
+#else
         where TElement : FrameworkElement
+#endif
     {
         private readonly Stack<IInputElementState> _states = new Stack<IInputElementState>();
 

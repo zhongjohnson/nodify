@@ -111,6 +111,9 @@ namespace System.Windows.Input
         /// <summary>Gets the set of modifier keys currently pressed.</summary>
         public static ModifierKeys Modifiers => InputStateTracker.Modifiers;
 
+        /// <summary>Gets the currently focused element when available.</summary>
+        public static IInputElement? FocusedElement { get; internal set; }
+
         /// <summary>Determines whether the specified key is currently pressed.</summary>
         /// <param name="key">The key to test.</param>
         public static bool IsKeyDown(Key key) => InputStateTracker.IsKeyDown(key);
@@ -118,6 +121,27 @@ namespace System.Windows.Input
         /// <summary>Determines whether the specified key is currently released.</summary>
         /// <param name="key">The key to test.</param>
         public static bool IsKeyUp(Key key) => !InputStateTracker.IsKeyDown(key);
+    }
+
+    /// <summary>Marker for keyboard-initiated input.</summary>
+    public sealed class KeyboardDevice
+    {
+    }
+
+    /// <summary>WPF-compatible most-recent-input-device tracker.</summary>
+    public sealed class InputManager
+    {
+        private static readonly InputManager Instance = new InputManager();
+
+        private InputManager()
+        {
+        }
+
+        /// <summary>Gets the process-wide input manager.</summary>
+        public static InputManager Current => Instance;
+
+        /// <summary>Gets the most recently observed input device.</summary>
+        public object? MostRecentInputDevice { get; internal set; }
     }
 
     /// <summary>WPF-compatible ambient mouse state.</summary>

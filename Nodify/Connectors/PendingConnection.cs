@@ -8,6 +8,11 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+#if AVALONIA
+using ConnectionElement = global::Avalonia.Controls.Control;
+#else
+using ConnectionElement = System.Windows.FrameworkElement;
+#endif
 
 namespace Nodify
 {
@@ -189,16 +194,16 @@ namespace Nodify
         /// </summary>
         public static readonly DependencyProperty IsOverElementProperty = DependencyProperty.RegisterAttached("IsOverElement", typeof(bool), typeof(PendingConnection), new FrameworkPropertyMetadata(BoxValue.False));
 
-        internal static bool GetAllowOnlyConnectorsAttached(UIElement elem)
+        internal static bool GetAllowOnlyConnectorsAttached(ConnectionElement elem)
             => (bool)elem.GetValue(AllowOnlyConnectorsAttachedProperty);
 
-        internal static void SetAllowOnlyConnectorsAttached(UIElement elem, bool value)
+        internal static void SetAllowOnlyConnectorsAttached(ConnectionElement elem, bool value)
             => elem.SetValue(AllowOnlyConnectorsAttachedProperty, value);
 
-        public static bool GetIsOverElement(UIElement elem)
+        public static bool GetIsOverElement(ConnectionElement elem)
             => (bool)elem.GetValue(IsOverElementProperty);
 
-        public static void SetIsOverElement(UIElement elem, bool value)
+        public static void SetIsOverElement(ConnectionElement elem, bool value)
             => elem.SetValue(IsOverElementProperty, value);
 
         private static void OnAllowOnlyConnectorsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -270,7 +275,7 @@ namespace Nodify
         /// </summary>
         protected NodifyEditor? Editor { get; private set; }
 
-        private FrameworkElement? _connectionTarget;
+        private ConnectionElement? _connectionTarget;
         private Connector? _hotKeysSource;
         private readonly List<HotKeyAdorner> _hotKeysAdorners = new List<HotKeyAdorner>();
         private AdornerLayer? _adornerLayer;
@@ -357,7 +362,7 @@ namespace Nodify
                 }
 
                 // Look for a potential connector
-                FrameworkElement? target = FindConnectionTarget(TargetAnchor);
+            ConnectionElement? target = FindConnectionTarget(TargetAnchor);
 
                 // Update the connector's anchor and snap to it, if snapping is enabled
                 if (EnableSnapping && target is Connector connector)
@@ -407,7 +412,7 @@ namespace Nodify
         /// <summary>
         /// Sets the connection target and updates the visual state of the target element.
         /// </summary>
-        private void SetConnectionTarget(FrameworkElement? target)
+        private void SetConnectionTarget(ConnectionElement? target)
         {
             if (target == _connectionTarget)
             {
@@ -430,7 +435,7 @@ namespace Nodify
         /// <summary>
         /// Searches for a potential <see cref="Connector"/> or <see cref="ItemContainer"/> at the specified position within the editor.
         /// </summary>
-        public FrameworkElement? FindConnectionTarget(Point position)
+        public ConnectionElement? FindConnectionTarget(Point position)
         {
             if (Editor != null)
             {
@@ -499,7 +504,11 @@ namespace Nodify
 
                 var possibleTargets = connectorsInViewport
                     .Where(x => isEditorConnect ? connectCommand.CanExecute((sourceConnector.DataContext, x.DataContext)) : connectCommand.CanExecute(x.DataContext))
-                    .OrderBy(x => (sourceConnector.Anchor - x.Anchor).LengthSquared)
+                    .OrderBy(x =>
+                    {
+                        Vector distance = sourceConnector.Anchor - x.Anchor;
+                        return distance.X * distance.X + distance.Y * distance.Y;
+                    })
                     .Take((int)Math.Min(MaxHotKeys, 9));
 
                 var adorners = possibleTargets.Select((x, i) => new HotKeyAdorner(x, i + 1));
@@ -546,7 +555,7 @@ namespace Nodify
         /// <br /> - The provided <see cref="NodifyEditor"/> itself if neither a <see cref="Connector"/> nor an <see cref="ItemContainer" /> is found, and <paramref name="allowOnlyConnectors"/> is true.
         /// <br /> - Null if no valid element is identified at the specified position.
         /// </returns>
-        internal static FrameworkElement? GetPotentialConnector(NodifyEditor editor, Point position, bool allowOnlyConnectors)
+        internal static ConnectionElement? GetPotentialConnector(NodifyEditor editor, Point position, bool allowOnlyConnectors)
         {
             Connector? connector = editor.ItemsHost.GetElementAtPosition<Connector>(position);
             if (connector != null && connector.Editor == editor)
@@ -571,7 +580,7 @@ namespace Nodify
         /// <returns>
         /// Returns a <see cref="Connector"/>, an <see cref="ItemContainer"/>, the <see cref="NodifyEditor"/>, or null.
         /// </returns>
-        internal static FrameworkElement? GetPotentialConnector(NodifyEditor editor, Point position)
+        internal static ConnectionElement? GetPotentialConnector(NodifyEditor editor, Point position)
             => GetPotentialConnector(editor, position, GetAllowOnlyConnectorsAttached(editor));
 
         #endregion
@@ -598,7 +607,11 @@ namespace Nodify
                 AddVisualChild(_hotKeyControl);
                 AddLogicalChild(_hotKeyControl);
 
+#if AVALONIA
+                _offset = global::Avalonia.VisualExtensions.TranslatePoint(connector.Thumb, new Point(0, 0), connector) ?? default;
+#else
                 _offset = connector.Thumb.TranslatePoint(new Point(0, 0), connector);
+#endif
             }
 
             protected override int VisualChildrenCount => 1;

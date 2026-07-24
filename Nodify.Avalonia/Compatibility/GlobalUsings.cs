@@ -42,13 +42,27 @@ global using Brush = Avalonia.Media.IBrush;
 // the natural equivalents of WPF's System.Windows.Media.Geometry / System.Windows.Media.Visual,
 // so they are aliased (they are used in signatures and generic constraints in the ported code).
 global using Geometry = Avalonia.Media.Geometry;
+global using LineGeometry = Avalonia.Media.LineGeometry;
 global using Visual = Avalonia.Visual;
+global using Pen = Avalonia.Media.Pen;
+global using DashStyle = Avalonia.Media.DashStyle;
+global using Typeface = Avalonia.Media.Typeface;
+global using FontFamily = Avalonia.Media.FontFamily;
+global using FontStyle = Avalonia.Media.FontStyle;
+global using FontWeight = Avalonia.Media.FontWeight;
+global using FontStretch = Avalonia.Media.FontStretch;
+global using FlowDirection = Avalonia.Media.FlowDirection;
 
 // Avalonia's DrawingContext is the render-time drawing surface, equivalent to WPF's
 // System.Windows.Media.DrawingContext. It is aliased so the ported shapes' OnRender(DrawingContext)
 // signatures match Avalonia's Render(DrawingContext); WPF-only draw helpers that Avalonia lacks
 // (e.g. DrawRoundedRectangle) are provided as extension methods in Compatibility/Wpf/DrawingContext.cs.
 global using DrawingContext = Avalonia.Media.DrawingContext;
+global using Transform = Avalonia.Media.Transform;
+global using TransformGroup = Avalonia.Media.TransformGroup;
+global using TranslateTransform = Avalonia.Media.TranslateTransform;
+global using ScaleTransform = Avalonia.Media.ScaleTransform;
+global using DragEventArgs = Avalonia.Input.DragEventArgs;
 
 // Layout enums (identical members between WPF and Avalonia).
 global using HorizontalAlignment = Avalonia.Layout.HorizontalAlignment;
@@ -59,6 +73,16 @@ global using Orientation = Avalonia.Layout.Orientation;
 // handlers (Connector/GroupingNode) use `(object sender, SizeChangedEventArgs e)` with `e.NewSize`/
 // `e.PreviousSize`, all of which Avalonia's type provides, so a straight alias is sufficient.
 global using SizeChangedEventArgs = Avalonia.Controls.SizeChangedEventArgs;
+
+// WPF selection facade types. Upstream uses ItemCollection only as `.Count` + indexer, and
+// SelectionChangedEventArgs only as the OnSelectionChanged parameter with AddedItems/RemovedItems --
+// both signature-compatible with Avalonia's types, so straight aliases are sufficient.
+global using ItemCollection = Avalonia.Controls.ItemCollection;
+global using SelectionChangedEventArgs = Avalonia.Controls.SelectionChangedEventArgs;
+
+// WPF's System.Windows.Input.KeyboardNavigationMode has the same members as Avalonia's, so the enum
+// is aliased (upstream uses KeyboardNavigationMode.None in keyboard-navigation metadata overrides).
+global using KeyboardNavigationMode = Avalonia.Input.KeyboardNavigationMode;
 
 // Single-value converter: Avalonia's IValueConverter is signature-compatible with WPF's,
 // so it is aliased rather than reshimmed (upstream converters that implement the WPF

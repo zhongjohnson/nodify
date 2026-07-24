@@ -9,7 +9,11 @@ namespace Nodify.Interactivity
     /// </summary>
     /// <typeparam name="TElement">The type of <see cref="FrameworkElement"/> that owns the state.</typeparam>
     public abstract class DragState<TElement> : InputElementState<TElement>, IInputHandler
+#if AVALONIA
+        where TElement : global::Avalonia.Controls.Control
+#else
         where TElement : FrameworkElement
+#endif
     {
         private enum InteractionState
         {
@@ -217,7 +221,8 @@ namespace Nodify.Interactivity
             if (HasContextMenu && e is MouseButtonEventArgs mbe && mbe.ChangedButton == MouseButton.Right)
             {
                 double dragThreshold = NodifyEditor.MouseActionSuppressionThreshold * NodifyEditor.MouseActionSuppressionThreshold;
-                double dragDistance = (mbe.GetPosition(PositionElement) - _initialPosition).LengthSquared;
+                Vector dragDelta = mbe.GetPosition(PositionElement) - _initialPosition;
+                double dragDistance = dragDelta.X * dragDelta.X + dragDelta.Y * dragDelta.Y;
 
                 if (dragDistance > dragThreshold)
                 {
@@ -275,14 +280,22 @@ namespace Nodify.Interactivity
         /// <param name="e">The <see cref="InputEventArgs"/> representing the input event.</param>
         /// <remarks>Must return true if the input is already captured by the current element.</remarks>
         protected virtual bool CanCaptureInput(InputEventArgs e)
+#if AVALONIA
+            => Mouse.Captured == null || WpfInputBridge.IsMouseCaptured(Element);
+#else
             => Mouse.Captured == null || Element.IsMouseCaptured;
+#endif
 
         /// <summary>
         /// Captures input for the element.
         /// </summary>
         /// <param name="e">The <see cref="InputEventArgs"/> representing the input event.</param>
         protected virtual void CaptureInput(InputEventArgs e)
+#if AVALONIA
+            => WpfInputBridge.CaptureMouse(Element);
+#else
             => Element.CaptureMouse();
+#endif
 
         /// <summary>
         /// Determines whether input capture has been lost.

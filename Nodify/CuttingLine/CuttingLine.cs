@@ -1,6 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
+#if AVALONIA
+using CuttingElement = global::Avalonia.Controls.Control;
+#else
+using CuttingElement = System.Windows.UIElement;
+#endif
 
 namespace Nodify
 {
@@ -14,10 +19,10 @@ namespace Nodify
         /// </summary>
         public static readonly DependencyProperty IsOverElementProperty = PendingConnection.IsOverElementProperty.AddOwner(typeof(CuttingLine));
 
-        public static bool GetIsOverElement(UIElement elem)
+        public static bool GetIsOverElement(CuttingElement elem)
             => (bool)elem.GetValue(IsOverElementProperty);
 
-        public static void SetIsOverElement(UIElement elem, bool value)
+        public static void SetIsOverElement(CuttingElement elem, bool value)
             => elem.SetValue(IsOverElementProperty, value);
 
         /// <summary>

@@ -190,4 +190,113 @@
       GlobalUsings.cs                          (SizeChangedEventArgs -> Avalonia.Controls.SizeChangedEventArgs)
   -->
 
+  <!--
+    Phase 8: Editor-core cluster. These upstream controls are mutually coupled (InputProcessor.Shared
+    references NodifyEditor/ItemContainer/Connector/Minimap/BaseConnection), so the whole remaining
+    control surface + its interactivity state machine is linked together. Linked verbatim from
+    upstream so they stay in sync; shim gaps are resolved in the Compatibility layer.
+  -->
+  <ItemGroup Label="Nodify.Interactivity (control-coupled handlers)">
+    <Compile Include="..\Nodify\Interactivity\InputProcessor.Shared.cs" Link="Interactivity\InputProcessor.Shared.cs" />
+    <Compile Include="..\Nodify\Interactivity\DragState.cs" Link="Interactivity\DragState.cs" />
+    <Compile Include="..\Nodify\Interactivity\InputElementStateStack.DragState.cs" Link="Interactivity\InputElementStateStack.DragState.cs" />
+    <Compile Include="..\Nodify\Interactivity\KeyboardNavigation\IKeyboardNavigationLayer.cs" Link="Interactivity\KeyboardNavigation\IKeyboardNavigationLayer.cs" />
+    <Compile Include="..\Nodify\Interactivity\KeyboardNavigation\LinearFocusNavigator.cs" Link="Interactivity\KeyboardNavigation\LinearFocusNavigator.cs" />
+    <Compile Include="..\Nodify\Interactivity\KeyboardNavigation\StatefulFocusNavigator.cs" Link="Interactivity\KeyboardNavigation\StatefulFocusNavigator.cs" />
+    <Compile Include="..\Nodify\Interactivity\KeyboardNavigation\DirectionalFocusNavigator.cs" Link="Interactivity\KeyboardNavigation\DirectionalFocusNavigator.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.Containers">
+    <Compile Include="..\Nodify\Containers\ItemContainer.cs" Link="Containers\ItemContainer.cs" />
+    <Compile Include="..\Nodify\Containers\DecoratorContainer.cs" Link="Containers\DecoratorContainer.cs" />
+    <Compile Include="..\Nodify\Containers\DecoratorsControl.cs" Link="Containers\DecoratorsControl.cs" />
+    <Compile Include="..\Nodify\Containers\Events\PreviewLocationChanged.cs" Link="Containers\Events\PreviewLocationChanged.cs" />
+    <Compile Include="..\Nodify\Containers\States\ContainerState.cs" Link="Containers\States\ContainerState.cs" />
+    <Compile Include="..\Nodify\Containers\States\Default.cs" Link="Containers\States\Default.cs" />
+    <Compile Include="..\Nodify\Containers\States\Dragging.cs" Link="Containers\States\Dragging.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.Editor">
+    <Compile Include="..\Nodify\Editor\NodifyEditor.cs" Link="Editor\NodifyEditor.cs" />
+    <Compile Include="..\Nodify\Editor\NodifyEditor.Panning.cs" Link="Editor\NodifyEditor.Panning.cs" />
+    <Compile Include="..\Nodify\Editor\NodifyEditor.PushingItems.cs" Link="Editor\NodifyEditor.PushingItems.cs" />
+    <Compile Include="..\Nodify\Editor\NodifyEditor.Scrolling.cs" Link="Editor\NodifyEditor.Scrolling.cs" />
+    <Compile Include="..\Nodify\Editor\NodifyEditor.Selecting.cs" Link="Editor\NodifyEditor.Selecting.cs" />
+    <Compile Include="..\Nodify\Editor\NodifyEditor.Cutting.cs" Link="Editor\NodifyEditor.Cutting.cs" />
+    <Compile Include="..\Nodify\Editor\NodifyEditor.Dragging.cs" Link="Editor\NodifyEditor.Dragging.cs" />
+    <Compile Include="..\Nodify\Editor\NodifyEditor.KeyboardNavigation.cs" Link="Editor\NodifyEditor.KeyboardNavigation.cs" />
+    <Compile Include="..\Nodify\Editor\EditorCommands.cs" Link="Editor\EditorCommands.cs" />
+    <Compile Include="..\Nodify\Editor\Events\ItemsMovedEventArgs.cs" Link="Editor\Events\ItemsMovedEventArgs.cs" />
+    <Compile Include="..\Nodify\Editor\Utilities\PushItemsStrategy.cs" Link="Editor\Utilities\PushItemsStrategy.cs" />
+    <Compile Include="..\Nodify\Editor\Utilities\DraggingOptimized.cs" Link="Editor\Utilities\DraggingOptimized.cs" />
+    <Compile Include="..\Nodify\Editor\Utilities\DraggingSimple.cs" Link="Editor\Utilities\DraggingSimple.cs" />
+    <Compile Include="..\Nodify\Editor\Utilities\AlignmentExtensions.cs" Link="Editor\Utilities\AlignmentExtensions.cs" />
+    <Compile Include="..\Nodify\Editor\States\EditorState.cs" Link="Editor\States\EditorState.cs" />
+    <Compile Include="..\Nodify\Editor\States\Cutting.cs" Link="Editor\States\Cutting.cs" />
+    <Compile Include="..\Nodify\Editor\States\KeyboardNavigation.cs" Link="Editor\States\KeyboardNavigation.cs" />
+    <Compile Include="..\Nodify\Editor\States\Panning.cs" Link="Editor\States\Panning.cs" />
+    <Compile Include="..\Nodify\Editor\States\Zooming.cs" Link="Editor\States\Zooming.cs" />
+    <Compile Include="..\Nodify\Editor\States\PushingItems.cs" Link="Editor\States\PushingItems.cs" />
+    <Compile Include="..\Nodify\Editor\States\Selecting.cs" Link="Editor\States\Selecting.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.Connectors">
+    <Compile Include="..\Nodify\Connectors\Connector.cs" Link="Connectors\Connector.cs" />
+    <Compile Include="..\Nodify\Connectors\PendingConnection.cs" Link="Connectors\PendingConnection.cs" />
+    <Compile Include="..\Nodify\Connectors\HotKeyControl.cs" Link="Connectors\HotKeyControl.cs" />
+    <Compile Include="..\Nodify\Connectors\Events\ConnectorEventArgs.cs" Link="Connectors\Events\ConnectorEventArgs.cs" />
+    <Compile Include="..\Nodify\Connectors\Events\PendingConnectionEventArgs.cs" Link="Connectors\Events\PendingConnectionEventArgs.cs" />
+    <Compile Include="..\Nodify\Connectors\States\ConnectorState.cs" Link="Connectors\States\ConnectorState.cs" />
+    <Compile Include="..\Nodify\Connectors\States\Default.cs" Link="Connectors\States\Default.cs" />
+    <Compile Include="..\Nodify\Connectors\States\Connecting.cs" Link="Connectors\States\Connecting.cs" />
+    <Compile Include="..\Nodify\Connectors\States\Disconnect.cs" Link="Connectors\States\Disconnect.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.Connections">
+    <Compile Include="..\Nodify\Connections\BaseConnection.cs" Link="Connections\BaseConnection.cs" />
+    <Compile Include="..\Nodify\Connections\Connection.cs" Link="Connections\Connection.cs" />
+    <Compile Include="..\Nodify\Connections\CircuitConnection.cs" Link="Connections\CircuitConnection.cs" />
+    <Compile Include="..\Nodify\Connections\StepConnection.cs" Link="Connections\StepConnection.cs" />
+    <Compile Include="..\Nodify\Connections\LineConnection.cs" Link="Connections\LineConnection.cs" />
+    <Compile Include="..\Nodify\Connections\ConnectionContainer.cs" Link="Connections\ConnectionContainer.cs" />
+    <Compile Include="..\Nodify\Connections\ConnectionsMultiSelector.cs" Link="Connections\ConnectionsMultiSelector.cs" />
+    <Compile Include="..\Nodify\Connections\Events\ConnectionEventArgs.cs" Link="Connections\Events\ConnectionEventArgs.cs" />
+    <Compile Include="..\Nodify\Connections\States\ConnectionState.cs" Link="Connections\States\ConnectionState.cs" />
+    <Compile Include="..\Nodify\Connections\States\Split.cs" Link="Connections\States\Split.cs" />
+    <Compile Include="..\Nodify\Connections\States\Disconnect.cs" Link="Connections\States\Disconnect.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.CuttingLine">
+    <Compile Include="..\Nodify\CuttingLine\CuttingLine.cs" Link="CuttingLine\CuttingLine.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.Minimap">
+    <Compile Include="..\Nodify\Minimap\Minimap.cs" Link="Minimap\Minimap.cs" />
+    <Compile Include="..\Nodify\Minimap\MinimapItem.cs" Link="Minimap\MinimapItem.cs" />
+    <Compile Include="..\Nodify\Minimap\MinimapPanel.cs" Link="Minimap\MinimapPanel.cs" />
+    <Compile Include="..\Nodify\Minimap\SubtractConverter.cs" Link="Minimap\SubtractConverter.cs" />
+    <Compile Include="..\Nodify\Minimap\Events\ZoomEventArgs.cs" Link="Minimap\Events\ZoomEventArgs.cs" />
+    <Compile Include="..\Nodify\Minimap\States\MinimapState.cs" Link="Minimap\States\MinimapState.cs" />
+    <Compile Include="..\Nodify\Minimap\States\Panning.cs" Link="Minimap\States\Panning.cs" />
+    <Compile Include="..\Nodify\Minimap\States\Zooming.cs" Link="Minimap\States\Zooming.cs" />
+    <Compile Include="..\Nodify\Minimap\States\KeyboardNavigation.cs" Link="Minimap\States\KeyboardNavigation.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.Nodes (Phase 8)">
+    <Compile Include="..\Nodify\Nodes\StateNode.cs" Link="Nodes\StateNode.cs" />
+    <Compile Include="..\Nodify\Nodes\GroupingNode.cs" Link="Nodes\GroupingNode.cs" />
+    <Compile Include="..\Nodify\Nodes\NodeInput.cs" Link="Nodes\NodeInput.cs" />
+    <Compile Include="..\Nodify\Nodes\NodeOutput.cs" Link="Nodes\NodeOutput.cs" />
+    <Compile Include="..\Nodify\Nodes\Events\ResizeEventArgs.cs" Link="Nodes\Events\ResizeEventArgs.cs" />
+  </ItemGroup>
+
+  <ItemGroup Label="Nodify.Utilities (Phase 8)">
+    <Compile Include="..\Nodify\Utilities\SelectionHelper.cs" Link="Utilities\SelectionHelper.cs" />
+    <Compile Include="..\Nodify\Utilities\EditorGesturesExtensions.cs" Link="Utilities\EditorGesturesExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Events\" />
+  </ItemGroup>
+
 </Project>

@@ -149,7 +149,7 @@ namespace Nodify
             return new Point((p3.X + p2.X - text.Width) / 2, (p3.Y + p2.Y - text.Height) / 2);
 
             static Vector GetMax(in Vector a, in Vector b)
-                => a.LengthSquared > b.LengthSquared ? a : b;
+                => a.X * a.X + a.Y * a.Y > b.X * b.X + b.Y * b.Y ? a : b;
         }
 
         protected override void DrawDirectionalArrowsGeometry(StreamGeometryContext context, Point source, Point target)

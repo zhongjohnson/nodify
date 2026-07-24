@@ -3,6 +3,11 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+#if AVALONIA
+using CuttableElement = global::Avalonia.Controls.Control;
+#else
+using CuttableElement = System.Windows.FrameworkElement;
+#endif
 using System.Diagnostics;
 using Nodify.Interactivity;
 
@@ -118,7 +123,7 @@ namespace Nodify
         /// </summary>
         public static readonly HashSet<Type> CuttingConnectionTypes = new HashSet<Type>();
 
-        private List<FrameworkElement>? _cuttingLinePreviousConnections;
+        private List<CuttableElement>? _cuttingLinePreviousConnections;
         private readonly LineGeometry _cuttingLineGeometry = new LineGeometry();
 
         /// <summary>
@@ -228,7 +233,7 @@ namespace Nodify
             IsCutting = false;
         }
 
-        private static void RemoveSupportedConnections(List<FrameworkElement> connections)
+        private static void RemoveSupportedConnections(List<CuttableElement> connections)
         {
             foreach (var connection in connections)
             {

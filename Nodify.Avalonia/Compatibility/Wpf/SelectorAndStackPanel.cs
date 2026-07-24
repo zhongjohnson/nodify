@@ -1,34 +1,17 @@
 // -----------------------------------------------------------------------------
-//  WPF selector / stack-panel primitive shims
+//  WPF stack-panel primitive shim
 // -----------------------------------------------------------------------------
-//  The editor-core controls reuse a few WPF framework dependency-property statics via
-//  AddOwner(...):
-//    * ItemContainer:      Selector.IsSelectedProperty
-//    * NodeInput/NodeOutput: StackPanel.OrientationProperty
-//  Avalonia exposes the equivalent properties on different types (the attached
-//  SelectingItemsControl.IsSelected and StackPanel.Orientation), so these shims re-expose
-//  them as WPF-shaped DP statics wrapping the real Avalonia properties (via
-//  DependencyProperty.FromExisting) so upstream AddOwner(...) works unchanged.
+//  Upstream NodeInput/NodeOutput reference StackPanel.OrientationProperty via AddOwner(...).
+//  Avalonia exposes the equivalent on Avalonia.Controls.StackPanel, so this re-exposes it as a
+//  WPF-shaped DP static wrapping the real Avalonia property (via DependencyProperty.FromExisting)
+//  so upstream AddOwner(...) works unchanged.
+//
+//  NOTE: the WPF Selector/MultiSelector control bases and the Selector.IsSelected attached
+//  property live in Compatibility\Wpf\Selection.cs (Phase 8a).
 // -----------------------------------------------------------------------------
 
 using System.Windows;
-using AvSelectingItemsControl = Avalonia.Controls.Primitives.SelectingItemsControl;
 using AvStackPanel = Avalonia.Controls.StackPanel;
-
-namespace System.Windows.Controls.Primitives
-{
-    /// <summary>
-    /// WPF-compatible <see cref="Selector"/> exposing the <c>IsSelected</c> attached dependency property.
-    /// Upstream <c>ItemContainer</c> only references <c>Selector.IsSelectedProperty</c> via <c>AddOwner(...)</c>;
-    /// this wraps Avalonia's real attached <see cref="AvSelectingItemsControl.IsSelectedProperty"/>.
-    /// </summary>
-    public static class Selector
-    {
-        /// <summary>WPF <c>IsSelected</c> attached property, wrapping Avalonia's <see cref="AvSelectingItemsControl.IsSelectedProperty"/>.</summary>
-        public static readonly DependencyProperty IsSelectedProperty =
-            DependencyProperty.FromExisting(AvSelectingItemsControl.IsSelectedProperty, typeof(Selector));
-    }
-}
 
 namespace System.Windows.Controls
 {

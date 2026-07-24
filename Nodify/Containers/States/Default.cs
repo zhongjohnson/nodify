@@ -73,7 +73,8 @@ namespace Nodify.Interactivity
                 protected override void OnMouseMove(MouseEventArgs e)
                 {
                     double dragThreshold = NodifyEditor.MouseActionSuppressionThreshold * NodifyEditor.MouseActionSuppressionThreshold;
-                    double dragDistance = (Element.Editor.MouseLocation - _initialPosition).LengthSquared;
+                    Vector dragDelta = Element.Editor.MouseLocation - _initialPosition;
+                    double dragDistance = dragDelta.X * dragDelta.X + dragDelta.Y * dragDelta.Y;
 
                     if (_isDragging && (dragDistance > dragThreshold))
                     {

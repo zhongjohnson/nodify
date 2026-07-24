@@ -6,7 +6,11 @@ using System.Windows.Input;
 namespace Nodify.Interactivity
 {
     internal readonly struct LinearFocusNavigator<TElement>
+#if AVALONIA
+        where TElement : global::Avalonia.Controls.Control, IKeyboardFocusTarget<TElement>
+#else
         where TElement : UIElement, IKeyboardFocusTarget<TElement>
+#endif
     {
         private enum LinearNavigationDirection
         {

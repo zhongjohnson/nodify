@@ -32,6 +32,8 @@ namespace System.Windows.Controls
     /// </summary>
     public class Panel : AvPanel
     {
+        /// <summary>Gets or sets the WPF cache-mode carrier.</summary>
+        public object? CacheMode { get; set; }
         /// <summary>WPF <c>ZIndex</c> attached property, wrapping Avalonia's <see cref="AvVisual.ZIndexProperty"/>.</summary>
         public static readonly DependencyProperty ZIndexProperty =
             DependencyProperty.FromExisting(AvVisual.ZIndexProperty, typeof(Panel));

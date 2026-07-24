@@ -36,6 +36,39 @@ using Avalonia.VisualTree;
 
 namespace System.Windows
 {
+    /// <summary>WPF-compatible visibility states.</summary>
+    public enum Visibility
+    {
+        /// <summary>The element is visible.</summary>
+        Visible,
+
+        /// <summary>The element is hidden but retains layout space.</summary>
+        Hidden,
+
+        /// <summary>The element is hidden and excluded from layout.</summary>
+        Collapsed
+    }
+
+    /// <summary>WPF-compatible DPI scale value.</summary>
+    public readonly struct DpiScale
+    {
+        /// <summary>Initializes a DPI scale.</summary>
+        public DpiScale(double dpiScaleX, double dpiScaleY)
+        {
+            DpiScaleX = dpiScaleX;
+            DpiScaleY = dpiScaleY;
+        }
+
+        /// <summary>Gets the horizontal scale.</summary>
+        public double DpiScaleX { get; }
+
+        /// <summary>Gets the vertical scale.</summary>
+        public double DpiScaleY { get; }
+
+        /// <summary>Gets pixels per device-independent pixel.</summary>
+        public double PixelsPerDip => DpiScaleY;
+    }
+
     /// <summary>
     /// WPF-compatible <c>SizeChangedInfo</c>. Carries the new/previous render size for the
     /// <see cref="UIElement.OnRenderSizeChanged"/> override, mirroring WPF's type. Only the members
@@ -76,6 +109,18 @@ namespace System.Windows
 
         /// <summary>WPF-compatible render size. Maps onto Avalonia's <see cref="Visual.Bounds"/> size.</summary>
         public Size RenderSize => Bounds.Size;
+
+        /// <summary>Gets the rendered width.</summary>
+        public double ActualWidth => Bounds.Width;
+
+        /// <summary>Gets the rendered height.</summary>
+        public double ActualHeight => Bounds.Height;
+
+        /// <summary>Gets whether this element currently has keyboard focus.</summary>
+        public bool IsKeyboardFocused => IsFocused;
+
+        /// <summary>Occurs when a mouse button is pressed over this element.</summary>
+        public event System.Windows.Input.MouseButtonEventHandler? MouseDown;
 
         /// <summary>
         /// WPF-compatible <c>OnRenderSizeChanged</c> hook. Invoked from Avalonia's <c>SizeChanged</c>
@@ -119,6 +164,105 @@ namespace System.Windows
             {
                 InputStateTracker.Pointer?.Capture(null);
             }
+        }
+
+        /// <summary>WPF mouse-down hook.</summary>
+        protected virtual void OnMouseDown(System.Windows.Input.MouseButtonEventArgs e)
+        {
+        }
+
+        /// <summary>WPF mouse-up hook.</summary>
+        protected virtual void OnMouseUp(System.Windows.Input.MouseButtonEventArgs e)
+        {
+        }
+
+        /// <summary>WPF mouse-move hook.</summary>
+        protected virtual void OnMouseMove(System.Windows.Input.MouseEventArgs e)
+        {
+        }
+
+        /// <summary>WPF mouse-wheel hook.</summary>
+        protected virtual void OnMouseWheel(System.Windows.Input.MouseWheelEventArgs e)
+        {
+        }
+
+        /// <summary>WPF lost-mouse-capture hook.</summary>
+        protected virtual void OnLostMouseCapture(System.Windows.Input.MouseEventArgs e)
+        {
+        }
+
+        /// <summary>WPF key-down hook.</summary>
+        protected virtual void OnKeyDown(System.Windows.Input.KeyEventArgs e)
+        {
+        }
+
+        /// <summary>WPF key-up hook.</summary>
+        protected virtual void OnKeyUp(System.Windows.Input.KeyEventArgs e)
+        {
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerPressed(Avalonia.Input.PointerPressedEventArgs e)
+        {
+            base.OnPointerPressed(e);
+            System.Windows.Input.MouseButtonEventArgs args = WpfInputBridge.CreateMouseButtonEvent(this, e);
+            OnMouseDown(args);
+            MouseDown?.Invoke(this, args);
+            WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerReleased(Avalonia.Input.PointerReleasedEventArgs e)
+        {
+            base.OnPointerReleased(e);
+            System.Windows.Input.MouseButtonEventArgs args = WpfInputBridge.CreateMouseButtonEvent(this, e);
+            OnMouseUp(args);
+            WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerMoved(Avalonia.Input.PointerEventArgs e)
+        {
+            base.OnPointerMoved(e);
+            System.Windows.Input.MouseEventArgs args = WpfInputBridge.CreateMouseMoveEvent(this, e);
+            OnMouseMove(args);
+            WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerWheelChanged(Avalonia.Input.PointerWheelEventArgs e)
+        {
+            base.OnPointerWheelChanged(e);
+            System.Windows.Input.MouseWheelEventArgs args = WpfInputBridge.CreateMouseWheelEvent(this, e);
+            OnMouseWheel(args);
+            WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerCaptureLost(Avalonia.Input.PointerCaptureLostEventArgs e)
+        {
+            base.OnPointerCaptureLost(e);
+            System.Windows.Input.MouseEventArgs args = WpfInputBridge.CreateLostMouseCaptureEvent(this, e.Pointer, e.Source);
+            OnLostMouseCapture(args);
+            WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            System.Windows.Input.KeyEventArgs args = WpfInputBridge.CreateKeyEvent(e, true);
+            OnKeyDown(args);
+            WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            System.Windows.Input.KeyEventArgs args = WpfInputBridge.CreateKeyEvent(e, false);
+            OnKeyUp(args);
+            WpfInputBridge.CopyHandled(args, e);
         }
 
         /// <summary>WPF-style value accessor. Shadows Avalonia's <c>GetValue(AvaloniaProperty)</c> so
@@ -240,6 +384,12 @@ namespace System.Windows.Input
         public KeyboardFocusChangedEventArgs()
         {
         }
+
+        /// <summary>Gets or sets the element that previously held focus.</summary>
+        public IInputElement? OldFocus { get; set; }
+
+        /// <summary>Gets or sets the element that now holds focus.</summary>
+        public IInputElement? NewFocus { get; set; }
     }
 
     /// <summary>WPF-compatible keyboard-focus-changed event handler.</summary>

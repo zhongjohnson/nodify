@@ -89,6 +89,78 @@ namespace System.Windows.Controls
         /// <summary>WPF focusable property wrapping Avalonia's real <c>Focusable</c>.</summary>
         public static new readonly DependencyProperty FocusableProperty = WpfControlServices.FocusableProperty;
 
+        /// <summary>WPF hit-test-visible dependency property.</summary>
+        public static new readonly DependencyProperty IsHitTestVisibleProperty =
+            DependencyProperty.FromExisting(Avalonia.Input.InputElement.IsHitTestVisibleProperty, typeof(ContentControl));
+
+        /// <summary>WPF enabled dependency property.</summary>
+        public static new readonly DependencyProperty IsEnabledProperty =
+            DependencyProperty.FromExisting(Avalonia.Input.InputElement.IsEnabledProperty, typeof(ContentControl));
+
+        /// <summary>WPF preview key-up routed event identity.</summary>
+        public static readonly RoutedEvent PreviewKeyUpEvent = UIElement.PreviewKeyUpEvent;
+
+        /// <summary>Record-only WPF focus visual style property.</summary>
+        public static readonly DependencyProperty FocusVisualStyleProperty =
+            DependencyProperty.Register(nameof(FocusVisualStyle), typeof(Style), typeof(ContentControl), new FrameworkPropertyMetadata(null));
+
+        private INameScope? _templateNameScope;
+
+        /// <summary>Initializes layout and loaded-event bridging.</summary>
+        public ContentControl()
+        {
+            base.Loaded += (_, _) => Loaded?.Invoke(this, new RoutedEventArgs { Source = this });
+            base.Unloaded += (_, _) => Unloaded?.Invoke(this, new RoutedEventArgs { Source = this });
+            SizeChanged += (_, e) => OnRenderSizeChanged(new SizeChangedInfo(e.NewSize, e.PreviousSize));
+        }
+
+        /// <summary>Occurs when the control is attached to the visual tree.</summary>
+        public new event RoutedEventHandler? Loaded;
+
+        /// <summary>Occurs when the control is detached from the visual tree.</summary>
+        public new event RoutedEventHandler? Unloaded;
+
+        /// <summary>Gets the current rendered size.</summary>
+        public Size RenderSize => Bounds.Size;
+
+        /// <summary>Gets the rendered width.</summary>
+        public double ActualWidth => Bounds.Width;
+
+        /// <summary>Gets the rendered height.</summary>
+        public double ActualHeight => Bounds.Height;
+
+        /// <summary>Gets whether this control currently has keyboard focus.</summary>
+        public bool IsKeyboardFocused => IsFocused;
+
+        /// <summary>Gets or sets WPF visibility through Avalonia's IsVisible property.</summary>
+        public Visibility Visibility
+        {
+            get => IsVisible ? Visibility.Visible : Visibility.Collapsed;
+            set => IsVisible = value == Visibility.Visible;
+        }
+
+        /// <summary>Gets or sets the focus visual style carrier.</summary>
+        public Style? FocusVisualStyle
+        {
+            get => (Style?)GetValue(FocusVisualStyleProperty);
+            set => SetValue(FocusVisualStyleProperty, value);
+        }
+
+        /// <summary>Gets whether this control owns pointer capture.</summary>
+        public bool IsMouseCaptured => global::System.Windows.Input.WpfInputBridge.IsMouseCaptured(this);
+
+        /// <summary>Captures the current pointer.</summary>
+        public bool CaptureMouse() => global::System.Windows.Input.WpfInputBridge.CaptureMouse(this);
+
+        /// <summary>Releases pointer capture.</summary>
+        public void ReleaseMouseCapture()
+        {
+            if (IsMouseCaptured)
+            {
+                global::System.Windows.Input.InputStateTracker.Pointer?.Capture(null);
+            }
+        }
+
         /// <summary>WPF-style value accessor. Shadows Avalonia's <c>GetValue(AvaloniaProperty)</c>.</summary>
         public object? GetValue(DependencyProperty property)
             => DependencyPropertyServices.GetValue(this, property);
@@ -115,6 +187,122 @@ namespace System.Windows.Controls
             base.OnPropertyChanged(change);
             DependencyPropertyServices.OnPropertyChanged(this, change);
         }
+
+        /// <inheritdoc />
+        protected sealed override void OnApplyTemplate(TemplateAppliedEventArgs e)
+        {
+            base.OnApplyTemplate(e);
+            _templateNameScope = e.NameScope;
+            OnApplyTemplate();
+        }
+
+        /// <summary>WPF parameterless template-applied hook.</summary>
+        public virtual void OnApplyTemplate()
+        {
+        }
+
+        /// <summary>Resolves a named template child.</summary>
+        protected object? GetTemplateChild(string childName)
+            => WpfTemplateServices.GetTemplateChild(_templateNameScope, childName);
+
+        /// <summary>WPF render-size-changed hook.</summary>
+        protected virtual void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+        }
+
+        /// <summary>WPF visual-parent-changed hook.</summary>
+        protected virtual void OnVisualParentChanged(DependencyObject oldParent)
+        {
+        }
+
+        /// <summary>WPF keyboard-focus-property-changed hook.</summary>
+        protected virtual void OnIsKeyboardFocusedChanged(DependencyPropertyChangedEventArgs e)
+        {
+        }
+
+        /// <summary>WPF mouse-down hook.</summary>
+        protected virtual void OnMouseDown(global::System.Windows.Input.MouseButtonEventArgs e) { }
+
+        /// <summary>WPF mouse-up hook.</summary>
+        protected virtual void OnMouseUp(global::System.Windows.Input.MouseButtonEventArgs e) { }
+
+        /// <summary>WPF mouse-move hook.</summary>
+        protected virtual void OnMouseMove(global::System.Windows.Input.MouseEventArgs e) { }
+
+        /// <summary>WPF mouse-wheel hook.</summary>
+        protected virtual void OnMouseWheel(global::System.Windows.Input.MouseWheelEventArgs e) { }
+
+        /// <summary>WPF lost-mouse-capture hook.</summary>
+        protected virtual void OnLostMouseCapture(global::System.Windows.Input.MouseEventArgs e) { }
+
+        /// <summary>WPF key-down hook.</summary>
+        protected virtual void OnKeyDown(global::System.Windows.Input.KeyEventArgs e) { }
+
+        /// <summary>WPF key-up hook.</summary>
+        protected virtual void OnKeyUp(global::System.Windows.Input.KeyEventArgs e) { }
+
+        /// <inheritdoc />
+        protected override void OnPointerPressed(Avalonia.Input.PointerPressedEventArgs e)
+        {
+            base.OnPointerPressed(e);
+            var args = global::System.Windows.Input.WpfInputBridge.CreateMouseButtonEvent(this, e);
+            OnMouseDown(args);
+            global::System.Windows.Input.WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerReleased(Avalonia.Input.PointerReleasedEventArgs e)
+        {
+            base.OnPointerReleased(e);
+            var args = global::System.Windows.Input.WpfInputBridge.CreateMouseButtonEvent(this, e);
+            OnMouseUp(args);
+            global::System.Windows.Input.WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerMoved(Avalonia.Input.PointerEventArgs e)
+        {
+            base.OnPointerMoved(e);
+            var args = global::System.Windows.Input.WpfInputBridge.CreateMouseMoveEvent(this, e);
+            OnMouseMove(args);
+            global::System.Windows.Input.WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerWheelChanged(Avalonia.Input.PointerWheelEventArgs e)
+        {
+            base.OnPointerWheelChanged(e);
+            var args = global::System.Windows.Input.WpfInputBridge.CreateMouseWheelEvent(this, e);
+            OnMouseWheel(args);
+            global::System.Windows.Input.WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnPointerCaptureLost(Avalonia.Input.PointerCaptureLostEventArgs e)
+        {
+            base.OnPointerCaptureLost(e);
+            var args = global::System.Windows.Input.WpfInputBridge.CreateLostMouseCaptureEvent(this, e.Pointer, e.Source);
+            OnLostMouseCapture(args);
+            global::System.Windows.Input.WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            var args = global::System.Windows.Input.WpfInputBridge.CreateKeyEvent(e, true);
+            OnKeyDown(args);
+            global::System.Windows.Input.WpfInputBridge.CopyHandled(args, e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
+        {
+            base.OnKeyUp(e);
+            var args = global::System.Windows.Input.WpfInputBridge.CreateKeyEvent(e, false);
+            OnKeyUp(args);
+            global::System.Windows.Input.WpfInputBridge.CopyHandled(args, e);
+        }
     }
 
     /// <summary>
@@ -138,6 +326,28 @@ namespace System.Windows.Controls
             DependencyProperty.FromExisting(AvHeaderedContentControl.HeaderTemplateProperty, typeof(HeaderedContentControl));
 
         private INameScope? _templateNameScope;
+
+        /// <summary>Initializes loaded-event bridging.</summary>
+        public HeaderedContentControl()
+        {
+            base.Loaded += (_, _) => Loaded?.Invoke(this, new RoutedEventArgs { Source = this });
+            base.Unloaded += (_, _) => Unloaded?.Invoke(this, new RoutedEventArgs { Source = this });
+        }
+
+        /// <summary>Occurs when the control is attached to the visual tree.</summary>
+        public new event RoutedEventHandler? Loaded;
+
+        /// <summary>Occurs when the control is detached from the visual tree.</summary>
+        public new event RoutedEventHandler? Unloaded;
+
+        /// <summary>Gets the current rendered size.</summary>
+        public Size RenderSize => Bounds.Size;
+
+        /// <summary>Gets the rendered width.</summary>
+        public double ActualWidth => Bounds.Width;
+
+        /// <summary>Gets the rendered height.</summary>
+        public double ActualHeight => Bounds.Height;
 
         /// <summary>WPF-style value accessor. Shadows Avalonia's <c>GetValue(AvaloniaProperty)</c>.</summary>
         public object? GetValue(DependencyProperty property)
@@ -188,21 +398,19 @@ namespace System.Windows.Controls
     }
 
     /// <summary>
-    /// WPF-compatible <see cref="ContentPresenter"/> over Avalonia's
-    /// <see cref="Avalonia.Controls.Presenters.ContentPresenter"/>. Upstream controls only reference
-    /// its dependency-property statics via <c>AddOwner(...)</c> (e.g. <c>StateNode</c> reuses
-    /// <c>ContentPresenter.ContentProperty</c>/<c>ContentTemplateProperty</c>); those statics wrap the
-    /// real Avalonia properties so binding/templating behave normally.
+    /// WPF-compatible <see cref="ContentPresenter"/>. It derives from the compatibility
+    /// <see cref="ContentControl"/> so connection containers inherit the WPF input/template hooks;
+    /// the content properties still wrap Avalonia's real content-control properties.
     /// </summary>
-    public class ContentPresenter : AvContentPresenter
+    public class ContentPresenter : ContentControl
     {
-        /// <summary>WPF <c>Content</c> property, wrapping Avalonia's <see cref="AvContentPresenter.ContentProperty"/>.</summary>
+        /// <summary>WPF <c>Content</c> property, wrapping Avalonia's content property.</summary>
         public static new readonly DependencyProperty ContentProperty =
-            DependencyProperty.FromExisting(AvContentPresenter.ContentProperty, typeof(ContentPresenter));
+            DependencyProperty.FromExisting(AvContentControl.ContentProperty, typeof(ContentPresenter));
 
-        /// <summary>WPF <c>ContentTemplate</c> property, wrapping Avalonia's <see cref="AvContentPresenter.ContentTemplateProperty"/>.</summary>
+        /// <summary>WPF <c>ContentTemplate</c> property, wrapping Avalonia's content-template property.</summary>
         public static new readonly DependencyProperty ContentTemplateProperty =
-            DependencyProperty.FromExisting(AvContentPresenter.ContentTemplateProperty, typeof(ContentPresenter));
+            DependencyProperty.FromExisting(AvContentControl.ContentTemplateProperty, typeof(ContentPresenter));
     }
 
     /// <summary>

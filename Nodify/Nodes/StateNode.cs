@@ -2,13 +2,19 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+#if AVALONIA
+using StateContentElement = global::Avalonia.Controls.Control;
+using global::Avalonia.VisualTree;
+#else
+using StateContentElement = System.Windows.UIElement;
+#endif
 
 namespace Nodify
 {
     /// <summary>
     /// Represents a control that acts as a <see cref="Connector"/>.
     /// </summary>
-    [TemplatePart(Name = ElementContent, Type = typeof(UIElement))]
+    [TemplatePart(Name = ElementContent, Type = typeof(StateContentElement))]
     public class StateNode : Connector
     {
         protected const string ElementContent = "PART_Content";
@@ -61,7 +67,7 @@ namespace Nodify
         /// <summary>
         /// Gets the <see cref="ContentControl"/> control of this <see cref="StateNode"/>.
         /// </summary>
-        protected UIElement? ContentControl { get; private set; }
+        protected StateContentElement? ContentControl { get; private set; }
 
         static StateNode()
         {
@@ -74,14 +80,22 @@ namespace Nodify
         {
             base.OnApplyTemplate();
 
-            ContentControl = Template.FindName(ElementContent, this) as UIElement;
+#if AVALONIA
+            ContentControl = GetTemplateChild(ElementContent) as StateContentElement;
+#else
+            ContentControl = Template.FindName(ElementContent, this) as StateContentElement;
+#endif
         }
 
         /// <inheritdoc />
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
+#if AVALONIA
+            if (e.OriginalSource is Visual visual && (!(ContentControl?.IsVisualAncestorOf(visual) ?? false)))
+#else
             if (e.OriginalSource is Visual visual && (!ContentControl?.IsAncestorOf(visual) ?? true))
+#endif
             {
                 base.OnMouseDown(e);
             }
@@ -91,7 +105,11 @@ namespace Nodify
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
             // Do not raise PendingConnection events if clicked on content
+#if AVALONIA
+            if (e.OriginalSource is Visual visual && (!(ContentControl?.IsVisualAncestorOf(visual) ?? false)))
+#else
             if (e.OriginalSource is Visual visual && (!ContentControl?.IsAncestorOf(visual) ?? true))
+#endif
             {
                 base.OnMouseUp(e);
             }
