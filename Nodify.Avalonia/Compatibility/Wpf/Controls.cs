@@ -49,7 +49,7 @@ namespace System.Windows.Controls
         /// calls compile and so the intended style key is captured for the theme phase.
         /// </summary>
         public static readonly DependencyProperty DefaultStyleKeyProperty =
-            DependencyProperty.Register("DefaultStyleKey", typeof(object), typeof(WpfControlServices), new FrameworkPropertyMetadata(null));
+            DependencyProperty.Register("DefaultStyleKey", typeof(object), typeof(Avalonia.Controls.Control), new FrameworkPropertyMetadata(null));
 
         /// <summary>
         /// WPF <c>Focusable</c> dependency property, wrapping Avalonia's real

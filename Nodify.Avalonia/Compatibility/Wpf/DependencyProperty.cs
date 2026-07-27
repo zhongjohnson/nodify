@@ -216,7 +216,8 @@ namespace System.Windows
 
         public static AvaloniaProperty CreateStyled(Type ownerType, Type valueType, string name, object? defaultValue, bool inherits, bool twoWay)
         {
-            MethodInfo method = RegisterStyledOpen.MakeGenericMethod(ownerType, valueType);
+            Type registrationOwner = ResolveRegistrationOwnerType(ownerType);
+            MethodInfo method = RegisterStyledOpen.MakeGenericMethod(registrationOwner, valueType);
             ParameterInfo[] parameters = method.GetParameters();
             var args = new object?[parameters.Length];
 
@@ -242,8 +243,9 @@ namespace System.Windows
 
         public static AvaloniaProperty CreateAttached(Type ownerType, Type valueType, string name, object? defaultValue, bool inherits)
         {
-            // RegisterAttached<TOwner, THost, TValue>(...) -- host is any AvaloniaObject-derived control.
-            MethodInfo method = RegisterAttachedOpen.MakeGenericMethod(ownerType, typeof(Avalonia.Controls.Control), valueType);
+            // RegisterAttached<TOwner, THost, TValue>(...) requires TOwner/THost to derive from AvaloniaObject.
+            Type registrationOwner = ResolveRegistrationOwnerType(ownerType);
+            MethodInfo method = RegisterAttachedOpen.MakeGenericMethod(registrationOwner, typeof(Avalonia.Controls.Control), valueType);
             ParameterInfo[] parameters = method.GetParameters();
             var args = new object?[parameters.Length];
 
@@ -261,6 +263,11 @@ namespace System.Windows
 
             return (AvaloniaProperty)method.Invoke(null, args)!;
         }
+
+        private static Type ResolveRegistrationOwnerType(Type ownerType)
+            => typeof(AvaloniaObject).IsAssignableFrom(ownerType)
+                ? ownerType
+                : typeof(Avalonia.Controls.Control);
 
         public static void OverrideDefaultValue(AvaloniaProperty property, Type ownerType, Type valueType, object? value)
         {

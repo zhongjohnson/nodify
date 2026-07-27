@@ -580,10 +580,14 @@ namespace Nodify
             {
                 if (_defaultFocusVisualPen is null)
                 {
+#if AVALONIA
+                    _defaultFocusVisualPen = new Pen(SystemColors.ControlTextBrush, 1);
+#else
                     _defaultFocusVisualPen = new Pen(SystemColors.ControlTextBrush, 1)
                     {
                         DashStyle = new DashStyle { Dashes = { 0.5d, 3d } }
                     };
+#endif
                     _defaultFocusVisualPen.Freeze();
                 }
 
