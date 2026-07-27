@@ -63,7 +63,7 @@ namespace Nodify
             Vector deltaSource = p1 - p0;
             Vector deltaTarget = p2 - p1;
 
-            if (deltaSource.X * deltaSource.X + deltaSource.Y * deltaSource.Y > deltaTarget.X * deltaTarget.X + deltaTarget.Y * deltaTarget.Y)
+            if (deltaSource.LengthSquared > deltaTarget.LengthSquared)
             {
                 return new Point((p0.X + p1.X - text.Width) / 2, (p0.Y + p1.Y - text.Height) / 2);
             }
@@ -95,7 +95,7 @@ namespace Nodify
 
             if (TargetOrientation == Orientation.Vertical)
             {
-                arrowOffset = new Vector(arrowOffset.Y, arrowOffset.X);
+                (arrowOffset.X, arrowOffset.Y) = (arrowOffset.Y, arrowOffset.X);
             }
 
             Point endPoint = Spacing > 0 ? target - arrowOffset : target;

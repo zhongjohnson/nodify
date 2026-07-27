@@ -74,11 +74,7 @@ namespace Nodify
         #region Keyboard Navigation
 
         public KeyboardNavigationLayerId Id { get; } = KeyboardNavigationLayerId.Decorators;
-#if AVALONIA
-        public IKeyboardFocusTarget<global::Avalonia.Controls.Control>? LastFocusedElement => _focusNavigator.LastFocusedElement;
-#else
         public IKeyboardFocusTarget<UIElement>? LastFocusedElement => _focusNavigator.LastFocusedElement;
-#endif
 
         private readonly StatefulFocusNavigator<DecoratorContainer> _focusNavigator;
 
@@ -100,11 +96,7 @@ namespace Nodify
             {
                 containerToFocus = FindNextFocusTarget(focusedContainer, request);
             }
-#if AVALONIA
-            else if (currentElement is global::Avalonia.Controls.Control elem && elem.GetParentOfType<DecoratorContainer>() is DecoratorContainer parentContainer)
-#else
             else if (currentElement is UIElement elem && elem.GetParentOfType<DecoratorContainer>() is DecoratorContainer parentContainer)
-#endif
             {
                 containerToFocus = parentContainer;
             }

@@ -13,11 +13,7 @@ namespace Nodify.Interactivity
         /// </summary>
         /// <typeparam name="TElement">The type of the UI element that the input handlers will be associated with.</typeparam>
         public sealed class Shared<TElement> : InputProcessor, IInputHandler
-#if AVALONIA
-            where TElement : global::Avalonia.Controls.Control
-#else
             where TElement : FrameworkElement
-#endif
         {
             private static readonly List<KeyValuePair<Type, Func<TElement, IInputHandler>>> _handlerFactories = new List<KeyValuePair<Type, Func<TElement, IInputHandler>>>();
 
@@ -123,11 +119,7 @@ namespace Nodify.Interactivity
         /// <param name="inputProcessor">The input processor to which the shared handlers will be added.</param>
         /// <param name="instance">The UI element instance associated with the shared handlers.</param>
         public static void AddSharedHandlers<TElement>(this InputProcessor inputProcessor, TElement instance)
-#if AVALONIA
-            where TElement : global::Avalonia.Controls.Control
-#else
             where TElement : FrameworkElement
-#endif
         {
             inputProcessor.AddHandler(new InputProcessor.Shared<TElement>(instance));
         }

@@ -51,11 +51,7 @@ namespace Nodify
         public IKeyboardNavigationLayer KeyboardNavigationLayer => this;
 
         KeyboardNavigationLayerId IKeyboardNavigationLayer.Id => KeyboardNavigationLayerId.Nodes;
-#if AVALONIA
-        IKeyboardFocusTarget<global::Avalonia.Controls.Control>? IKeyboardNavigationLayer.LastFocusedElement => _focusNavigator.LastFocusedElement;
-#else
         IKeyboardFocusTarget<UIElement>? IKeyboardNavigationLayer.LastFocusedElement => _focusNavigator.LastFocusedElement;
-#endif
 
         int IReadOnlyCollection<IKeyboardNavigationLayer>.Count => _navigationLayers.Count;
 
@@ -87,11 +83,7 @@ namespace Nodify
                 containerToFocus = FindNextFocusTarget(focusedContainer, request);
             }
             // The current element is not a nested editor, but a focusable element inside an ItemContainer
-#if AVALONIA
-            else if (currentElement is global::Avalonia.Controls.Control elem && elem != this && elem.GetParentOfType<ItemContainer>() is ItemContainer parentContainer)
-#else
             else if (currentElement is UIElement elem && elem != this && elem.GetParentOfType<ItemContainer>() is ItemContainer parentContainer)
-#endif
             {
                 containerToFocus = parentContainer;
             }

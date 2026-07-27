@@ -325,15 +325,9 @@ namespace Nodify
         {
             base.OnApplyTemplate();
 
-#if AVALONIA
-            ResizeThumb = GetTemplateChild(ElementResizeThumb) as FrameworkElement;
-            HeaderControl = GetTemplateChild(ElementHeader) as FrameworkElement;
-            ContentControl = GetTemplateChild(ElementContent) as FrameworkElement;
-#else
             ResizeThumb = Template.FindName(ElementResizeThumb, this) as FrameworkElement;
             HeaderControl = Template.FindName(ElementHeader, this) as FrameworkElement;
             ContentControl = Template.FindName(ElementContent, this) as FrameworkElement;
-#endif
 
             Container = this.GetParentOfType<ItemContainer>();
             Editor = Container?.Editor ?? this.GetParentOfType<NodifyEditor>();

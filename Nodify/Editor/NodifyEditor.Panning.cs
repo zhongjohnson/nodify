@@ -155,11 +155,7 @@ namespace Nodify
 
         #region Auto panning
 
-#if AVALONIA
-        private readonly MouseEventArgs _autoPanningEventArgs = new MouseEventArgs
-#else
         private readonly MouseEventArgs _autoPanningEventArgs = new MouseEventArgs(Mouse.PrimaryDevice, 0, Stylus.CurrentStylusDevice)
-#endif
         {
             RoutedEvent = MouseMoveEvent
         };

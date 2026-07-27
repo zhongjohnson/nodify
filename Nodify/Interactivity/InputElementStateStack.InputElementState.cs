@@ -2,12 +2,7 @@
 
 namespace Nodify.Interactivity
 {
-    public partial class InputElementStateStack<TElement>
-#if AVALONIA
-        where TElement : global::Avalonia.Controls.Control
-#else
-        where TElement : FrameworkElement
-#endif
+    public partial class InputElementStateStack<TElement> where TElement : FrameworkElement
     {
         /// <summary>
         /// Base class for defining input element states.

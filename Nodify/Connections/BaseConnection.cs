@@ -9,11 +9,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-#if AVALONIA
-using ConnectionElement = global::Avalonia.Controls.Control;
-#else
-using ConnectionElement = System.Windows.UIElement;
-#endif
 
 namespace Nodify
 {
@@ -165,16 +160,16 @@ namespace Nodify
             }
         }
 
-        public static bool GetIsSelectable(ConnectionElement elem)
+        public static bool GetIsSelectable(UIElement elem)
             => (bool)elem.GetValue(IsSelectableProperty);
 
-        public static void SetIsSelectable(ConnectionElement elem, bool value)
+        public static void SetIsSelectable(UIElement elem, bool value)
             => elem.SetValue(IsSelectableProperty, value);
 
-        public static bool GetIsSelected(ConnectionElement elem)
+        public static bool GetIsSelected(UIElement elem)
             => (bool)elem.GetValue(IsSelectedProperty);
 
-        public static void SetIsSelected(ConnectionElement? elem, bool value)
+        public static void SetIsSelected(UIElement? elem, bool value)
             => elem?.SetValue(IsSelectedProperty, value);
 
         private static void OnIsAnimatingDirectionalArrowsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -580,14 +575,10 @@ namespace Nodify
             {
                 if (_defaultFocusVisualPen is null)
                 {
-#if AVALONIA
-                    _defaultFocusVisualPen = new Pen(SystemColors.ControlTextBrush, 1);
-#else
                     _defaultFocusVisualPen = new Pen(SystemColors.ControlTextBrush, 1)
                     {
                         DashStyle = new DashStyle { Dashes = { 0.5d, 3d } }
                     };
-#endif
                     _defaultFocusVisualPen.Freeze();
                 }
 
@@ -807,12 +798,12 @@ namespace Nodify
 
             if (SourceOrientation == Orientation.Vertical)
             {
-                sourceOffset = new Vector(sourceOffset.Y, sourceOffset.X);
+                (sourceOffset.X, sourceOffset.Y) = (sourceOffset.Y, sourceOffset.X);
             }
 
             if (TargetOrientation == Orientation.Vertical)
             {
-                targetOffset = new Vector(targetOffset.Y, targetOffset.X);
+                (targetOffset.X, targetOffset.Y) = (targetOffset.Y, targetOffset.X);
             }
 
             return (sourceOffset, targetOffset);
@@ -845,10 +836,9 @@ namespace Nodify
 
             static Vector GetCircleModeOffset(Vector delta, Size offset)
             {
-                double lengthSquared = delta.X * delta.X + delta.Y * delta.Y;
-                if (lengthSquared > 0d)
+                if (delta.LengthSquared > 0d)
                 {
-                    delta /= Math.Sqrt(lengthSquared);
+                    delta.Normalize();
                 }
 
                 return new Vector(delta.X * offset.Width, delta.Y * offset.Height);
@@ -856,28 +846,26 @@ namespace Nodify
 
             static Vector GetRectangleModeOffset(Vector delta, Size offset)
             {
-                double lengthSquared = delta.X * delta.X + delta.Y * delta.Y;
-                if (lengthSquared > 0d)
+                if (delta.LengthSquared > 0d)
                 {
-                    delta /= Math.Sqrt(lengthSquared);
+                    delta.Normalize();
                 }
 
                 double angle = Math.Atan2(delta.Y, delta.X);
-                double resultX;
-                double resultY;
+                var result = new Vector();
 
                 if (offset.Width * 2d * Math.Abs(delta.Y) < offset.Height * 2d * Math.Abs(delta.X))
                 {
-                    resultX = Math.Sign(delta.X) * offset.Width;
-                    resultY = Math.Tan(angle) * resultX;
+                    result.X = Math.Sign(delta.X) * offset.Width;
+                    result.Y = Math.Tan(angle) * result.X;
                 }
                 else
                 {
-                    resultY = Math.Sign(delta.Y) * offset.Height;
-                    resultX = 1.0d / Math.Tan(angle) * resultY;
+                    result.Y = Math.Sign(delta.Y) * offset.Height;
+                    result.X = 1.0d / Math.Tan(angle) * result.Y;
                 }
 
-                return new Vector(resultX, resultY);
+                return result;
             }
         }
 
@@ -1054,20 +1042,12 @@ namespace Nodify
             double radius = TextCornerRadius;
 
             var rectSize = new Size(bounds.Width + padding.Left + padding.Right, bounds.Height + padding.Bottom + padding.Top);
-#if AVALONIA
-            var rect = new Rect(bounds.TopLeft - new Vector(padding.Left, padding.Top), rectSize);
-#else
             var rect = new Rect(bounds.Location - new Vector(padding.Left, padding.Top), rectSize);
-#endif
 
             if (OutlineBrush != null)
             {
                 var outlineRect = rect;
-#if AVALONIA
-                outlineRect = outlineRect.Inflate(OutlineThickness);
-#else
                 outlineRect.Inflate(OutlineThickness, OutlineThickness);
-#endif
                 drawingContext.DrawRoundedRectangle(OutlineBrush, null, outlineRect, radius, radius);
             }
 
@@ -1113,14 +1093,8 @@ namespace Nodify
                 {
                     var widenPen = new Pen(null, _baseConnection.StrokeThickness + drawPen.Thickness + _baseConnection.FocusVisualPadding * 2d);
                     var geometry = _baseConnection.DefiningGeometry;
-#if AVALONIA
-                    var widenedGeometry = geometry.GetWidenedGeometry(widenPen);
-                    var expandedGeometry = new global::Avalonia.Media.CombinedGeometry(global::Avalonia.Media.GeometryCombineMode.Union, geometry, widenedGeometry);
-                    drawingContext.DrawGeometry(null, drawPen, expandedGeometry);
-#else
                     var expandedGeometry = Geometry.Combine(geometry, geometry.GetWidenedPathGeometry(widenPen), GeometryCombineMode.Union, Transform.Identity);
                     drawingContext.DrawGeometry(null, drawPen, expandedGeometry.GetOutlinedPathGeometry());
-#endif
                 }
             }
         }

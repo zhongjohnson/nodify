@@ -4,11 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-#if AVALONIA
-using ConnectionVisual = global::Avalonia.Controls.Control;
-#else
-using ConnectionVisual = System.Windows.FrameworkElement;
-#endif
 
 namespace Nodify
 {
@@ -73,7 +68,7 @@ namespace Nodify
 
         #endregion
 
-        private ConnectionVisual? _connection;
+        private FrameworkElement? _connection;
         private SelectionType? _selectionType;
 
         public Rect Bounds => ConnectionFocusTarget.Bounds;
@@ -87,9 +82,9 @@ namespace Nodify
         private IKeyboardFocusTarget<FrameworkElement> ConnectionFocusTarget => Connection as IKeyboardFocusTarget<FrameworkElement>
             ?? throw new NotSupportedException($"Custom connections must implement {nameof(IKeyboardFocusTarget<FrameworkElement>)} for keyboard navigation. Or disable keyboard navigation for the connections layer.");
 
-        public ConnectionVisual? Connection => _connection ??= BaseConnection.PrioritizeBaseConnectionForSelection
-            ? this.GetChildOfType<BaseConnection>() ?? this.GetChildOfType<ConnectionVisual>()
-            : this.GetChildOfType<ConnectionVisual>();
+        public FrameworkElement? Connection => _connection ??= BaseConnection.PrioritizeBaseConnectionForSelection
+            ? this.GetChildOfType<BaseConnection>() ?? this.GetChildOfType<FrameworkElement>()
+            : this.GetChildOfType<FrameworkElement>();
 
         public ConnectionsMultiSelector Selector { get; }
 

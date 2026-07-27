@@ -3,12 +3,7 @@ using System.Windows.Input;
 
 namespace Nodify.Interactivity
 {
-    public partial class InputElementStateStack<TElement>
-#if AVALONIA
-        where TElement : global::Avalonia.Controls.Control
-#else
-        where TElement : FrameworkElement
-#endif
+    public partial class InputElementStateStack<TElement> where TElement : FrameworkElement
     {
         /// <summary>
         /// Represents a specialized state for handling drag interactions.
@@ -20,11 +15,7 @@ namespace Nodify.Interactivity
             /// </summary>
             public InputElementStateStack<TElement> Stack { get; }
 
-#if AVALONIA
-            private readonly InputEventArgs _mouseEventArgs = new MouseEventArgs
-#else
             private readonly InputEventArgs _mouseEventArgs = new MouseEventArgs(Mouse.PrimaryDevice, 0, Stylus.CurrentStylusDevice)
-#endif
             {
                 RoutedEvent = NodifyEditor.ViewportUpdatedEvent  // dummy event
             };

@@ -7,11 +7,7 @@ using System.Windows.Input;
 namespace Nodify.Interactivity
 {
     internal readonly struct DirectionalFocusNavigator<TElement>
-#if AVALONIA
-        where TElement : global::Avalonia.Controls.Control, IKeyboardFocusTarget<TElement>
-#else
         where TElement : UIElement, IKeyboardFocusTarget<TElement>
-#endif
     {
         private readonly IEnumerable<IKeyboardFocusTarget<TElement>> _availableTargets;
 
@@ -57,8 +53,7 @@ namespace Nodify.Interactivity
 
             foreach (var candidate in candidates)
             {
-                Vector distance = candidate.Bounds.TopLeft - currentContainerBounds.TopLeft;
-                double distanceSquared = distance.X * distance.X + distance.Y * distance.Y;
+                double distanceSquared = (candidate.Bounds.TopLeft - currentContainerBounds.TopLeft).LengthSquared;
                 if (distanceSquared < minDistanceSquared)
                 {
                     minDistanceSquared = distanceSquared;

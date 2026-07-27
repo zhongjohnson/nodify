@@ -110,11 +110,7 @@ namespace Nodify
             for (int i = 0; i < children.Count; i++)
             {
                 var item = (MinimapItem)children[i];
-#if AVALONIA
-                item.Arrange(new Rect(item.Location - (Vector)Extent.TopLeft, item.DesiredSize));
-#else
                 item.Arrange(new Rect(item.Location - (Vector)Extent.Location, item.DesiredSize));
-#endif
             }
 
             return finalSize;

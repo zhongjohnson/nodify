@@ -4,11 +4,6 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-#if AVALONIA
-using ConnectorElement = global::Avalonia.Controls.Control;
-#else
-using ConnectorElement = System.Windows.FrameworkElement;
-#endif
 
 namespace Nodify
 {
@@ -16,7 +11,7 @@ namespace Nodify
     /// Represents a connector control that can start and complete a <see cref="PendingConnection"/>.
     /// Has a <see cref="ElementConnector"/> that the <see cref="Anchor"/> is calculated from for the <see cref="PendingConnection"/>. Center of this control is used if missing.
     /// </summary>
-    [TemplatePart(Name = ElementConnector, Type = typeof(ConnectorElement))]
+    [TemplatePart(Name = ElementConnector, Type = typeof(FrameworkElement))]
     public class Connector : Control
     {
         protected const string ElementConnector = "PART_Connector";
@@ -126,16 +121,11 @@ namespace Nodify
 
         #region Fields
 
-        private ConnectorElement? _thumb;
+        private FrameworkElement? _thumb;
         /// <summary>
         /// Gets the <see cref="FrameworkElement"/> used to calculate the <see cref="Anchor"/>.
         /// </summary>
-        protected internal ConnectorElement Thumb
-#if AVALONIA
-            => _thumb ??= GetTemplateChild(ElementConnector) as ConnectorElement ?? this;
-#else
-            => _thumb ??= Template.FindName(ElementConnector, this) as ConnectorElement ?? this;
-#endif
+        protected internal FrameworkElement Thumb => _thumb ??= Template.FindName(ElementConnector, this) as FrameworkElement ?? this;
 
         /// <summary>
         /// Gets the <see cref="ItemContainer"/> that contains this <see cref="Connector"/>.
@@ -302,11 +292,7 @@ namespace Nodify
             var viewport = new Rect(editor.ViewportLocation, editor.ViewportSize);
             double offset = OptimizeSafeZone / editor.ViewportZoom;
 
-#if AVALONIA
-            Rect area = viewport.Inflate(offset);
-#else
             Rect area = Rect.Inflate(viewport, offset, offset);
-#endif
 
             // Update only the connectors that are in the viewport or will be in the viewport
             if (area.Contains(location))
@@ -325,17 +311,9 @@ namespace Nodify
 
             if (Thumb != null && Container != null)
             {
-#if AVALONIA
-                var thumbSize = new Vector(Thumb.Bounds.Width, Thumb.Bounds.Height);
-                Vector containerMargin = new Vector(
-                    Container.RenderSize.Width - Container.DesiredSize.Width,
-                    Container.RenderSize.Height - Container.DesiredSize.Height);
-                Point relativeLocation = global::Avalonia.VisualExtensions.TranslatePoint(Thumb, (Point)(thumbSize / 2 - containerMargin / 2), Container) ?? default;
-#else
                 var thumbSize = (Vector)Thumb.RenderSize;
                 Vector containerMargin = (Vector)Container.RenderSize - (Vector)Container.DesiredSize;
                 Point relativeLocation = Thumb.TranslatePoint((Point)(thumbSize / 2 - containerMargin / 2), Container);
-#endif
                 Anchor = new Point(location.X + relativeLocation.X, location.Y + relativeLocation.Y);
             }
         }
@@ -509,7 +487,7 @@ namespace Nodify
                 return;
             }
 
-            ConnectorElement? elem = FindConnectionTarget(_pendingConnectionEndPosition);
+            FrameworkElement? elem = FindConnectionTarget(_pendingConnectionEndPosition);
             EndConnecting(elem?.DataContext);
         }
 
@@ -578,11 +556,7 @@ namespace Nodify
         /// </remarks>
         internal Point GetLocationInsideEditor(MouseEventArgs e)
         {
-#if AVALONIA
-            Vector thumbOffset = e.GetPosition(Thumb) - new Point(Thumb.Bounds.Width / 2, Thumb.Bounds.Height / 2);
-#else
             Vector thumbOffset = e.GetPosition(Thumb) - new Point(Thumb.ActualWidth / 2, Thumb.ActualHeight / 2);
-#endif
             return Anchor + thumbOffset;
         }
 
@@ -604,7 +578,7 @@ namespace Nodify
         /// Searches for a potential <see cref="Connector"/> or <see cref="ItemContainer"/> at the specified position within the editor.
         /// </summary>
         /// <param name="position">The position in the editor to check for a potential connection target.</param>
-        public ConnectorElement? FindConnectionTarget(Point position)
+        public FrameworkElement? FindConnectionTarget(Point position)
         {
             if (Editor != null)
             {

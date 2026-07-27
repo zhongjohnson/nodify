@@ -5,11 +5,7 @@ using System.Windows;
 namespace Nodify.Interactivity
 {
     internal class StatefulFocusNavigator<TElement>
-#if AVALONIA
-        where TElement : global::Avalonia.Controls.Control, IKeyboardFocusTarget<TElement>
-#else
         where TElement : UIElement, IKeyboardFocusTarget<TElement>
-#endif
     {
         public delegate bool FindNextFocusTargetDelegate(TElement? currentElement, TraversalRequest request, out TElement? elementToFocus);
 
@@ -60,11 +56,7 @@ namespace Nodify.Interactivity
         {
             if (_lastFocusedElement.TryGetTarget(out var lastTarget))
             {
-#if AVALONIA
-                if (lastTarget!.IsFocused)
-#else
                 if (lastTarget!.IsKeyboardFocused)
-#endif
                 {
                     return true;
                 }

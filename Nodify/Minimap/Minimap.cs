@@ -319,20 +319,15 @@ namespace Nodify
 
         protected void SetViewportLocation(Point location)
         {
-#if AVALONIA
-            var position = location - new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2) + (Vector)Extent.TopLeft;
-#else
             var position = location - new Vector(ViewportSize.Width / 2, ViewportSize.Height / 2) + (Vector)Extent.Location;
-#endif
 
             if (MaxViewportOffset.Width != 0 || MaxViewportOffset.Height != 0)
             {
                 double maxRight = ResizeToViewport ? ItemsExtent.Right : Math.Max(ItemsExtent.Right, ItemsExtent.Left + ViewportSize.Width);
                 double maxBottom = ResizeToViewport ? ItemsExtent.Bottom : Math.Max(ItemsExtent.Bottom, ItemsExtent.Top + ViewportSize.Height);
 
-                position = new Point(
-                    position.X.Clamp(ItemsExtent.Left - ViewportSize.Width / 2 - MaxViewportOffset.Width, maxRight - ViewportSize.Width / 2 + MaxViewportOffset.Width),
-                    position.Y.Clamp(ItemsExtent.Top - ViewportSize.Height / 2 - MaxViewportOffset.Height, maxBottom - ViewportSize.Height / 2 + MaxViewportOffset.Height));
+                position.X = position.X.Clamp(ItemsExtent.Left - ViewportSize.Width / 2 - MaxViewportOffset.Width, maxRight - ViewportSize.Width / 2 + MaxViewportOffset.Width);
+                position.Y = position.Y.Clamp(ItemsExtent.Top - ViewportSize.Height / 2 - MaxViewportOffset.Height, maxBottom - ViewportSize.Height / 2 + MaxViewportOffset.Height);
             }
 
             ViewportLocation = position;
@@ -359,7 +354,7 @@ namespace Nodify
                 SetViewportLocation(location);
             }
 
-            var viewportLocation = ViewportLocation + new Vector(ViewportSize.Width, ViewportSize.Height) / 2;
+            var viewportLocation = ViewportLocation + (Vector)ViewportSize / 2;
             var args = new ZoomEventArgs(zoom, viewportLocation)
             {
                 RoutedEvent = ZoomEvent,
@@ -391,7 +386,7 @@ namespace Nodify
 
         private void SetZoom(double zoom)
         {
-            var viewportLocation = ViewportLocation + new Vector(ViewportSize.Width, ViewportSize.Height) / 2;
+            var viewportLocation = ViewportLocation + (Vector)ViewportSize / 2;
             var args = new ZoomEventArgs(zoom, viewportLocation)
             {
                 RoutedEvent = ZoomEvent,

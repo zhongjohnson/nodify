@@ -8,11 +8,7 @@ namespace Nodify.Interactivity
     /// </summary>
     /// <typeparam name="TElement">The type of the framework element that owns this state.</typeparam>
     public abstract class InputElementState<TElement> : IInputHandler
-#if AVALONIA
-        where TElement : global::Avalonia.Controls.Control
-#else
         where TElement : FrameworkElement
-#endif
     {
         /// <summary>
         /// Gets the owner of the state.

@@ -77,11 +77,7 @@ namespace Nodify.Interactivity
         /// <summary>
         /// Gets the last focused element within this layer, if any.
         /// </summary>
-#if AVALONIA
-        IKeyboardFocusTarget<global::Avalonia.Controls.Control>? LastFocusedElement { get; }
-#else
         IKeyboardFocusTarget<UIElement>? LastFocusedElement { get; }
-#endif
 
         /// <summary>
         /// Attempts to move focus within this layer based on the provided traversal request.
@@ -112,11 +108,7 @@ namespace Nodify.Interactivity
     /// </summary>
     /// <typeparam name="TElement">The associated UI element.</typeparam>
     public interface IKeyboardFocusTarget<out TElement>
-#if AVALONIA
-        where TElement : global::Avalonia.Controls.Control
-#else
         where TElement : UIElement
-#endif
     {
         /// <summary>
         /// Gets the bounds of the focus target within the layer.

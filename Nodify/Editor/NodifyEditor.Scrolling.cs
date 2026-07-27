@@ -125,11 +125,7 @@ namespace Nodify
                 _extentHeight = extent.Height;
                 _extentWidth = extent.Width;
 
-#if AVALONIA
-                var scrollOffset = ViewportLocation - ItemsExtent.TopLeft;
-#else
                 var scrollOffset = ViewportLocation - ItemsExtent.Location;
-#endif
 
                 _horizontalOffset = Math.Max(0, scrollOffset.X);
                 _verticalOffset = Math.Max(0, scrollOffset.Y);
