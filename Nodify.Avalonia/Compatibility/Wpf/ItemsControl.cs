@@ -33,7 +33,7 @@ namespace System.Windows.Controls
     /// Adds the WPF <see cref="GroupStyle"/> collection that upstream <c>Node</c> populates for its input/output
     /// connector item hosts.
     /// </summary>
-    public class ItemsControl : Control
+    public class ItemsControl : AvItemsControl
     {
         /// <summary>WPF default style key dependency property.</summary>
         public static readonly DependencyProperty DefaultStyleKeyProperty = WpfControlServices.DefaultStyleKeyProperty;
