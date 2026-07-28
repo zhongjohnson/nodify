@@ -14,15 +14,17 @@
 //  controls, ...) are intentionally NOT aliased here; they are provided as shim
 //  classes inside the System.Windows.* namespaces in the Compatibility folder.
 // -----------------------------------------------------------------------------
+global using Nodify.Avalonia.Compatibility;
 
 // Geometry / layout value types (structs) -> Avalonia primitives.
-global using Point = Avalonia.Point;
-global using Size = Avalonia.Size;
-global using Rect = Avalonia.Rect;
-global using Vector = Avalonia.Vector;
+global using Point = System.Windows.Point;
+global using Size = System.Windows.Size;
+global using Rect = System.Windows.Rect;
+global using Vector = System.Windows.Vector;
+global using Matrix = System.Windows.Media.Matrix;
+
 global using Thickness = Avalonia.Thickness;
 global using CornerRadius = Avalonia.CornerRadius;
-global using Matrix = Avalonia.Matrix;
 
 // The WPF dependency base type maps onto Avalonia's object model root. It MUST be an alias
 // (not a shim class) so that shim controls -- which derive from Avalonia controls and hence

@@ -73,7 +73,7 @@ namespace Nodify
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            Point result = (Point)((Vector)(Point)values[0] * (double)values[1]);
+            Point result = (Point)((global::Avalonia.Vector)(Point)values[0] * (double)values[1]);
             return result;
         }
 

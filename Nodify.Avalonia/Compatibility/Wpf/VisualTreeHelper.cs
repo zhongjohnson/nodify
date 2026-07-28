@@ -147,7 +147,7 @@ namespace System.Windows.Media
 
                 case GeometryHitTestParameters geometry:
                     Rect geometryBounds = geometry.HitGeometry.Bounds;
-                    return bounds.Intersects(geometryBounds);
+                    return bounds.IntersectsWith(geometryBounds);
 
                 default:
                     return false;
