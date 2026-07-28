@@ -109,3 +109,6 @@ global using Style = Avalonia.Styling.Style;
 // collection. Upstream panels only use it as `collection[i]` + `.Count`, both of which Avalonia's
 // Controls type provides, so a straight alias is sufficient.
 global using UIElementCollection = Avalonia.Controls.Controls;
+
+global using UIElement = Avalonia.Controls.Control;
+global using FrameworkElement = Avalonia.Controls.Control;

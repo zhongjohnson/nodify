@@ -19,8 +19,10 @@
 //      property so upstream `Panel.ZIndexProperty.OverrideMetadata(...)` works.
 // -----------------------------------------------------------------------------
 
-using System.Windows;
 using Avalonia;
+using Nodify;
+using System.Windows;
+using System.Xml.Linq;
 using AvPanel = Avalonia.Controls.Panel;
 using AvVisual = Avalonia.Visual;
 
@@ -74,6 +76,27 @@ namespace System.Windows.Controls
         {
             base.OnPropertyChanged(change);
             DependencyPropertyServices.OnPropertyChanged(this, change);
+        }
+
+        protected override Avalonia.Size ArrangeOverride(Avalonia.Size finalSize)
+        {
+            return ArrangeOverride((Size)finalSize);
+        }
+
+        protected override Avalonia.Size MeasureOverride(Avalonia.Size availableSize)
+        {
+            return MeasureOverride((Size)availableSize);
+        }
+
+        protected virtual Size ArrangeOverride(Size arrangeSize)
+        {
+            return (Size)base.ArrangeOverride((Avalonia.Size)arrangeSize);
+        }
+
+        /// <inheritdoc />
+        protected virtual Size MeasureOverride(Size constraint)
+        {
+            return (Size)base.MeasureOverride((Avalonia.Size)constraint);
         }
     }
 }

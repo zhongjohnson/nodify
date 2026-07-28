@@ -33,6 +33,8 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.VisualTree;
+using AvControl = Avalonia.Controls.Primitives.TemplatedControl;
+using AvContentControl = Avalonia.Controls.ContentControl;
 
 namespace System.Windows
 {
@@ -95,7 +97,7 @@ namespace System.Windows
     /// <see cref="Control"/> so ported controls can inherit it, and hosts the WPF-shaped
     /// input <see cref="RoutedEvent"/> identities used by the interactivity state machine.
     /// </summary>
-    public class UIElement : Control
+    public class UIElement : AvControl
     {
         /// <summary>Bridges Avalonia's <see cref="Control.SizeChanged"/> to the WPF
         /// <see cref="OnRenderSizeChanged"/> override so upstream layout code runs unchanged.</summary>

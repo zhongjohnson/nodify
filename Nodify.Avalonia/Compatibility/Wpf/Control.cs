@@ -3,7 +3,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using System.Windows.Input;
-using AvControl = Avalonia.Controls.Primitives.TemplatedControl;
 using AvKeyEventArgs = Avalonia.Input.KeyEventArgs;
 using AvPointerEventArgs = Avalonia.Input.PointerEventArgs;
 using AvPointerPressedEventArgs = Avalonia.Input.PointerPressedEventArgs;
@@ -16,8 +15,8 @@ using WpfMouseWheelEventArgs = System.Windows.Input.MouseWheelEventArgs;
 
 namespace System.Windows.Controls
 {
-    /// <summary>WPF-compatible control base over Avalonia's <see cref="AvControl"/>.</summary>
-    public class Control : AvControl
+    /// <summary>WPF-compatible control base over Avalonia's <see cref="FrameworkElement"/>.</summary>
+    public class Control : FrameworkElement
     {
         /// <summary>WPF default style key dependency property.</summary>
         public static readonly DependencyProperty DefaultStyleKeyProperty = WpfControlServices.DefaultStyleKeyProperty;

@@ -146,6 +146,27 @@ namespace System.Windows.Documents
         protected virtual void OnRender(DrawingContext drawingContext)
         {
         }
+
+        protected override Avalonia.Size ArrangeOverride(Avalonia.Size finalSize)
+        {
+            return ArrangeOverride((Size)finalSize);
+        }
+
+        protected override Avalonia.Size MeasureOverride(Avalonia.Size availableSize)
+        {
+            return MeasureOverride((Size)availableSize);
+        }
+
+        protected virtual Size ArrangeOverride(Size arrangeSize)
+        {
+            return (Size)base.ArrangeOverride((Avalonia.Size)arrangeSize);
+        }
+
+        /// <inheritdoc />
+        protected virtual Size MeasureOverride(Size constraint)
+        {
+            return (Size)base.MeasureOverride((Avalonia.Size)constraint);
+        }
     }
 
     /// <summary>
