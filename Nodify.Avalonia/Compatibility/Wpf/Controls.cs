@@ -81,7 +81,7 @@ namespace System.Windows.Controls
     /// <see cref="Avalonia.Controls.ContentControl"/>. Exposes the WPF control statics and value
     /// accessors so upstream controls that derive from it compile and behave as expected.
     /// </summary>
-    public class ContentControl : Control
+    public class ContentControl : AvContentControl
     {
         /// <summary>Record-only WPF default-style-key property (theming deferred; see <see cref="WpfControlServices"/>).</summary>
         public static readonly DependencyProperty DefaultStyleKeyProperty = WpfControlServices.DefaultStyleKeyProperty;
