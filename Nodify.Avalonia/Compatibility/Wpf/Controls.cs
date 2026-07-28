@@ -303,6 +303,10 @@ namespace System.Windows.Controls
             OnKeyUp(args);
             global::System.Windows.Input.WpfInputBridge.CopyHandled(args, e);
         }
+
+        public Size DesiredSize => base.DesiredSize;
+
+        public void Arrange(Rect finalRect) => base.Arrange(finalRect);
     }
 
     /// <summary>
