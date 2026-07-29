@@ -109,7 +109,7 @@ namespace System.Windows.Controls
 
         /// <summary>Resolves a named template child.</summary>
         protected object? GetTemplateChild(string childName)
-            => WpfTemplateServices.GetTemplateChild(_templateNameScope, childName);
+            => WpfTemplateServices.GetTemplateChild(this, _templateNameScope, childName);
 
         /// <summary>WPF-style container factory.</summary>
         protected virtual DependencyObject? GetContainerForItemOverride() => null;

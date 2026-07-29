@@ -30,6 +30,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using AvContentControl = Avalonia.Controls.ContentControl;
+using AvItemsControl = Avalonia.Controls.ItemsControl;
 using AvHeaderedContentControl = Avalonia.Controls.Primitives.HeaderedContentControl;
 using AvInputElement = Avalonia.Input.InputElement;
 using AvContentPresenter = Avalonia.Controls.Presenters.ContentPresenter;
@@ -68,11 +69,36 @@ namespace System.Windows.Controls
     /// </summary>
     internal static class WpfTemplateServices
     {
+        /// <summary>The WPF items-host part name upstream items controls resolve from their template.</summary>
+        public const string ItemsHostPartName = "PART_ItemsHost";
+
         /// <summary>Resolves a named template part from the last-applied name scope, mirroring WPF's <c>GetTemplateChild</c>.</summary>
         public static object? GetTemplateChild(INameScope? nameScope, string childName)
         {
             ArgumentException.ThrowIfNullOrEmpty(childName);
             return nameScope?.Find(childName);
+        }
+
+        /// <summary>
+        /// Resolves a named template part for an items control, falling back to the realized items panel.
+        /// </summary>
+        /// <remarks>
+        /// WPF marks the items host inline in the template (<c>IsItemsHost="True"</c>), so upstream resolves
+        /// it by name. Avalonia instead realizes the panel from <c>ItemsPanel</c> inside an
+        /// <see cref="ItemsPresenter"/>, so the panel is not a named part. When the name lookup misses and
+        /// the requested part is the items host, this applies the presenter's template (the panel is
+        /// otherwise created too late for the owner's <c>OnApplyTemplate</c>) and returns the realized panel.
+        /// </remarks>
+        public static object? GetTemplateChild(AvItemsControl owner, INameScope? nameScope, string childName)
+        {
+            var child = GetTemplateChild(nameScope, childName);
+            if (child != null || childName != ItemsHostPartName)
+            {
+                return child;
+            }
+
+            owner.Presenter?.ApplyTemplate();
+            return owner.ItemsPanelRoot;
         }
     }
 

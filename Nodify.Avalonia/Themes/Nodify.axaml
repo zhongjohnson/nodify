@@ -13,6 +13,17 @@
   -->
   <Style Selector="nodify|NodifyEditor">
     <Setter Property="Background" Value="#1E1E1E" />
+    <Setter Property="ItemsPanel">
+      <!--
+        NodifyCanvas must be the ItemsPanel, not a plain template child. Avalonia's
+        ItemsControl only realizes generated containers into the panel produced by
+        ItemsPanel (hosted by the ItemsPresenter below). Placing the canvas directly in
+        the template leaves it empty, so no nodes are ever rendered.
+      -->
+      <ItemsPanelTemplate>
+        <nodify:NodifyCanvas />
+      </ItemsPanelTemplate>
+    </Setter>
     <Setter Property="Template">
       <ControlTemplate>
         <Border Background="{TemplateBinding Background}"
@@ -20,7 +31,8 @@
                 BorderThickness="{TemplateBinding BorderThickness}"
                 ClipToBounds="True">
           <Grid>
-            <nodify:NodifyCanvas x:Name="PART_ItemsHost" />
+            <ItemsPresenter x:Name="PART_ItemsPresenter"
+                            ItemsPanel="{TemplateBinding ItemsPanel}" />
             <Canvas x:Name="PART_ConnectionsHost" />
           </Grid>
         </Border>

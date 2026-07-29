@@ -187,7 +187,7 @@ namespace System.Windows.Controls.Primitives
 
         /// <summary>Resolves a named template child.</summary>
         protected object? GetTemplateChild(string childName)
-            => WpfTemplateServices.GetTemplateChild(_templateNameScope, childName);
+            => WpfTemplateServices.GetTemplateChild(this, _templateNameScope, childName);
 
         /// <summary>WPF render-size-changed hook.</summary>
         protected virtual void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
