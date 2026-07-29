@@ -126,7 +126,12 @@ namespace System.Windows
         /// bridge onto Avalonia's class-handler system is wired when the owning controls are
         /// ported. Used by <c>KeyComboGesture</c> to observe global key-up / focus-lost.
         /// </summary>
-        public static void RegisterClassHandler(Type classType, RoutedEvent routedEvent, Delegate handler, bool handledEventsToo = false)
+        /// <remarks>
+        /// The event parameter is typed as Avalonia's routed event (the base of the WPF shim) so
+        /// that identities projected from Avalonia's own input events -- e.g. the WPF-shaped
+        /// <c>UIElement.PreviewKeyUpEvent</c> -- can be registered alongside shim-declared events.
+        /// </remarks>
+        public static void RegisterClassHandler(Type classType, AvRoutedEvent routedEvent, Delegate handler, bool handledEventsToo = false)
             => ClassHandlerRegistry.Register(classType, routedEvent, handler, handledEventsToo);
     }
 

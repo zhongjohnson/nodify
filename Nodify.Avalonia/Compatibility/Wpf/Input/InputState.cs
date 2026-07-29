@@ -166,6 +166,13 @@ namespace System.Windows.Input
         public static IInputElement? Captured => InputStateTracker.Pointer?.Captured;
 
         /// <summary>
+        /// WPF's <c>Mouse.PrimaryDevice</c>. Avalonia has no ambient mouse-device object; upstream
+        /// only uses this value as an opaque token when constructing synthetic auto-panning events,
+        /// so the last-seen pointer (possibly <c>null</c>) is a faithful stand-in.
+        /// </summary>
+        public static IPointer? PrimaryDevice => InputStateTracker.Pointer;
+
+        /// <summary>
         /// Returns the last-known pointer position relative to the specified element.
         /// </summary>
         /// <param name="relativeTo">The element to compute the position relative to.</param>
@@ -182,5 +189,16 @@ namespace System.Windows.Input
 
             return default;
         }
+    }
+
+    /// <summary>
+    /// WPF-compatible <c>Stylus</c> facade. Avalonia unifies pen input into its pointer system, so
+    /// there is no separate stylus device. Upstream only passes <c>CurrentStylusDevice</c> straight
+    /// into a synthetic <see cref="MouseEventArgs"/>, where it is unused, so <c>null</c> is correct.
+    /// </summary>
+    public static class Stylus
+    {
+        /// <summary>Gets the current stylus device; always <c>null</c> on Avalonia.</summary>
+        public static object? CurrentStylusDevice => null;
     }
 }

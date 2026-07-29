@@ -75,6 +75,19 @@ namespace System.Windows.Input
             _pointerArgs = pointerArgs;
         }
 
+        /// <summary>
+        /// WPF-shaped constructor for SYNTHETIC mouse events (upstream builds auto-panning and
+        /// drag-simulation events this way). Avalonia has no mouse/stylus device objects, so the
+        /// device arguments are accepted and ignored; the resulting instance carries no underlying
+        /// Avalonia event, which is why <see cref="GetPosition"/> falls back to the ambient state.
+        /// </summary>
+        /// <param name="mouseDevice">Ignored; present for WPF signature compatibility.</param>
+        /// <param name="timestamp">Ignored; present for WPF signature compatibility.</param>
+        /// <param name="stylusDevice">Ignored; present for WPF signature compatibility.</param>
+        public MouseEventArgs(object? mouseDevice, int timestamp, object? stylusDevice)
+        {
+        }
+
         /// <summary>The Avalonia pointer associated with this event, used for capture.</summary>
         public IPointer? Pointer => _pointerArgs?.Pointer;
 
@@ -99,7 +112,9 @@ namespace System.Windows.Input
                 return _pointerArgs.GetPosition(visual);
             }
 
-            return default;
+            // Synthetic event (no wrapped Avalonia args): fall back to the ambient pointer state,
+            // which is what upstream auto-panning expects to read.
+            return Mouse.GetPosition(relativeTo);
         }
 
         /// <summary>Populates the per-button states from the current global mouse state.</summary>

@@ -341,10 +341,10 @@ namespace System.Windows
     /// </summary>
     internal static class ClassHandlerRegistry
     {
-        private static readonly List<(Type ClassType, RoutedEvent Event, Delegate Handler, bool HandledToo)> _handlers
-            = new List<(Type, RoutedEvent, Delegate, bool)>();
+        private static readonly List<(Type ClassType, global::Avalonia.Interactivity.RoutedEvent Event, Delegate Handler, bool HandledToo)> _handlers
+            = new List<(Type, global::Avalonia.Interactivity.RoutedEvent, Delegate, bool)>();
 
-        public static void Register(Type classType, RoutedEvent routedEvent, Delegate handler, bool handledEventsToo)
+        public static void Register(Type classType, global::Avalonia.Interactivity.RoutedEvent routedEvent, Delegate handler, bool handledEventsToo)
             => _handlers.Add((classType, routedEvent, handler, handledEventsToo));
     }
 }

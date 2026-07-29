@@ -577,7 +577,10 @@ namespace Nodify
                 {
                     _defaultFocusVisualPen = new Pen(SystemColors.ControlTextBrush, 1)
                     {
-                        DashStyle = new DashStyle { Dashes = { 0.5d, 3d } }
+                        // Uses the (dashes, offset) constructor rather than a collection initializer:
+                        // it is valid in both WPF and Avalonia, whereas the collection-initializer form
+                        // relies on a pre-populated Dashes collection that Avalonia leaves null.
+                        DashStyle = new DashStyle(new[] { 0.5d, 3d }, 0d)
                     };
                     _defaultFocusVisualPen.Freeze();
                 }

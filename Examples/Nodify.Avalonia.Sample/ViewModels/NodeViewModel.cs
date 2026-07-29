@@ -1,4 +1,7 @@
-using Avalonia;
+// NOTE: Location uses System.Windows.Point -- the type ItemContainer.Location exposes. Using
+// Avalonia.Point here makes comparisons against the container ambiguous, because the
+// compatibility layer defines implicit conversions in both directions.
+using Point = System.Windows.Point;
 
 namespace Nodify.Avalonia.Sample;
 

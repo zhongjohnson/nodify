@@ -140,7 +140,7 @@ namespace System.Windows.Media
                 case PointHitTestParameters point:
                     if (bounds.Contains(point.HitPoint))
                     {
-                        localPoint = point.HitPoint - new Point(bounds.X, bounds.Y);
+                        localPoint = (Point)(point.HitPoint - new Point(bounds.X, bounds.Y));
                         return true;
                     }
                     return false;
